@@ -1,0 +1,135 @@
+{
+  "Scenes": {
+    "hall": {
+      "SceneId": "hall",
+      "Name": "Hall",
+      "Description": "The main entrance hall."
+    },
+    "lounge": {
+      "SceneId": "lounge",
+      "Name": "Lounge",
+      "Description": "A comfortable lounge."
+    },
+    "dining-room": {
+      "SceneId": "dining-room",
+      "Name": "Dining Room",
+      "Description": "A formal dining room."
+    },
+    "kitchen": {
+      "SceneId": "kitchen",
+      "Name": "Kitchen",
+      "Description": "Where meals are prepared."
+    },
+    "ballroom": {
+      "SceneId": "ballroom",
+      "Name": "Ballroom",
+      "Description": "A grand ballroom for dances."
+    },
+    "conservatory": {
+      "SceneId": "conservatory",
+      "Name": "Conservatory",
+      "Description": "A room filled with plants."
+    },
+    "billiard-room": {
+      "SceneId": "billiard-room",
+      "Name": "Billiard Room",
+      "Description": "Contains a billiard table."
+    },
+    "library": {
+      "SceneId": "library",
+      "Name": "Library",
+      "Description": "A quiet library."
+    },
+    "study": {
+      "SceneId": "study",
+      "Name": "Study",
+      "Description": "A small study."
+    }
+  },
+  "Items": {
+    "candlestick": {
+      "Id": "candlestick",
+      "Name": "Candlestick",
+      "Description": "A heavy brass candlestick."
+    },
+    "dagger": {
+      "Id": "dagger",
+      "Name": "Dagger",
+      "Description": "A sharp dagger."
+    },
+    "lead-pipe": {
+      "Id": "lead-pipe",
+      "Name": "Lead Pipe",
+      "Description": "A length of lead pipe."
+    },
+    "revolver": {
+      "Id": "revolver",
+      "Name": "Revolver",
+      "Description": "A small revolver."
+    },
+    "rope": {
+      "Id": "rope",
+      "Name": "Rope",
+      "Description": "A sturdy rope."
+    },
+    "wrench": {
+      "Id": "wrench",
+      "Name": "Wrench",
+      "Description": "A heavy wrench."
+    }
+  },
+  "Npcs": {
+    "scarlet": {
+      "Id": "scarlet",
+      "Name": "Miss Scarlet",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "mustard": {
+      "Id": "mustard",
+      "Name": "Colonel Mustard",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "white": {
+      "Id": "white",
+      "Name": "Mrs. White",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "green": {
+      "Id": "green",
+      "Name": "Mr. Green",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "peacock": {
+      "Id": "peacock",
+      "Name": "Mrs. Peacock",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "plum": {
+      "Id": "plum",
+      "Name": "Professor Plum",
+      "HitPoints": 10,
+      "ArmorClass": 10
+    }
+  },
+  "InitialSceneMap": {
+    "Objects": [
+      { "Id": "scarlet", "Type": "npc", "LocationId": "hall" },
+      { "Id": "mustard", "Type": "npc", "LocationId": "hall" },
+      { "Id": "white", "Type": "npc", "LocationId": "hall" },
+      { "Id": "green", "Type": "npc", "LocationId": "hall" },
+      { "Id": "peacock", "Type": "npc", "LocationId": "hall" },
+      { "Id": "plum", "Type": "npc", "LocationId": "hall" },
+      { "Id": "candlestick", "Type": "item", "LocationId": "lounge" },
+      { "Id": "dagger", "Type": "item", "LocationId": "dining-room" },
+      { "Id": "lead-pipe", "Type": "item", "LocationId": "conservatory" },
+      { "Id": "revolver", "Type": "item", "LocationId": "study" },
+      { "Id": "rope", "Type": "item", "LocationId": "billiard-room" },
+      { "Id": "wrench", "Type": "item", "LocationId": "kitchen" }
+    ]
+  }
+}
