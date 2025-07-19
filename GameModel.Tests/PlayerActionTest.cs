@@ -1,4 +1,6 @@
 ﻿using GameModel;
+using GameModel.Model;
+using GameModel.Actions;
 namespace GameModel.Tests;
 
 [TestClass]

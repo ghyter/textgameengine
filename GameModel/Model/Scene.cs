@@ -1,8 +1,6 @@
-using System;
+namespace GameModel.Model;
 
-namespace GameModel;
-
-public class Scene : StatefulObject
+public class Scene : StatefullGameElements
 {
     public string SceneId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

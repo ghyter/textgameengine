@@ -1,8 +1,6 @@
-using System;
+namespace GameModel.Model;
 
-namespace GameModel;
-
-public class Player : StatefulObject
+public class Player : StatefullGameElements
 {
     public int HitPoints { get; set; } = 10;
     public int ArmorClass { get; set; } = 10;

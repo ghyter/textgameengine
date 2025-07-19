@@ -1,11 +1,14 @@
-using System;
 using System.Text;
 using GameModel.Pack;
+using GameModel.Actions;
+using GameModel.Model;
 
 namespace GameModel;
 
 public class GameSession
 {
+    private GameActionRegistry _actionRegistry { get; set; } = new();
+
     public GamePack GamePack { get; set; } = default!;
     public Player Player { get; set; } = new();
     public List<PlayerAction> ActionHistory { get; set; } = [];
@@ -20,6 +23,9 @@ public class GameSession
         GameSession gs = new();
         gs.GamePack = gamePack;
         gs.SceneMap = gamePack.InitialSceneMap;
+
+        gs._actionRegistry.Register(Handlers.HandleLook, "look", "examine", "view");
+
         return gs;
     }
 
@@ -48,79 +54,17 @@ public class GameSession
 
         if (showDescription)
         {
-            sb.AppendLine(LookScene(CurrentScene));
+            sb.AppendLine(Handlers.HandleLook(this, new()));
         }
         return sb.ToString();
     }
 
     public string Execute(string input)
     {
-        try
-        {
-            var action = PlayerAction.Parse(input);
-            ActionHistory.Append(action);
-            return action.Verb switch
-            {
-                Verbs.look => Look(action),
-                _ => "I don't understand that command"
-            };
-        }
-        catch
-        {
-            return "I don't understand that command";
-        }
+       var action = PlayerAction.Parse(input);
+       return _actionRegistry.TryExecute(this, action, out var result) ? result : result;
     }
 
-    private string Look(PlayerAction? action = null)
-    {
-        action = action ?? new();
-        StringBuilder sb = new();
 
-        //I am looking at a specific thing.
-        if (action.Targets.Any())
-        {
-            sb.AppendLine("Look at object, not yet supported");
-        }
-        else
-        {
-            sb.AppendLine(LookScene(CurrentScene));    
-        }
-        
-        return sb.ToString();
-    }
-
-    private string LookScene(Scene scene)
-    {
-        StringBuilder sb = new();
-            //I am looking at the scene
-        sb.AppendLine(scene.Description);
-        var whoishere = SceneMap.GetInLocation(scene.SceneId);
-
-        var npcs = whoishere.Where(x => x.Type == "npc");
-        if (npcs.Any())
-        {
-            sb.AppendLine("The following people are present.");
-            foreach (var item in npcs)
-            {
-                var npc = GamePack.Npcs[item.Id];
-                sb.AppendLine($"* {npc.Name}");
-            }
-        }
-
-        if (scene.Exits.Count == 0)
-        {
-            sb.AppendLine("There are no visible exits");
-        }
-        else
-        {
-            sb.AppendLine("Visible Exits:");
-            foreach (var exit in CurrentScene.Exits)
-            {
-                sb.AppendLine($"* {GamePack.Scenes[exit].Name} ({exit})");
-            }
-        }
-
-        return sb.ToString();
-    }
 
 }

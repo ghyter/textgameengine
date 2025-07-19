@@ -2,7 +2,7 @@ using System;
 
 namespace GameModel;
 
-public class MappedObject
+public class MappedGameElement
 {
     public string Id { get; set; } = "";           // e.g. "bill"
     public string Type { get; set; } = "";         // e.g. "npc", "item", "player"

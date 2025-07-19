@@ -1,8 +1,8 @@
 using System;
 
-namespace GameModel;
+namespace GameModel.Model;
 
-public class GameItem: StatefulObject
+public class GameItem: StatefullGameElements
 {
 
     public string Id { get; set; } = string.Empty;

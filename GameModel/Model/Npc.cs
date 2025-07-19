@@ -1,8 +1,6 @@
-using System;
+namespace GameModel.Model;
 
-namespace GameModel;
-
-public class Npc: StatefulObject
+public class Npc: StatefullGameElements
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
