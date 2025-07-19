@@ -3,7 +3,12 @@
     "hall": {
       "SceneId": "hall",
       "Name": "Hall",
-      "Description": "The main entrance hall."
+      "Description": "The main entrance hall.",
+      "Exits": ["lounge","kitchen"],
+      "States":{
+        "default":"All is normal here.",
+        "post-bomb":"All of the furiture is destroyed and bits of wood and shards of glass litter the floor."
+      }
     },
     "lounge": {
       "SceneId": "lounge",
@@ -76,7 +81,18 @@
       "Id": "wrench",
       "Name": "Wrench",
       "Description": "A heavy wrench."
-    }
+    },
+      "cabinet":{
+        "Id": "cabinet",
+        "Name": "Old Oak Cabinet",
+        "Description": "A antique old cabinet with a lock",
+        "States":{
+          "locked": "The cabinet is locked.",
+          "unlocked": "The cabinet is unlocked.",
+          "open": "The cabinet stands open."
+        }
+      }
+    
   },
   "Npcs": {
     "scarlet": {
@@ -118,6 +134,7 @@
   },
   "InitialSceneMap": {
     "Objects": [
+      { "Id": "player", "Type": "player", "LocationId": "hall0" },
       { "Id": "scarlet", "Type": "npc", "LocationId": "hall" },
       { "Id": "mustard", "Type": "npc", "LocationId": "hall" },
       { "Id": "white", "Type": "npc", "LocationId": "hall" },
@@ -128,7 +145,8 @@
       { "Id": "dagger", "Type": "item", "LocationId": "dining-room" },
       { "Id": "lead-pipe", "Type": "item", "LocationId": "conservatory" },
       { "Id": "revolver", "Type": "item", "LocationId": "study" },
-      { "Id": "rope", "Type": "item", "LocationId": "billiard-room" },
+      { "Id": "rope", "Type": "item", "State":"open","LocationId": "cabinet" },
+      { "Id": "cabinet", "Type": "item", "LocationId": "billiard-room" },
       { "Id": "wrench", "Type": "item", "LocationId": "kitchen" }
     ]
   }
