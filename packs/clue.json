@@ -1,4 +1,5 @@
 {
+  "Title": "Afternoon in the Clue Mansion",
   "Scenes": {
     "hall": {
       "SceneId": "hall",
@@ -134,7 +135,7 @@
   },
   "InitialSceneMap": {
     "Objects": [
-      { "Id": "player", "Type": "player", "LocationId": "hall0" },
+      { "Id": "player", "Type": "player", "LocationId": "hall" },
       { "Id": "scarlet", "Type": "npc", "LocationId": "hall" },
       { "Id": "mustard", "Type": "npc", "LocationId": "hall" },
       { "Id": "white", "Type": "npc", "LocationId": "hall" },

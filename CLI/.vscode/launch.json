@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET CLI Debug",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-cli",
+      "program": "${workspaceFolder}/CLI/bin/Debug/net9.0/CLI.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/CLI",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}

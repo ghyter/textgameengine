@@ -24,3 +24,35 @@ public class SceneMap
         return Objects.Where(o => o.LocationId == location && (type == null || o.Type == type));
     }
 }
+
+public static class SceneMapExtensions
+{
+    public static string? GetLocationOf(this SceneMap map, string type, string id)
+    {
+        return map.Objects
+            .FirstOrDefault(o => o.Type == type && o.Id == id)
+            ?.LocationId;
+    }
+
+    public static bool IsInScene(this SceneMap map, string type, string id, string sceneId)
+    {
+        var loc = map.GetLocationOf(type, id);
+        return loc == sceneId;
+    }
+
+    public static bool IsInInventory(this SceneMap map, string type, string id)
+    {
+        return map.GetLocationOf(type, id) == "inventory";
+    }
+
+    public static bool IsOffMap(this SceneMap map, string type, string id)
+    {
+        return map.GetLocationOf(type, id) == "_off";
+    }
+
+    public static bool IsInPlay(this SceneMap map, string type, string id)
+    {
+        var loc = map.GetLocationOf(type, id);
+        return loc != null && loc != "_off";
+    }
+}
