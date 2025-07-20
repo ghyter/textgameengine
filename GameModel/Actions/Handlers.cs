@@ -59,7 +59,7 @@ public static class Handlers
         if (exitId == null)
             return $"There is no exit '{input}' from here.";
 
-        session.CurrentScene = session.GamePack.Scenes[exitId];
+        session.CurrentScene = session.GetGameElement<Scene>(exitId)!;
         session.SceneMap.SetLocation("player", "player", session.CurrentScene.Id);
 
         return LookScene(session, action, session.CurrentScene);
@@ -83,8 +83,9 @@ public static class Handlers
             i = 0;
             foreach (var item in npcs)
             {
-                var npc = session.GamePack.Npcs[item.Id];
-                sb.AppendLine($"{++i}. {npc.Name} ({npc.Id})");
+                var npc = session.GetGameElement<Npc>(item.Id);
+                if (npc != null)
+                    sb.AppendLine($"{++i}. {npc.Name} ({npc.Id})");
             }
         }
         else
@@ -101,8 +102,9 @@ public static class Handlers
             i = 0;
             foreach (var item in items)
             {
-                var itm = session.GamePack.Items[item.Id];
-                sb.AppendLine($"{++i}. {itm.Name}");
+                var itm = session.GetGameElement<GameItem>(item.Id);
+                if (itm != null)
+                    sb.AppendLine($"{++i}. {itm.Name}");
             }
         }
         else
@@ -119,7 +121,9 @@ public static class Handlers
             i = 0;
             foreach (var exit in scene.Exits)
             {
-                sb.AppendLine($"{++i}. {session.GamePack.Scenes[exit].Name} ({exit})");
+                var exScene = session.GetGameElement<Scene>(exit);
+                var name = exScene?.Name ?? exit;
+                sb.AppendLine($"{++i}. {name} ({exit})");
             }
         }
         else
@@ -147,7 +151,9 @@ public static class Handlers
             return $"There is no item with ID '{itemId}'.";
         }
         session.SceneMap.SetLocation(item.Type, item.Id, "_inventory");
-        var gameitem = session.GetGameElement<GameItem>(itemId); // Update item's location
+        if (session.Elements.TryGetValue(item.Id, out var info))
+            info.LocationId = "_inventory";
+        var gameitem = session.GetGameElement<GameItem>(itemId);
         sb.AppendLine($"You have picked up {gameitem?.Name} ({gameitem?.Id}).");
         return sb.ToString();
     }
@@ -168,7 +174,9 @@ public static class Handlers
             return $"You are not carrying an item with ID '{itemId}'.";
         }
         session.SceneMap.SetLocation(item.Type, item.Id, session.CurrentScene.Id);
-        var gameitem = session.GetGameElement<GameItem>(itemId); // Update item's location
+        if (session.Elements.TryGetValue(item.Id, out var info))
+            info.LocationId = session.CurrentScene.Id;
+        var gameitem = session.GetGameElement<GameItem>(itemId);
         sb.AppendLine($"You have dropped {gameitem?.Name} ({gameitem?.Id}).");
         return sb.ToString();
 
@@ -187,8 +195,9 @@ public static class Handlers
             sb.AppendLine("You are carrying:");
             foreach (var item in inventory)
             {
-                var gameItem = session.GamePack.Items[item.Id];
-                sb.AppendLine($"{gameItem.Name} ({gameItem.Id})");
+                var gameItem = session.GetGameElement<GameItem>(item.Id);
+                if (gameItem != null)
+                    sb.AppendLine($"{gameItem.Name} ({gameItem.Id})");
             }
         }
         return sb.ToString();
