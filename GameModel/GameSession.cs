@@ -2,6 +2,7 @@ using System.Text;
 using GameModel.Pack;
 using GameModel.Actions;
 using GameModel.Model;
+using System.Linq;
 
 namespace GameModel;
 
@@ -16,8 +17,7 @@ public class GameSession
     public SceneMap SceneMap { get; set; } = new();
     public Scene CurrentScene { get; set; } = new();
 
-    public Dictionary<string, string> TypeLookup { get; set; } = [];
-    public Dictionary<string, string> StateLookup { get; set; } = [];
+    public Dictionary<string, GameElementInfo> Elements { get; set; } = [];
 
     public static GameSession NewGame(string PackPath)
     {
@@ -33,18 +33,33 @@ public class GameSession
 
         foreach (var s in gs.GamePack.Scenes)
         {
-            gs.TypeLookup[s.Key] = "scene";
-            gs.StateLookup[s.Key] = "default";
+            gs.Elements[s.Key] = new GameElementInfo
+            {
+                Type = "scene",
+                Element = s.Value,
+                LocationId = null,
+                Exits = s.Value.Exits.ToList()
+            };
         }
+
         foreach (var i in gs.GamePack.Items)
         {
-            gs.TypeLookup[i.Key] = "item";
-            gs.StateLookup[i.Key] = "default";
+            gs.Elements[i.Key] = new GameElementInfo
+            {
+                Type = "item",
+                Element = i.Value,
+                LocationId = gs.SceneMap.GetLocationOf("item", i.Key)
+            };
         }
+
         foreach (var npc in gs.GamePack.Npcs)
         {
-            gs.TypeLookup[npc.Key] = "npc";
-            gs.StateLookup[npc.Key] = "default";
+            gs.Elements[npc.Key] = new GameElementInfo
+            {
+                Type = "npc",
+                Element = npc.Value,
+                LocationId = gs.SceneMap.GetLocationOf("npc", npc.Key)
+            };
         }
 
 
@@ -61,31 +76,13 @@ public class GameSession
 
     public IGameElement? GetGameElement(string id)
     {
-        var type = TypeLookup.GetValueOrDefault(id, "unknown");
-        return type switch
-        {
-            "scene" => GamePack.Scenes[id],
-            "item" => GamePack.Items[id],
-            "npc" => GamePack.Npcs[id],
-            _ => null
-        };
+        return Elements.TryGetValue(id, out var info) ? info.Element : null;
     }
 
-public T? GetGameElement<T>(string id) where T : class
-{
-    var type = TypeLookup.GetValueOrDefault(id, "unknown");
-
-    if (typeof(T) == typeof(Scene) && type == "scene")
-        return GamePack.Scenes.TryGetValue(id, out var scene) ? scene as T : null;
-
-    if (typeof(T) == typeof(GameItem) && type == "item")
-        return GamePack.Items.TryGetValue(id, out var item) ? item as T : null;
-
-    if (typeof(T) == typeof(Npc) && type == "npc")
-        return GamePack.Npcs.TryGetValue(id, out var npc) ? npc as T : null;
-
-    return null;
-}
+    public T? GetGameElement<T>(string id) where T : class
+    {
+        return Elements.TryGetValue(id, out var info) ? info.Get<T>() : null;
+    }
 
 
     public string Execute(string input)
