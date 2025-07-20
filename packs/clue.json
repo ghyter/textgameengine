@@ -268,7 +268,7 @@
       {
         "Id": "flashlight",
         "Type": "item",
-        "LocationId": "_player"
+        "LocationId": "_inventory"
       }
     ]
   }

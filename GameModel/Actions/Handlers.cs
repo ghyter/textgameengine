@@ -146,7 +146,7 @@ public static class Handlers
         {
             return $"There is no item with ID '{itemId}'.";
         }
-        session.SceneMap.SetLocation(item.Type, item.Id, "_player");
+        session.SceneMap.SetLocation(item.Type, item.Id, "_inventory");
         var gameitem = session.GetGameElement<GameItem>(itemId); // Update item's location
         sb.AppendLine($"You have picked up {gameitem?.Name} ({gameitem?.Id}).");
         return sb.ToString();
@@ -161,7 +161,7 @@ public static class Handlers
         }
         var itemId = action.Targets[0];
         // Check if the item exists in the player's inventory
-        var item = session.SceneMap.GetInLocation("_player", "item")
+        var item = session.SceneMap.GetInLocation("_inventory", "item")
             .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
         if (item == null)
         {
@@ -177,7 +177,7 @@ public static class Handlers
     public static string HandleInventory(GameSession session, PlayerAction action)
     {
         StringBuilder sb = new();
-        var inventory = session.SceneMap.GetInLocation("_player", "item");
+        var inventory = session.SceneMap.GetInLocation("_inventory", "item");
         if (!inventory.Any())
         {
             sb.AppendLine("You are not carrying anything.");
