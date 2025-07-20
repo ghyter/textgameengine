@@ -53,7 +53,7 @@ public class GameSession
         gs._actionRegistry.Register(Handlers.HandleHistory, "history", "hist");
         gs._actionRegistry.Register(Handlers.HandleInventory, "inventory", "inv", "i");
         gs._actionRegistry.Register(Handlers.HandleInventoryGet, "get", "grab", "g");
-        gs._actionRegistry.Register(Handlers.HandleInventoryDrop, "drop", "d");q
+        gs._actionRegistry.Register(Handlers.HandleInventoryDrop, "drop", "d");
 
 
         return gs;
