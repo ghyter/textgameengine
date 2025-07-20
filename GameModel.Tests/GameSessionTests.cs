@@ -11,7 +11,7 @@ public class GameSessionTests
     [TestMethod]
     public void GetGameElement_TypedAndGeneric_ReturnsObjects()
     {
-        var session = GameSession.NewGame("../packs/clue.json");
+        var session = GameSession.NewGame("/workspaces/textgameengine/packs/clue.json");
 
         var scene = session.GetGameElement<Scene>("hall");
         Assert.IsNotNull(scene);

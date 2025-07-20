@@ -10,5 +10,5 @@ public class GameElementInfo
     public string? LocationId { get; set; }
     public List<string> Exits { get; set; } = [];
 
-    public T? Get<T>() where T : class, IGameElement => Element as T;
+    public T? Get<T>() where T :class, IGameElement => Element as T;
 }

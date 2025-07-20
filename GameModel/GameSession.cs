@@ -79,7 +79,7 @@ public class GameSession
         return Elements.TryGetValue(id, out var info) ? info.Element : null;
     }
 
-    public T? GetGameElement<T>(string id) where T : class
+    public T? GetGameElement<T>(string id) where T : class, IGameElement
     {
         return Elements.TryGetValue(id, out var info) ? info.Get<T>() : null;
     }

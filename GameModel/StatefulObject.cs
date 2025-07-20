@@ -3,7 +3,7 @@ using GameModel.Model;
 
 namespace GameModel;
 
-public abstract class StatefullGameElements: IGameElement
+public abstract class StatefullGameElements : IGameElement
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
@@ -15,4 +15,15 @@ public abstract class StatefullGameElements: IGameElement
     public string DefaultState { get; set; } = "default";
 
 
+    /// <summary>
+    /// Returns the description for a given state (provided externally).
+    /// </summary>
+    public virtual string ToDescription(string stateId)
+    {
+        if (States != null && States.TryGetValue(stateId, out var desc))
+            return desc;
+
+        return Description ?? $"[{Id}]";
+    }
+    
 }
