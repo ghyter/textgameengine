@@ -60,7 +60,7 @@ public static class Handlers
             return $"There is no exit '{input}' from here.";
 
         session.CurrentScene = session.GetGameElement<Scene>(exitId)!;
-        session.SceneMap.SetLocation("player", "player", session.CurrentScene.Id);
+        session.Elements["player"].LocationId = session.CurrentScene.Id; 
 
         return LookScene(session, action, session.CurrentScene);
     }
@@ -73,7 +73,7 @@ public static class Handlers
         int i = 1;
         //I am looking at the scene
         sb.AppendLine(scene.Description);
-        var whoishere = session.SceneMap.GetInLocation(scene.Id);
+        var whoishere = session.Elements.GetInLocation(scene.Id);
 
         var npcs = whoishere.Where(x => x.Type == "npc");
         if (npcs.Any())
@@ -144,13 +144,13 @@ public static class Handlers
         }
         var itemId = action.Targets[0];
         // Check if the item exists in the current scene
-        var item = session.SceneMap.GetInLocation(session.CurrentScene.Id, "item")
+        var item = session.Elements.GetInLocation(session.CurrentScene.Id, "item")
             .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
         if (item == null)
         {
             return $"There is no item with ID '{itemId}'.";
         }
-        session.SceneMap.SetLocation(item.Type, item.Id, "_inventory");
+        session.Elements[item.Id].LocationId = "_inventory";
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = "_inventory";
         var gameitem = session.GetGameElement<GameItem>(itemId);
@@ -167,13 +167,13 @@ public static class Handlers
         }
         var itemId = action.Targets[0];
         // Check if the item exists in the player's inventory
-        var item = session.SceneMap.GetInLocation("_inventory", "item")
+        var item = session.Elements.GetInLocation("_inventory", "item")
             .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
         if (item == null)
         {
             return $"You are not carrying an item with ID '{itemId}'.";
         }
-        session.SceneMap.SetLocation(item.Type, item.Id, session.CurrentScene.Id);
+        session.Elements[item.Id].LocationId = session.CurrentScene.Id;
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = session.CurrentScene.Id;
         var gameitem = session.GetGameElement<GameItem>(itemId);
@@ -185,7 +185,7 @@ public static class Handlers
     public static string HandleInventory(GameSession session, PlayerAction action)
     {
         StringBuilder sb = new();
-        var inventory = session.SceneMap.GetInLocation("_inventory", "item");
+        var inventory = session.Elements.GetInLocation("_inventory", "item");
         if (!inventory.Any())
         {
             sb.AppendLine("You are not carrying anything.");
