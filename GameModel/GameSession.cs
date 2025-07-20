@@ -16,6 +16,9 @@ public class GameSession
     public SceneMap SceneMap { get; set; } = new();
     public Scene CurrentScene { get; set; } = new();
 
+    public Dictionary<string, string> TypeLookup { get; set; } = [];
+    public Dictionary<string, string> StateLookup { get; set; } = [];
+
     public static GameSession NewGame(string PackPath)
     {
         var gamePack = GamePackLoader.Load(PackPath);
@@ -24,45 +27,89 @@ public class GameSession
         gs.GamePack = gamePack;
         gs.SceneMap = gamePack.InitialSceneMap;
 
-        gs._actionRegistry.Register(Handlers.HandleLook, "look", "examine", "view");
+
+        string playerlocation = gs.SceneMap.GetLocationOf("player", "player") ?? "default";
+        gs.CurrentScene = gs.GamePack.Scenes[playerlocation];
+
+        foreach (var s in gs.GamePack.Scenes)
+        {
+            gs.TypeLookup[s.Key] = "scene";
+            gs.StateLookup[s.Key] = "default";
+        }
+        foreach (var i in gs.GamePack.Items)
+        {
+            gs.TypeLookup[i.Key] = "item";
+            gs.StateLookup[i.Key] = "default";
+        }
+        foreach (var npc in gs.GamePack.Npcs)
+        {
+            gs.TypeLookup[npc.Key] = "npc";
+            gs.StateLookup[npc.Key] = "default";
+        }
+
+
+        gs._actionRegistry.Register(Handlers.HandleLook, "look", "examine", "view","l");
+        gs._actionRegistry.Register(Handlers.HandleMove, "move", "go","m", "g");
+        gs._actionRegistry.Register(Handlers.HandleHistory, "history", "hist");
+        gs._actionRegistry.Register(Handlers.HandleInventory, "inventory", "inv", "i");
+        gs._actionRegistry.Register(Handlers.HandleInventoryGet, "get", "grab", "g");
+        gs._actionRegistry.Register(Handlers.HandleInventoryDrop, "drop", "d");q
+
 
         return gs;
     }
 
-    public string Screen()
+    public IGameElement? GetGameElement(string id)
     {
-        StringBuilder sb = new();
-
-        //Check the scenemap for the Player's location.
-
-        string playerlocation = SceneMap.GetLocationOf("player", "player") ?? "default";
-        var scene = GamePack.Scenes[playerlocation];
-
-        //If you have just moved to this scene, then
-        //print the full description, otherwise just the name.
-        //full description is available on look
-        bool showDescription = false;
-        if (CurrentScene == null || CurrentScene.SceneId != scene.SceneId)
+        var type = TypeLookup.GetValueOrDefault(id, "unknown");
+        return type switch
         {
-            CurrentScene = scene;
-            showDescription = true;
-        }
-        sb.Append(GamePack.Title);
-        sb.Append(": ");
-        sb.AppendLine(scene.Name);
-        sb.AppendLine("============");
-
-        if (showDescription)
-        {
-            sb.AppendLine(Handlers.HandleLook(this, new()));
-        }
-        return sb.ToString();
+            "scene" => GamePack.Scenes[id],
+            "item" => GamePack.Items[id],
+            "npc" => GamePack.Npcs[id],
+            _ => null
+        };
     }
+
+public T? GetGameElement<T>(string id) where T : class
+{
+    var type = TypeLookup.GetValueOrDefault(id, "unknown");
+
+    if (typeof(T) == typeof(Scene) && type == "scene")
+        return GamePack.Scenes.TryGetValue(id, out var scene) ? scene as T : null;
+
+    if (typeof(T) == typeof(GameItem) && type == "item")
+        return GamePack.Items.TryGetValue(id, out var item) ? item as T : null;
+
+    if (typeof(T) == typeof(Npc) && type == "npc")
+        return GamePack.Npcs.TryGetValue(id, out var npc) ? npc as T : null;
+
+    return null;
+}
+
 
     public string Execute(string input)
     {
-       var action = PlayerAction.Parse(input);
-       return _actionRegistry.TryExecute(this, action, out var result) ? result : result;
+        StringBuilder sb = new();
+
+
+
+        var action = PlayerAction.Parse(input);
+     
+
+        var actionresult = _actionRegistry.TryExecute(this, action, out var result) ? result : result;
+        ActionHistory.Add(action);
+
+        //Header
+        sb.Append($"{ActionHistory.Count} ");
+        sb.Append(GamePack.Title);
+        sb.Append(": ");
+        sb.AppendLine(CurrentScene.Name);
+        sb.AppendLine(new string('=', GamePack.Title.Length + CurrentScene.Name.Length + 2));
+        sb.AppendLine(actionresult);
+
+
+        return sb.ToString();
     }
 
 

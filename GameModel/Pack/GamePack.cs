@@ -1,4 +1,5 @@
-namespace GameModel.Model;
+using GameModel.Model;
+namespace GameModel.Pack;
 
 public class GamePack
 {
