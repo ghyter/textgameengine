@@ -1,7 +1,4 @@
-using System;
-using GameModel.Model;
-
-namespace GameModel;
+namespace GameModel.Model;
 
 public abstract class StatefullGameElements : IGameElement
 {

@@ -9,7 +9,8 @@
         "library",
         "hall",
         "kitchen"
-      ]
+      ],
+      "States": {}
     },
     "hall": {
       "Id": "hall",
@@ -20,8 +21,9 @@
         "lounge",
         "dining-room"
       ],
+      "DefaultState": "initial",
       "States": {
-        "default": "All is normal here.",
+        "initial": "All is normal here.",
         "post-bomb": "All of the furniture is destroyed and bits of wood and shards of glass litter the floor."
       }
     },
@@ -33,7 +35,8 @@
         "hall",
         "dining-room",
         "conservatory"
-      ]
+      ],
+      "States": {}
     },
     "dining-room": {
       "Id": "dining-room",
@@ -44,7 +47,8 @@
         "lounge",
         "billiard-room",
         "kitchen"
-      ]
+      ],
+      "States": {}
     },
     "kitchen": {
       "Id": "kitchen",
@@ -54,7 +58,8 @@
         "dining-room",
         "ballroom",
         "study"
-      ]
+      ],
+      "States": {}
     },
     "ballroom": {
       "Id": "ballroom",
@@ -64,7 +69,8 @@
         "kitchen",
         "billiard-room",
         "conservatory"
-      ]
+      ],
+      "States": {}
     },
     "conservatory": {
       "Id": "conservatory",
@@ -73,7 +79,8 @@
       "Exits": [
         "ballroom",
         "lounge"
-      ]
+      ],
+      "States": {}
     },
     "billiard-room": {
       "Id": "billiard-room",
@@ -83,7 +90,8 @@
         "library",
         "dining-room",
         "ballroom"
-      ]
+      ],
+      "States": {}
     },
     "library": {
       "Id": "library",
@@ -92,39 +100,46 @@
       "Exits": [
         "study",
         "billiard-room"
-      ]
+      ],
+      "States": {}
     }
   },
   "Items": {
     "candlestick": {
       "Id": "candlestick",
       "Name": "Candlestick",
-      "Description": "A heavy brass candlestick, ornately sculpted and cold to the touch. Traces of soot and wax cling to its rim, but it feels more like a weapon than a decoration."
+      "Description": "A heavy brass candlestick, ornately sculpted and cold to the touch. Traces of soot and wax cling to its rim, but it feels more like a weapon than a decoration.",
+      "States": {}
     },
     "dagger": {
       "Id": "dagger",
       "Name": "Dagger",
-      "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use."
+      "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use.",
+      "States": {}
     },
     "lead-pipe": {
       "Id": "lead-pipe",
       "Name": "Lead Pipe",
-      "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion."
+      "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
+      "States": {}
     },
     "revolver": {
       "Id": "revolver",
       "Name": "Revolver",
-      "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired."
+      "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired.",
+      "States": {}
     },
     "rope": {
       "Id": "rope",
       "Name": "Rope",
-      "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension."
+      "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension.",
+      "States": {}
     },
     "wrench": {
       "Id": "wrench",
       "Name": "Wrench",
-      "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands."
+      "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands.",
+      "States": {}
     },
     "flashlight": {
       "Id": "flashlight",
@@ -136,7 +151,6 @@
         "off": "The flashlight is off, leaving you in darkness."
       }
     },
-
     "cabinet": {
       "Id": "cabinet",
       "Name": "Old Oak Cabinet",
@@ -154,42 +168,48 @@
       "Name": "Miss Scarlet",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Miss Scarlet exudes charm and mystery. Draped in crimson silk, she glides through rooms like a whisper of perfume and suspicion. Her smile rarely reaches her eyes."
+      "Description": "Miss Scarlet exudes charm and mystery. Draped in crimson silk, she glides through rooms like a whisper of perfume and suspicion. Her smile rarely reaches her eyes.",
+      "States": {}
     },
     "mustard": {
       "Id": "mustard",
       "Name": "Colonel Mustard",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Colonel Mustard stands tall and broad-shouldered, his military uniform still crisp despite his retirement. He speaks in clipped commands and never turns his back to a door."
+      "Description": "Colonel Mustard stands tall and broad-shouldered, his military uniform still crisp despite his retirement. He speaks in clipped commands and never turns his back to a door.",
+      "States": {}
     },
     "white": {
       "Id": "white",
       "Name": "Mrs. White",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets."
+      "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets.",
+      "States": {}
     },
     "green": {
       "Id": "green",
       "Name": "Mr. Green",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Mr. Green fidgets nervously, adjusting his tie far too often. He speaks in practiced pleasantries, but his darting eyes suggest he's hiding more than gossip."
+      "Description": "Mr. Green fidgets nervously, adjusting his tie far too often. He speaks in practiced pleasantries, but his darting eyes suggest he's hiding more than gossip.",
+      "States": {}
     },
     "peacock": {
       "Id": "peacock",
       "Name": "Mrs. Peacock",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Mrs. Peacock is regal and razor-tongued, adorned in sapphire feathers and too much jewelry. She always knows who last entered the room — and why they shouldn't have."
+      "Description": "Mrs. Peacock is regal and razor-tongued, adorned in sapphire feathers and too much jewelry. She always knows who last entered the room — and why they shouldn't have.",
+      "States": {}
     },
     "plum": {
       "Id": "plum",
       "Name": "Professor Plum",
       "HitPoints": 10,
       "ArmorClass": 10,
-      "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective."
+      "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective.",
+      "States": {}
     }
   },
   "InitialSceneMap": {
