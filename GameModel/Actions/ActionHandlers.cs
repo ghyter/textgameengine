@@ -4,7 +4,7 @@ using GameModel.Model;
 
 namespace GameModel.Actions;
 
-public static class Handlers
+public static class ActionHandlers
 {
     public static string HandleLook(GameSession session, PlayerAction action)
     {
@@ -102,7 +102,7 @@ public static class Handlers
             i = 0;
             foreach (var item in items)
             {
-                var itm = session.GetGameElement<GameItem>(item.Id);
+                var itm = session.GetGameElement<Item>(item.Id);
                 if (itm != null)
                     sb.AppendLine($"{++i}. {itm.Name}");
             }
@@ -153,7 +153,7 @@ public static class Handlers
         session.Elements[item.Id].LocationId = "_inventory";
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = "_inventory";
-        var gameitem = session.GetGameElement<GameItem>(itemId);
+        var gameitem = session.GetGameElement<Item>(itemId);
         sb.AppendLine($"You have picked up {gameitem?.Name} ({gameitem?.Id}).");
         return sb.ToString();
     }
@@ -176,7 +176,7 @@ public static class Handlers
         session.Elements[item.Id].LocationId = session.CurrentScene.Id;
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = session.CurrentScene.Id;
-        var gameitem = session.GetGameElement<GameItem>(itemId);
+        var gameitem = session.GetGameElement<Item>(itemId);
         sb.AppendLine($"You have dropped {gameitem?.Name} ({gameitem?.Id}).");
         return sb.ToString();
 
@@ -195,7 +195,7 @@ public static class Handlers
             sb.AppendLine("You are carrying:");
             foreach (var item in inventory)
             {
-                var gameItem = session.GetGameElement<GameItem>(item.Id);
+                var gameItem = session.GetGameElement<Item>(item.Id);
                 if (gameItem != null)
                     sb.AppendLine($"{gameItem.Name} ({gameItem.Id})");
             }

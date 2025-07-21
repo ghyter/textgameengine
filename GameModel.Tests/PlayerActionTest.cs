@@ -58,6 +58,18 @@ public class PlayerActionTests
         Assert.AreEqual("rag", action.Targets[1]);
     }
 
+
+    [TestMethod]
+    public void Parse_MultipleWordVerb_OneTarget()
+    {
+        var action = PlayerAction.Parse("turn on flashlight");
+
+        Assert.AreEqual("turn on", action.VerbText);
+        Assert.AreEqual(1, action.Targets.Count);
+        Assert.AreEqual("flashlight", action.Targets[0]);
+    }
+
+
     [TestMethod]
     public void Parse_ExtraSpaces_ShouldStillParseCorrectly()
     {

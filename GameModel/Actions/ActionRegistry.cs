@@ -1,13 +1,13 @@
 using GameModel;
 namespace GameModel.Actions;
 
-public delegate string GameActionHandler(GameSession session, PlayerAction action);
+public delegate string ActionHandler(GameSession session, PlayerAction action);
 
-public class GameActionRegistry
+public class ActionRegistry
 {
-    private readonly Dictionary<string, GameActionHandler> _handlers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ActionHandler> _handlers = new(StringComparer.OrdinalIgnoreCase);
 
-    public void Register(GameActionHandler handler, params string[] verbs)
+    public void Register(ActionHandler handler, params string[] verbs)
     {
         foreach (var verb in verbs)
             _handlers[verb] = handler;
@@ -25,6 +25,6 @@ public class GameActionRegistry
         return false;
     }
 
-    public IReadOnlyDictionary<string, GameActionHandler> Handlers => _handlers;
+    public IReadOnlyDictionary<string, ActionHandler> Handlers => _handlers;
 }
 

@@ -8,7 +8,7 @@ namespace GameModel;
 
 public class GameSession
 {
-    private GameActionRegistry _actionRegistry { get; set; } = new();
+    private ActionRegistry _actionRegistry { get; set; } = new();
 
     public GamePack GamePack { get; set; } = default!;
     
@@ -75,12 +75,12 @@ public class GameSession
         }
 
 
-        gs._actionRegistry.Register(Handlers.HandleLook, "look", "examine", "view","l");
-        gs._actionRegistry.Register(Handlers.HandleMove, "move", "go","m", "g");
-        gs._actionRegistry.Register(Handlers.HandleHistory, "history", "hist");
-        gs._actionRegistry.Register(Handlers.HandleInventory, "inventory", "inv", "i");
-        gs._actionRegistry.Register(Handlers.HandleInventoryGet, "get", "grab", "g");
-        gs._actionRegistry.Register(Handlers.HandleInventoryDrop, "drop", "d");
+        gs._actionRegistry.Register(ActionHandlers.HandleLook, "look", "examine", "view","l");
+        gs._actionRegistry.Register(ActionHandlers.HandleMove, "move", "go","m", "g");
+        gs._actionRegistry.Register(ActionHandlers.HandleHistory, "history", "hist");
+        gs._actionRegistry.Register(ActionHandlers.HandleInventory, "inventory", "inv", "i");
+        gs._actionRegistry.Register(ActionHandlers.HandleInventoryGet, "get", "grab", "g");
+        gs._actionRegistry.Register(ActionHandlers.HandleInventoryDrop, "drop", "d");
 
         return gs;
     }

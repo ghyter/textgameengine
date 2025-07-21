@@ -1,6 +1,6 @@
 namespace GameModel.Pack;
 
-public class MappedGameElement
+public class PackGameElement
 {
     public string Id { get; set; } = "";           // e.g. "bill"
     public string Type { get; set; } = "";         // e.g. "npc", "item", "player"

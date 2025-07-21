@@ -1,6 +1,6 @@
 namespace GameModel.Model;
 
-public abstract class StatefullGameElements : IGameElement
+public abstract class GameElement : IGameElement
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
