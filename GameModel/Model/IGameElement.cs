@@ -10,4 +10,6 @@ public interface IGameElement
     public string Description { get; set; }
 
     public string DefaultState { get; set; }
+    public string ToDescription(string stateId);
+    
 }

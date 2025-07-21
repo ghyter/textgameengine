@@ -153,8 +153,8 @@ public static class ActionHandlers
         session.Elements[item.Id].LocationId = "_inventory";
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = "_inventory";
-        var gameitem = session.GetGameElement<Item>(itemId);
-        sb.AppendLine($"You have picked up {gameitem?.Name} ({gameitem?.Id}).");
+        var Item = session.GetGameElement<Item>(itemId);
+        sb.AppendLine($"You have picked up {Item?.Name} ({Item?.Id}).");
         return sb.ToString();
     }
 
@@ -176,8 +176,8 @@ public static class ActionHandlers
         session.Elements[item.Id].LocationId = session.CurrentScene.Id;
         if (session.Elements.TryGetValue(item.Id, out var info))
             info.LocationId = session.CurrentScene.Id;
-        var gameitem = session.GetGameElement<Item>(itemId);
-        sb.AppendLine($"You have dropped {gameitem?.Name} ({gameitem?.Id}).");
+        var Item = session.GetGameElement<Item>(itemId);
+        sb.AppendLine($"You have dropped {Item?.Name} ({Item?.Id}).");
         return sb.ToString();
 
     }
@@ -195,9 +195,9 @@ public static class ActionHandlers
             sb.AppendLine("You are carrying:");
             foreach (var item in inventory)
             {
-                var gameItem = session.GetGameElement<Item>(item.Id);
-                if (gameItem != null)
-                    sb.AppendLine($"{gameItem.Name} ({gameItem.Id})");
+                var Item = session.GetGameElement<Item>(item.Id);
+                if (Item != null)
+                    sb.AppendLine($"{Item.Name} ({Item.Id})");
             }
         }
         return sb.ToString();

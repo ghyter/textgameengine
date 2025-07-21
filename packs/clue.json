@@ -154,6 +154,7 @@
     "cabinet": {
       "Id": "cabinet",
       "Name": "Old Oak Cabinet",
+      "IsMovable": false,
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
       "States": {
         "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",

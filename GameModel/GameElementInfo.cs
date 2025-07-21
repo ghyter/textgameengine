@@ -11,6 +11,8 @@ public class GameElementInfo
     public string? LocationId { get; set; }
     public List<string> Exits { get; set; } = [];
 
+    public string Description => Element.ToDescription(State);
+
     public T? Get<T>() where T : class, IGameElement => Element as T;
 }
 

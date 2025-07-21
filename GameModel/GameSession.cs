@@ -99,13 +99,10 @@ public class GameSession
     public string Execute(string input)
     {
         StringBuilder sb = new();
-        var action = PlayerAction.Parse(input);
-     
-        var actionresult = _actionRegistry.TryExecute(this, action, out var result) ? result : result;
-        ActionHistory.Add(action);
-
+        var actionresult = _actionRegistry.TryExecute(this, input, out var result) ? result : result;
+        
         //Header
-        sb.Append($"{ActionHistory.Count} ");
+        
         sb.Append(GamePack.Title);
         sb.Append(": ");
         sb.AppendLine(CurrentScene.Name);

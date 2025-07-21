@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace GameModel.Model;
 
 public abstract class GameElement : IGameElement
@@ -11,16 +13,22 @@ public abstract class GameElement : IGameElement
     public Dictionary<string, string> States { get; set; } = [];
     public string DefaultState { get; set; } = "default";
 
-
     /// <summary>
     /// Returns the description for a given state (provided externally).
     /// </summary>
     public virtual string ToDescription(string stateId)
     {
+        StringBuilder sb = new();
+        if (Description != string.Empty)
+        {
+            sb.AppendLine(Description);
+            sb.AppendLine(" ");
+        }
         if (States != null && States.TryGetValue(stateId, out var desc))
-            return desc;
-
-        return Description ?? $"[{Id}]";
+        {
+            sb.Append(desc);
+        }
+        return sb.ToString();
     }
     
 }

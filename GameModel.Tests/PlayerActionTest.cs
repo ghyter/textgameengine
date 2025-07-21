@@ -1,90 +1,138 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GameModel;
 using GameModel.Actions;
+using System.Collections.Generic;
 
 namespace GameEngine.Tests;
 
 [TestClass]
 public class PlayerActionTests
 {
+    private ActionRegistry _registry = null!;
+    private GameSession _session = null!;
+    private readonly Dictionary<string, bool> _handlerInvoked = new();
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _registry = new ActionRegistry();
+        _session = new GameSession(); // Adjust constructor if needed
+
+        void Register(string verb, params string[] aliases)
+        {
+            _registry.Register((session, action) =>
+            {
+                _handlerInvoked[verb] = true;
+                return $"Executed {verb}";
+            }, new[] { verb }.Concat(aliases).ToArray());
+        }
+
+        Register("look");
+        Register("examine");
+        Register("go", "move", "walk");
+        Register("use");
+        Register("combine");
+        Register("turn on", "activate", "switch on");
+    }
+
     [TestMethod]
     public void Parse_LookWithoutTarget_ShouldReturnVerbOnly()
     {
-        var action = PlayerAction.Parse("look");
+        _registry.TryExecute(_session, "look", out var result);
 
-        Assert.AreEqual("look", action.VerbText);
-        Assert.AreEqual(0, action.Targets.Count);
+        Assert.AreEqual("Executed look", result);
+        Assert.IsTrue(_handlerInvoked["look"]);
     }
 
     [TestMethod]
     public void Parse_ExamineStatue_ShouldReturnOneTarget()
     {
-        var action = PlayerAction.Parse("examine statue");
+        _registry.TryExecute(_session, "examine statue", out var result);
 
-        Assert.AreEqual("examine", action.VerbText);
-        Assert.AreEqual(1, action.Targets.Count);
-        Assert.AreEqual("statue", action.Targets[0]);
+        Assert.AreEqual("Executed examine", result);
+        Assert.IsTrue(_handlerInvoked["examine"]);
     }
 
     [TestMethod]
     public void Parse_MoveToRoom_ShouldReturnTarget()
     {
-        var action = PlayerAction.Parse("go hallway");
+        _registry.TryExecute(_session, "go hallway", out var result);
 
-        Assert.AreEqual("go", action.VerbText);
-        Assert.AreEqual(1, action.Targets.Count);
-        Assert.AreEqual("hallway", action.Targets[0]);
+        Assert.AreEqual("Executed go", result);
+        Assert.IsTrue(_handlerInvoked["go"]);
     }
 
     [TestMethod]
     public void Parse_UseKeyOnDoor_ShouldReturnTwoTargets()
     {
-        var action = PlayerAction.Parse("use key on door");
+        _registry.TryExecute(_session, "use key on door", out var result);
 
-        Assert.AreEqual("use", action.VerbText);
-        Assert.AreEqual(2, action.Targets.Count);
-        Assert.AreEqual("key", action.Targets[0]);
-        Assert.AreEqual("door", action.Targets[1]);
+        Assert.AreEqual("Executed use", result);
+        Assert.IsTrue(_handlerInvoked["use"]);
     }
 
     [TestMethod]
     public void Parse_CombineOilWithRag_ShouldReturnTwoTargets()
     {
-        var action = PlayerAction.Parse("combine oil with rag");
+        _registry.TryExecute(_session, "combine oil with rag", out var result);
 
-        Assert.AreEqual("combine", action.VerbText);
-        Assert.AreEqual(2, action.Targets.Count);
-        Assert.AreEqual("oil", action.Targets[0]);
-        Assert.AreEqual("rag", action.Targets[1]);
+        Assert.AreEqual("Executed combine", result);
+        Assert.IsTrue(_handlerInvoked["combine"]);
     }
-
 
     [TestMethod]
     public void Parse_MultipleWordVerb_OneTarget()
     {
-        var action = PlayerAction.Parse("turn on flashlight");
+        _registry.TryExecute(_session, "turn on flashlight", out var result);
 
-        Assert.AreEqual("turn on", action.VerbText);
-        Assert.AreEqual(1, action.Targets.Count);
-        Assert.AreEqual("flashlight", action.Targets[0]);
+        Assert.AreEqual("Executed turn on", result);
+        Assert.IsTrue(_handlerInvoked["turn on"]);
     }
-
 
     [TestMethod]
     public void Parse_ExtraSpaces_ShouldStillParseCorrectly()
     {
-        var action = PlayerAction.Parse("  use   lantern   on    hook ");
+        _registry.TryExecute(_session, "  use   lantern   on    hook ", out var result);
 
-        Assert.AreEqual("use", action.VerbText);
-        Assert.AreEqual(2, action.Targets.Count);
-        Assert.AreEqual("lantern", action.Targets[0]);
-        Assert.AreEqual("hook", action.Targets[1]);
+        Assert.AreEqual("Executed use", result);
+        Assert.IsTrue(_handlerInvoked["use"]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(InvalidDataException))]
-    public void Parse_EmptyInput_ShouldThrow()
+    public void Parse_UnrecognizedVerb_ShouldFailGracefully()
     {
-        PlayerAction.Parse("");
+        var success = _registry.TryExecute(_session, "destroy everything", out var result);
+
+        Assert.IsFalse(success);
+        Assert.AreEqual("I don't know how to 'destroy everything'.", result);
+    }
+
+    [TestMethod]
+    public void Parse_VerifyTargetsAreSplitCorrectly()
+    {
+        PlayerAction? parsed = null;
+
+        _registry.Register((session, action) =>
+        {
+            parsed = action;
+            return "ok";
+        }, "use");
+
+        _registry.TryExecute(_session, "use sword on dragon", out _);
+
+        Assert.IsNotNull(parsed);
+        Assert.AreEqual("use", parsed!.VerbText);
+        Assert.AreEqual(2, parsed.Targets.Count);
+        Assert.AreEqual("sword", parsed.Targets[0]);
+        Assert.AreEqual("dragon", parsed.Targets[1]);
+    }
+
+    [TestMethod]
+    public void Parse_ShortSynonym_ShouldResolveToCanonical()
+    {
+        _registry.TryExecute(_session, "walk north", out var result);
+
+        Assert.AreEqual("Executed go", result); // "walk" is alias of "go"
+        Assert.IsTrue(_handlerInvoked["go"]);
     }
 }
