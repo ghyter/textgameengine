@@ -6,9 +6,30 @@
       "Name": "Study",
       "Description": "A dimly lit study lined with aged bookshelves and a large, claw-footed desk. Dust lingers in the air and a single green-shaded lamp flickers softly. A faint draft suggests a hidden passage might lie nearby.",
       "Exits": [
-        "library",
-        "hall",
-        "kitchen"
+        {
+          "TargetId": "library",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the library is open.",
+            "closed": "The exit to the library is closed."
+          }
+        },
+        {
+          "TargetId": "hall",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the hall is open.",
+            "closed": "The exit to the hall is closed."
+          }
+        },
+        {
+          "TargetId": "kitchen",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -17,9 +38,30 @@
       "Name": "Hall",
       "Description": "A long entrance hall with polished marble floors, twin staircases sweeping upward, and antique portraits staring down from every wall. You feel as if the house itself is watching.",
       "Exits": [
-        "study",
-        "lounge",
-        "dining-room"
+        {
+          "TargetId": "study",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed."
+          }
+        },
+        {
+          "TargetId": "lounge",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        },
+        {
+          "TargetId": "dining-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        }
       ],
       "DefaultState": "initial",
       "States": {
@@ -32,9 +74,30 @@
       "Name": "Lounge",
       "Description": "A richly decorated sitting room with velvet curtains, high-backed chairs, and the lingering scent of cigar smoke. The room feels like it was made for secrets and whispers.",
       "Exits": [
-        "hall",
-        "dining-room",
-        "conservatory"
+        {
+          "TargetId": "hall",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the hall is open.",
+            "closed": "The exit to the hall is closed."
+          }
+        },
+        {
+          "TargetId": "dining-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        },
+        {
+          "TargetId": "conservatory",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -43,10 +106,38 @@
       "Name": "Dining Room",
       "Description": "A long mahogany table stretches beneath a flickering chandelier. The silverware is still set, as if dinner had been interrupted — or never started at all.",
       "Exits": [
-        "hall",
-        "lounge",
-        "billiard-room",
-        "kitchen"
+        {
+          "TargetId": "hall",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the hall is open.",
+            "closed": "The exit to the hall is closed."
+          }
+        },
+        {
+          "TargetId": "lounge",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        },
+        {
+          "TargetId": "billiard-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the billiard room is open.",
+            "closed": "The exit to the billiard room is closed."
+          }
+        },
+        {
+          "TargetId": "kitchen",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -55,9 +146,30 @@
       "Name": "Kitchen",
       "Description": "Pots dangle from wrought-iron racks above stone counters. The smell of old spices and something more metallic lingers in the air. Knives rest suspiciously out of place.",
       "Exits": [
-        "dining-room",
-        "ballroom",
-        "study"
+        {
+          "TargetId": "dining-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        },
+        {
+          "TargetId": "ballroom",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        },
+        {
+          "TargetId": "study",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -66,9 +178,30 @@
       "Name": "Ballroom",
       "Description": "An echoing chamber with a polished parquet floor and towering windows. Chandeliers overhead sway slightly, though there is no wind. Footsteps seem to follow your own.",
       "Exits": [
-        "kitchen",
-        "billiard-room",
-        "conservatory"
+        {
+          "TargetId": "kitchen",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        },
+        {
+          "TargetId": "billiard-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the billiard room is open.",
+            "closed": "The exit to the billiard room is closed."
+          }
+        },
+        {
+          "TargetId": "conservatory",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -77,8 +210,22 @@
       "Name": "Conservatory",
       "Description": "Tall glass walls rise into a domed ceiling, letting moonlight bathe rows of exotic plants. Leaves rustle even when you’re still, and the air is thick with humidity.",
       "Exits": [
-        "ballroom",
-        "lounge"
+        {
+          "TargetId": "ballroom",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        },
+        {
+          "TargetId": "lounge",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -87,9 +234,30 @@
       "Name": "Billiard Room",
       "Description": "Faded green felt lines the billiard table at the center. Chalk dust covers the cues and a forgotten drink rests on a side table, still half full. Someone left in a hurry.",
       "Exits": [
-        "library",
-        "dining-room",
-        "ballroom"
+        {
+          "TargetId": "library",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the library is open.",
+            "closed": "The exit to the library is closed."
+          }
+        },
+        {
+          "TargetId": "dining-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        },
+        {
+          "TargetId": "ballroom",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        }
       ],
       "States": {}
     },
@@ -98,8 +266,22 @@
       "Name": "Library",
       "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
       "Exits": [
-        "study",
-        "billiard-room"
+        {
+          "TargetId": "study",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed."
+          }
+        },
+        {
+          "TargetId": "billiard-room",
+          "DefaultState": "open",
+          "States": {
+            "open": "The exit to the billiard room is open.",
+            "closed": "The exit to the billiard room is closed."
+          }
+        }
       ],
       "States": {}
     }
@@ -115,36 +297,59 @@
       "Id": "dagger",
       "Name": "Dagger",
       "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use.",
-      "States": {}
+      "DefaultState": "clean",
+      "States": {
+        "clean": "The dagger's blade gleams, free of any stains.",
+        "bloody": "The dagger's blade is stained with fresh blood."
+      }
     },
     "lead-pipe": {
       "Id": "lead-pipe",
       "Name": "Lead Pipe",
       "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
-      "States": {}
+      "DefaultState": "clean",
+      "States": {
+        "clean": "The lead pipe is free of any marks except for rust.",
+        "bloody": "The lead pipe is smeared with blood."
+      }
     },
     "revolver": {
       "Id": "revolver",
       "Name": "Revolver",
       "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired.",
-      "States": {}
+      "DefaultState": "loaded",
+      "States": {
+        "loaded": "The revolver is loaded and ready to fire.",
+        "unloaded": "The revolver is empty, its chamber clicking hollowly.",
+        "fired": "The revolver has just been fired, smoke curling from the barrel."
+      }
     },
     "rope": {
       "Id": "rope",
       "Name": "Rope",
       "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension.",
-      "States": {}
+      "DefaultState": "coiled",
+      "States": {
+        "coiled": "The rope is neatly coiled and ready for use.",
+        "tied": "The rope is tied securely around something.",
+        "frayed": "The rope is frayed and weakened from use."
+      }
     },
     "wrench": {
       "Id": "wrench",
       "Name": "Wrench",
       "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands.",
-      "States": {}
+      "DefaultState": "clean",
+      "States": {
+        "clean": "The wrench is clean and shiny.",
+        "bloody": "The wrench is smeared with blood."
+      }
     },
     "flashlight": {
       "Id": "flashlight",
       "Name": "Black and Decker Flashlight",
       "Description": "Powerful and reliable, this flashlight cuts through the darkness with a beam that feels almost alive. The batteries are fresh, and it hums softly when switched on.",
+      "DefaultState": "default",
       "States": {
         "default": "The flashlight is off, waiting to be used.",
         "on": "The flashlight is on, illuminating the room with a steady beam.",
@@ -156,6 +361,7 @@
       "Name": "Old Oak Cabinet",
       "IsMovable": false,
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
+      "DefaultState": "locked",
       "States": {
         "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",
         "unlocked": "The cabinet stands unlocked, its contents waiting to be revealed.",
@@ -216,79 +422,64 @@
   "InitialSceneMap": {
     "Objects": [
       {
-        "Id": "player",
-        "Type": "player",
+        "Id": "player:player",
         "LocationId": "hall"
       },
       {
-        "Id": "scarlet",
-        "Type": "npc",
+        "Id": "npc:scarlet",
         "LocationId": "lounge"
       },
       {
-        "Id": "mustard",
-        "Type": "npc",
+        "Id": "npc:mustard",
         "LocationId": "hall"
       },
       {
-        "Id": "white",
-        "Type": "npc",
+        "Id": "npc:white",
         "LocationId": "hall"
       },
       {
-        "Id": "green",
-        "Type": "npc",
+        "Id": "npc:green",
         "LocationId": "hall"
       },
       {
-        "Id": "peacock",
-        "Type": "npc",
+        "Id": "npc:peacock",
         "LocationId": "hall"
       },
       {
-        "Id": "plum",
-        "Type": "npc",
+        "Id": "npc:plum",
         "LocationId": "hall"
       },
       {
-        "Id": "candlestick",
-        "Type": "item",
+        "Id": "item:candlestick",
         "LocationId": "lounge"
       },
       {
-        "Id": "dagger",
-        "Type": "item",
+        "Id": "item:dagger",
         "LocationId": "dining-room"
       },
       {
-        "Id": "lead-pipe",
-        "Type": "item",
+        "Id": "item:lead-pipe",
         "LocationId": "conservatory"
       },
       {
-        "Id": "revolver",
-        "Type": "item",
+        "Id": "item:revolver",
         "LocationId": "study"
       },
       {
-        "Id": "rope",
-        "Type": "item",
+        "Id": "item:rope",
         "State": "open",
         "LocationId": "cabinet"
       },
       {
-        "Id": "cabinet",
-        "Type": "item",
+        "Id": "item:cabinet",
         "LocationId": "billiard-room"
       },
       {
-        "Id": "wrench",
-        "Type": "item",
+        "Id": "item:wrench",
         "LocationId": "kitchen"
       },
       {
-        "Id": "flashlight",
-        "Type": "item",
+        "Id": "item:flashlight",
         "LocationId": "_inventory"
       }
     ]
