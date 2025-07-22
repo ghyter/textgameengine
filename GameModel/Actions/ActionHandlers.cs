@@ -26,7 +26,7 @@ public static class ActionHandlers
         }
         else
         {
-            return LookScene(session, action, session.CurrentScene);
+            return session.CurrentScene.ToDescription(session);
         }
 
     }
@@ -62,78 +62,10 @@ public static class ActionHandlers
         session.CurrentScene = session.GetGameElement<Scene>(exitId.TargetId)!;
         session.Elements["player:player"].LocationId = session.CurrentScene.Id; 
 
-        return LookScene(session, action, session.CurrentScene);
+        return session.CurrentScene.ToDescription(session);
     }
 
 
-
-    private static string LookScene(GameSession session, PlayerAction action, Scene scene)
-    {
-        StringBuilder sb = new();
-        int i = 1;
-        //I am looking at the scene
-        sb.AppendLine(scene.Description);
-        var whoishere = session.Elements.GetInLocation(scene.Id);
-
-        var npcs = whoishere.Where(x => x.Id.StartsWith("npc:"));
-        if (npcs.Any())
-        {
-            sb.AppendLine("");
-            sb.AppendLine("The following people are here:");
-            i = 0;
-            foreach (var item in npcs)
-            {
-                var npc = session.GetGameElement<Npc>(item.Id);
-                if (npc != null)
-                    sb.AppendLine($"{++i}. {npc.Name} ({npc.Id})");
-            }
-        }
-        else
-        {
-            sb.AppendLine("");
-            sb.AppendLine("No one is here.");
-        }
-
-        var items = whoishere.Where(x => x.Id.StartsWith("item:"));
-        if (items.Any())
-        {
-            sb.AppendLine("");
-            sb.AppendLine("You see the following items:");
-            i = 0;
-            foreach (var item in items)
-            {
-                var itm = session.GetGameElement<Item>(item.Id);
-                if (itm != null)
-                    sb.AppendLine($"{++i}. {itm.Name}");
-            }
-        }
-        else
-        {
-            sb.AppendLine("");
-            sb.AppendLine("There are no items here.");
-        }
-
-
-        if (scene.Exits.ToList().Any())
-        {
-            sb.AppendLine("");
-            sb.AppendLine("You can see these exits:");
-            i = 0;
-            foreach (var exit in scene.Exits)
-            {
-                var exScene = session.GetGameElement<Scene>(exit.TargetId);
-                var name = exScene?.Name ?? exit.Name;
-                sb.AppendLine($"{++i}. {exit.Name} ({exit.TargetId})");
-            }
-        }
-        else
-        {
-            sb.AppendLine("");
-            sb.AppendLine("There are no exits from here.");
-        }
-
-        return sb.ToString();
-    }
 
     public static string HandleInventoryGet(GameSession session, PlayerAction action)
     {
