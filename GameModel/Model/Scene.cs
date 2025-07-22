@@ -2,7 +2,7 @@ namespace GameModel.Model;
 
 public class Scene : GameElement
 {
-    public List<string> Exits { get; set; } = [];
+    public List<Exit> Exits { get; set; } = [];
     
 
 }

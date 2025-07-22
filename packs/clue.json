@@ -7,6 +7,7 @@
       "Description": "A dimly lit study lined with aged bookshelves and a large, claw-footed desk. Dust lingers in the air and a single green-shaded lamp flickers softly. A faint draft suggests a hidden passage might lie nearby.",
       "Exits": [
         {
+          "Name":"South",
           "TargetId": "library",
           "DefaultState": "open",
           "States": {
@@ -15,6 +16,7 @@
           }
         },
         {
+          "Name": "East",
           "TargetId": "hall",
           "DefaultState": "open",
           "States": {
@@ -23,9 +25,11 @@
           }
         },
         {
+          "Name": "Secret Passage",
           "TargetId": "kitchen",
-          "DefaultState": "open",
+          "DefaultState": "hidden",
           "States": {
+            "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the kitchen is open.",
             "closed": "The exit to the kitchen is closed."
           }
@@ -39,6 +43,7 @@
       "Description": "A long entrance hall with polished marble floors, twin staircases sweeping upward, and antique portraits staring down from every wall. You feel as if the house itself is watching.",
       "Exits": [
         {
+          "Name": "West",
           "TargetId": "study",
           "DefaultState": "open",
           "States": {
@@ -47,19 +52,12 @@
           }
         },
         {
+          "Name": "East",
           "TargetId": "lounge",
           "DefaultState": "open",
           "States": {
             "open": "The exit to the lounge is open.",
             "closed": "The exit to the lounge is closed."
-          }
-        },
-        {
-          "TargetId": "dining-room",
-          "DefaultState": "open",
-          "States": {
-            "open": "The exit to the dining room is open.",
-            "closed": "The exit to the dining room is closed."
           }
         }
       ],
@@ -75,6 +73,7 @@
       "Description": "A richly decorated sitting room with velvet curtains, high-backed chairs, and the lingering scent of cigar smoke. The room feels like it was made for secrets and whispers.",
       "Exits": [
         {
+          "Name": "West",
           "TargetId": "hall",
           "DefaultState": "open",
           "States": {
@@ -83,6 +82,7 @@
           }
         },
         {
+          "Name": "South",
           "TargetId": "dining-room",
           "DefaultState": "open",
           "States": {
@@ -91,9 +91,11 @@
           }
         },
         {
+          "Name": "Secret",
           "TargetId": "conservatory",
-          "DefaultState": "open",
+          "DefaultState": "hidden",
           "States": {
+            "hidden": "",
             "open": "The exit to the conservatory is open.",
             "closed": "The exit to the conservatory is closed."
           }
@@ -107,14 +109,7 @@
       "Description": "A long mahogany table stretches beneath a flickering chandelier. The silverware is still set, as if dinner had been interrupted — or never started at all.",
       "Exits": [
         {
-          "TargetId": "hall",
-          "DefaultState": "open",
-          "States": {
-            "open": "The exit to the hall is open.",
-            "closed": "The exit to the hall is closed."
-          }
-        },
-        {
+          "Name": "North",
           "TargetId": "lounge",
           "DefaultState": "open",
           "States": {
@@ -123,14 +118,7 @@
           }
         },
         {
-          "TargetId": "billiard-room",
-          "DefaultState": "open",
-          "States": {
-            "open": "The exit to the billiard room is open.",
-            "closed": "The exit to the billiard room is closed."
-          }
-        },
-        {
+          "Name": "South",
           "TargetId": "kitchen",
           "DefaultState": "open",
           "States": {
@@ -147,6 +135,7 @@
       "Description": "Pots dangle from wrought-iron racks above stone counters. The smell of old spices and something more metallic lingers in the air. Knives rest suspiciously out of place.",
       "Exits": [
         {
+          "Name": "North",
           "TargetId": "dining-room",
           "DefaultState": "open",
           "States": {
@@ -155,6 +144,7 @@
           }
         },
         {
+          "Name": "West",
           "TargetId": "ballroom",
           "DefaultState": "open",
           "States": {
@@ -163,9 +153,11 @@
           }
         },
         {
+          "Name": "Secret Passage",
           "TargetId": "study",
-          "DefaultState": "open",
+          "DefaultState": "hidden",
           "States": {
+            "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the study is open.",
             "closed": "The exit to the study is closed."
           }
@@ -179,6 +171,7 @@
       "Description": "An echoing chamber with a polished parquet floor and towering windows. Chandeliers overhead sway slightly, though there is no wind. Footsteps seem to follow your own.",
       "Exits": [
         {
+          "Name": "East",
           "TargetId": "kitchen",
           "DefaultState": "open",
           "States": {
@@ -187,14 +180,7 @@
           }
         },
         {
-          "TargetId": "billiard-room",
-          "DefaultState": "open",
-          "States": {
-            "open": "The exit to the billiard room is open.",
-            "closed": "The exit to the billiard room is closed."
-          }
-        },
-        {
+          "Name": "West",
           "TargetId": "conservatory",
           "DefaultState": "open",
           "States": {
@@ -211,6 +197,7 @@
       "Description": "Tall glass walls rise into a domed ceiling, letting moonlight bathe rows of exotic plants. Leaves rustle even when you’re still, and the air is thick with humidity.",
       "Exits": [
         {
+          "Name": "East",
           "TargetId": "ballroom",
           "DefaultState": "open",
           "States": {
@@ -219,9 +206,20 @@
           }
         },
         {
-          "TargetId": "lounge",
+          "Name": "North",
+          "TargetId": "billiard-room",
           "DefaultState": "open",
           "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        },
+        {
+          "Name": "Secret Passage",
+          "TargetId": "lounge",
+          "DefaultState": "hidden",
+          "States": {
+            "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the lounge is open.",
             "closed": "The exit to the lounge is closed."
           }
@@ -235,6 +233,7 @@
       "Description": "Faded green felt lines the billiard table at the center. Chalk dust covers the cues and a forgotten drink rests on a side table, still half full. Someone left in a hurry.",
       "Exits": [
         {
+          "Name": "North",
           "TargetId": "library",
           "DefaultState": "open",
           "States": {
@@ -243,19 +242,11 @@
           }
         },
         {
-          "TargetId": "dining-room",
+          "TargetId": "conservatory",
           "DefaultState": "open",
           "States": {
-            "open": "The exit to the dining room is open.",
-            "closed": "The exit to the dining room is closed."
-          }
-        },
-        {
-          "TargetId": "ballroom",
-          "DefaultState": "open",
-          "States": {
-            "open": "The exit to the ballroom is open.",
-            "closed": "The exit to the ballroom is closed."
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
           }
         }
       ],
@@ -267,6 +258,7 @@
       "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
       "Exits": [
         {
+          "Name": "North",
           "TargetId": "study",
           "DefaultState": "open",
           "States": {
@@ -275,6 +267,7 @@
           }
         },
         {
+          "Name": "South",
           "TargetId": "billiard-room",
           "DefaultState": "open",
           "States": {

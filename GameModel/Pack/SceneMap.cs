@@ -25,32 +25,32 @@ public class SceneMap
 
 public static class SceneMapExtensions
 {
-    public static string? GetLocationOf(this SceneMap map, string type, string id)
+    public static string? GetLocationOf(this SceneMap map, string id)
     {
         return map.Objects
-            .FirstOrDefault(o => o.Type == type && o.Id == id)
+            .FirstOrDefault(o => o.Id == id)
             ?.LocationId;
     }
 
     public static bool IsInScene(this SceneMap map, string type, string id, string sceneId)
     {
-        var loc = map.GetLocationOf(type, id);
+        var loc = map.GetLocationOf(id);
         return loc == sceneId;
     }
 
-    public static bool IsInInventory(this SceneMap map, string type, string id)
+    public static bool IsInInventory(this SceneMap map, string id)
     {
-        return map.GetLocationOf(type, id) == "inventory";
+        return map.GetLocationOf(id) == "inventory";
     }
 
-    public static bool IsOffMap(this SceneMap map, string type, string id)
+    public static bool IsOffMap(this SceneMap map, string id)
     {
-        return map.GetLocationOf(type, id) == "_off";
+        return map.GetLocationOf(id) == "_off";
     }
 
-    public static bool IsInPlay(this SceneMap map, string type, string id)
+    public static bool IsInPlay(this SceneMap map, string id)
     {
-        var loc = map.GetLocationOf(type, id);
+        var loc = map.GetLocationOf(id);
         return loc != null && loc != "_off";
     }
 }

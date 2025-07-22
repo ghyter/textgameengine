@@ -25,41 +25,42 @@ public class GameSession
         GameSession gs = new();
         gs.GamePack = gamePack;
 
-        gs.Elements["player"] = new GameElementInfo
+        gs.Elements["player:player"] = new GameElementInfo
         {
-            Id = "player",
-            Type = "player",
+            Id = "player:player",
             Element = new Player()
             {
                 Id = "player",
                 Name = "Player",
                 Description = "You are the player character."
             },
-            LocationId = gamePack.InitialSceneMap.GetLocationOf("player", "player")
+            LocationId = gamePack.InitialSceneMap.GetLocationOf("player:player")
         };
-        gs.CurrentScene = gs.GamePack.Scenes[gs.Elements["player"].LocationId ?? "default"];
+        gs.CurrentScene = gs.GamePack.Scenes[gs.Elements["player:player"].LocationId ?? "default"];
 
 
         foreach (var s in gs.GamePack.Scenes)
         {
             gs.Elements[s.Key] = new GameElementInfo
             {
-                Id = s.Key,
-                Type = "scene",
+                Id = $"scene:{s.Key}",
                 Element = s.Value,
                 LocationId = null,
                 Exits = s.Value.Exits.ToList()
             };
+            gs.Elements[s.Key].Exits.ForEach(exit => 
+            {
+                exit.Id = $"{s.Value.Id}:{exit.TargetId}";
+            });
         }
 
         foreach (var i in gs.GamePack.Items)
         {
             gs.Elements[i.Key] = new GameElementInfo
             {
-                Id = i.Key,
-                Type = "item",
+                Id = $"item:{i.Key}",
                 Element = i.Value,
-                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf("item", i.Key)
+                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf($"item:{i.Key}")
             };
         }
 
@@ -67,10 +68,9 @@ public class GameSession
         {
             gs.Elements[npc.Key] = new GameElementInfo
             {
-                Id = npc.Key,
-                Type = "npc",
+                Id = $"npc:{npc.Key}",
                 Element = npc.Value,
-                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf("npc", npc.Key)
+                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf($"npc:{npc.Key}")
             };
         }
 

@@ -5,11 +5,10 @@ namespace GameModel;
 public class GameElementInfo
 {
     public required string Id { get; init; }
-    public required string Type { get; init; }
     public required IGameElement Element { get; init; }
     public string State { get; set; } = "default";
     public string? LocationId { get; set; }
-    public List<string> Exits { get; set; } = [];
+    public List<Exit> Exits { get; set; } = [];
 
     public string Description => Element.ToDescription(State);
 
@@ -24,7 +23,7 @@ public static class GameElementsExtensions
 {
     public static IEnumerable<GameElementInfo> GetInLocation(this GameElements map, string location, string? type = null)
     {
-        return map.Values.Where(o => o.LocationId == location && (type == null || o.Type == type));
+        return map.Values.Where(o => o.LocationId == location && (type == null || o.Id.StartsWith($"{type}:") ));
     }
     
     public static string? GetLocationOf(this GameElements map, string id)

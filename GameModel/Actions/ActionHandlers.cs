@@ -39,7 +39,7 @@ public static class ActionHandlers
         var input = action.Targets[0];
         var exits = session.CurrentScene.Exits;
 
-        string? exitId = null;
+        Exit? exitId = null;
 
         if (int.TryParse(input, out var index))
         {
@@ -47,20 +47,20 @@ public static class ActionHandlers
             if (index >= 1 && index <= exits.Count)
             {
                 exitId = exits[index - 1];
-                action.Targets[0] = exitId; // Update the action target to the actual exit ID
+                action.Targets[0] = exitId.Id; // Update the action target to the actual exit ID
             }
 
         }
-        else if (exits.Contains(input))
+        else if (exits.Exists(x => x.Id == input))
         {
-            exitId = input;
+            exitId = exits.Where(x => x.Id == input).First();
         }
 
         if (exitId == null)
             return $"There is no exit '{input}' from here.";
 
-        session.CurrentScene = session.GetGameElement<Scene>(exitId)!;
-        session.Elements["player"].LocationId = session.CurrentScene.Id; 
+        session.CurrentScene = session.GetGameElement<Scene>(exitId.TargetId)!;
+        session.Elements["player:player"].LocationId = session.CurrentScene.Id; 
 
         return LookScene(session, action, session.CurrentScene);
     }
@@ -75,7 +75,7 @@ public static class ActionHandlers
         sb.AppendLine(scene.Description);
         var whoishere = session.Elements.GetInLocation(scene.Id);
 
-        var npcs = whoishere.Where(x => x.Type == "npc");
+        var npcs = whoishere.Where(x => x.Id.StartsWith("npc:"));
         if (npcs.Any())
         {
             sb.AppendLine("");
@@ -94,7 +94,7 @@ public static class ActionHandlers
             sb.AppendLine("No one is here.");
         }
 
-        var items = whoishere.Where(x => x.Type == "item");
+        var items = whoishere.Where(x => x.Id.StartsWith("item:"));
         if (items.Any())
         {
             sb.AppendLine("");
@@ -121,9 +121,9 @@ public static class ActionHandlers
             i = 0;
             foreach (var exit in scene.Exits)
             {
-                var exScene = session.GetGameElement<Scene>(exit);
-                var name = exScene?.Name ?? exit;
-                sb.AppendLine($"{++i}. {name} ({exit})");
+                var exScene = session.GetGameElement<Scene>(exit.TargetId);
+                var name = exScene?.Name ?? exit.Name;
+                sb.AppendLine($"{++i}. {exit.Name} ({exit.TargetId})");
             }
         }
         else
