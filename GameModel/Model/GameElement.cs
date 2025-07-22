@@ -11,7 +11,8 @@ public abstract class GameElement : IGameElement
     // This is a dictionary of states and their descriptions
     // The default state is the one that is used if no other state is specified
     public Dictionary<string, string> States { get; set; } = [];
-    public string DefaultState { get; set; } = "default";
+    public string StartingState { get; set; } = "default";
+    public string StartingLocation {get; set; } = "default";
 
     /// <summary>
     /// Returns the description for a given state (provided externally).

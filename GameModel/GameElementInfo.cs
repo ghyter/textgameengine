@@ -7,7 +7,7 @@ public class GameElementInfo
     public required string Id { get; init; }
     public required IGameElement Element { get; init; }
     public string State { get; set; } = "default";
-    public string? LocationId { get; set; }
+    public string? Location { get; set; }
     public List<Exit> Exits { get; set; } = [];
 
     public string Description => Element.ToDescription(State);
@@ -23,12 +23,12 @@ public static class GameElementsExtensions
 {
     public static IEnumerable<GameElementInfo> GetInLocation(this GameElements map, string location, string? type = null)
     {
-        return map.Values.Where(o => o.LocationId == location && (type == null || o.Id.StartsWith($"{type}:") ));
+        return map.Values.Where(o => o.Location == location && (type == null || o.Id.StartsWith($"{type}:") ));
     }
     
     public static string? GetLocationOf(this GameElements map, string id)
     {
-        return map.TryGetValue(id, out var info) ? info.LocationId : null;
+        return map.TryGetValue(id, out var info) ? info.Location : null;
     }
 
     public static bool IsInScene(this GameElements map, string id, string sceneId)

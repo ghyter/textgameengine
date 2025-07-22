@@ -13,12 +13,12 @@ public class GameSessionTests
     {
         var session = GameSession.NewGame("/workspaces/textgameengine/packs/clue.json");
 
-        var scene = session.GetGameElement<Scene>("hall");
+        var scene = session.GetGameElement<Scene>("scene:hall");
         Assert.IsNotNull(scene);
-        Assert.AreEqual("hall", scene!.Id);
+        Assert.AreEqual("scene:hall", scene!.Id);
 
-        var generic = session.GetGameElement("candlestick");
+        var generic = session.GetGameElement("item:candlestick");
         Assert.IsNotNull(generic);
-        Assert.AreEqual("candlestick", generic!.Id);
+        Assert.AreEqual("item:candlestick", generic!.Id);
     }
 }

@@ -1,5 +1,18 @@
 {
   "Title": "Clue Mansion",
+  "Player": {
+    "Id": "player:player",
+    "Name": "Player",
+    "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
+    "StartingLocation": "hall",
+    "StartingState": "default",
+    "HitPoints": 10,
+    "ArmorClass": 10,
+    "States": {
+      "default": "You are ready to explore the mansion.",
+      "injured": "You are injured and need to find a way to heal."
+    }
+  },
   "Scenes": {
     "study": {
       "Id": "study",
@@ -279,17 +292,19 @@
       "States": {}
     }
   },
-  "Items": {
+ "Items": {
     "candlestick": {
       "Id": "candlestick",
       "Name": "Candlestick",
       "Description": "A heavy brass candlestick, ornately sculpted and cold to the touch. Traces of soot and wax cling to its rim, but it feels more like a weapon than a decoration.",
+      "StartingLocation": "lounge",
       "States": {}
     },
     "dagger": {
       "Id": "dagger",
       "Name": "Dagger",
       "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use.",
+      "StartingLocation": "dining-room",
       "DefaultState": "clean",
       "States": {
         "clean": "The dagger's blade gleams, free of any stains.",
@@ -300,6 +315,7 @@
       "Id": "lead-pipe",
       "Name": "Lead Pipe",
       "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
+      "StartingLocation": "conservatory",
       "DefaultState": "clean",
       "States": {
         "clean": "The lead pipe is free of any marks except for rust.",
@@ -310,6 +326,7 @@
       "Id": "revolver",
       "Name": "Revolver",
       "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired.",
+      "StartingLocation": "study",
       "DefaultState": "loaded",
       "States": {
         "loaded": "The revolver is loaded and ready to fire.",
@@ -321,6 +338,8 @@
       "Id": "rope",
       "Name": "Rope",
       "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension.",
+      "StartingLocation": "cabinet",
+      "StartingState": "open",
       "DefaultState": "coiled",
       "States": {
         "coiled": "The rope is neatly coiled and ready for use.",
@@ -332,6 +351,7 @@
       "Id": "wrench",
       "Name": "Wrench",
       "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands.",
+      "StartingLocation": "kitchen",
       "DefaultState": "clean",
       "States": {
         "clean": "The wrench is clean and shiny.",
@@ -342,6 +362,7 @@
       "Id": "flashlight",
       "Name": "Black and Decker Flashlight",
       "Description": "Powerful and reliable, this flashlight cuts through the darkness with a beam that feels almost alive. The batteries are fresh, and it hums softly when switched on.",
+      "StartingLocation": "_inventory",
       "DefaultState": "default",
       "States": {
         "default": "The flashlight is off, waiting to be used.",
@@ -354,6 +375,7 @@
       "Name": "Old Oak Cabinet",
       "IsMovable": false,
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
+      "StartingLocation": "billiard-room",
       "DefaultState": "locked",
       "States": {
         "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",
@@ -368,6 +390,7 @@
       "Name": "Miss Scarlet",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "lounge",
       "Description": "Miss Scarlet exudes charm and mystery. Draped in crimson silk, she glides through rooms like a whisper of perfume and suspicion. Her smile rarely reaches her eyes.",
       "States": {}
     },
@@ -376,6 +399,7 @@
       "Name": "Colonel Mustard",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "hall",
       "Description": "Colonel Mustard stands tall and broad-shouldered, his military uniform still crisp despite his retirement. He speaks in clipped commands and never turns his back to a door.",
       "States": {}
     },
@@ -384,6 +408,7 @@
       "Name": "Mrs. White",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "hall",
       "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets.",
       "States": {}
     },
@@ -392,6 +417,7 @@
       "Name": "Mr. Green",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "hall",
       "Description": "Mr. Green fidgets nervously, adjusting his tie far too often. He speaks in practiced pleasantries, but his darting eyes suggest he's hiding more than gossip.",
       "States": {}
     },
@@ -400,6 +426,7 @@
       "Name": "Mrs. Peacock",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "hall",
       "Description": "Mrs. Peacock is regal and razor-tongued, adorned in sapphire feathers and too much jewelry. She always knows who last entered the room — and why they shouldn't have.",
       "States": {}
     },
@@ -408,73 +435,9 @@
       "Name": "Professor Plum",
       "HitPoints": 10,
       "ArmorClass": 10,
+      "StartingLocation": "hall",
       "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective.",
       "States": {}
     }
-  },
-  "InitialSceneMap": {
-    "Objects": [
-      {
-        "Id": "player:player",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "npc:scarlet",
-        "LocationId": "lounge"
-      },
-      {
-        "Id": "npc:mustard",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "npc:white",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "npc:green",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "npc:peacock",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "npc:plum",
-        "LocationId": "hall"
-      },
-      {
-        "Id": "item:candlestick",
-        "LocationId": "lounge"
-      },
-      {
-        "Id": "item:dagger",
-        "LocationId": "dining-room"
-      },
-      {
-        "Id": "item:lead-pipe",
-        "LocationId": "conservatory"
-      },
-      {
-        "Id": "item:revolver",
-        "LocationId": "study"
-      },
-      {
-        "Id": "item:rope",
-        "State": "open",
-        "LocationId": "cabinet"
-      },
-      {
-        "Id": "item:cabinet",
-        "LocationId": "billiard-room"
-      },
-      {
-        "Id": "item:wrench",
-        "LocationId": "kitchen"
-      },
-      {
-        "Id": "item:flashlight",
-        "LocationId": "_inventory"
-      }
-    ]
   }
 }

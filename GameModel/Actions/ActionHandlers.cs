@@ -60,7 +60,7 @@ public static class ActionHandlers
             return $"There is no exit '{input}' from here.";
 
         session.CurrentScene = session.GetGameElement<Scene>(exitId.TargetId)!;
-        session.Elements["player:player"].LocationId = session.CurrentScene.Id; 
+        session.Elements["player:player"].Location = session.CurrentScene.Id; 
 
         return LookScene(session, action, session.CurrentScene);
     }
@@ -150,9 +150,9 @@ public static class ActionHandlers
         {
             return $"There is no item with ID '{itemId}'.";
         }
-        session.Elements[item.Id].LocationId = "_inventory";
+        session.Elements[item.Id].Location = "_inventory";
         if (session.Elements.TryGetValue(item.Id, out var info))
-            info.LocationId = "_inventory";
+            info.Location = "_inventory";
         var Item = session.GetGameElement<Item>(itemId);
         sb.AppendLine($"You have picked up {Item?.Name} ({Item?.Id}).");
         return sb.ToString();
@@ -173,9 +173,9 @@ public static class ActionHandlers
         {
             return $"You are not carrying an item with ID '{itemId}'.";
         }
-        session.Elements[item.Id].LocationId = session.CurrentScene.Id;
+        session.Elements[item.Id].Location = session.CurrentScene.Id;
         if (session.Elements.TryGetValue(item.Id, out var info))
-            info.LocationId = session.CurrentScene.Id;
+            info.Location = session.CurrentScene.Id;
         var Item = session.GetGameElement<Item>(itemId);
         sb.AppendLine($"You have dropped {Item?.Name} ({Item?.Id}).");
         return sb.ToString();

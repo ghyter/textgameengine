@@ -9,7 +9,8 @@ public interface IGameElement
     public string Name { get; set; }
     public string Description { get; set; }
 
-    public string DefaultState { get; set; }
+    public string StartingState { get; set; }
+    public string StartingLocation { get; set; }
     public string ToDescription(string stateId);
     
 }

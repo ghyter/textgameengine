@@ -8,10 +8,12 @@ namespace GameModel;
 
 public class GameSession
 {
-    private ActionRegistry _actionRegistry { get; set; } = new();
-
-    public GamePack GamePack { get; set; } = default!;
+    const string _playerid = "player:player";
     
+    public string GameTitle { get; set; } = "Text Game Engine";
+
+    private ActionRegistry _actionRegistry { get; set; } = new();
+       
     public List<PlayerAction> ActionHistory { get; set; } = [];
 
     public Scene CurrentScene { get; set; } = new();
@@ -20,61 +22,69 @@ public class GameSession
 
     public static GameSession NewGame(string PackPath)
     {
-        var gamePack = GamePackLoader.Load(PackPath);
-
+        var _gamePack = GamePackLoader.Load(PackPath);
+        if (_gamePack == null)
+        {
+            throw new ArgumentException("Invalid game pack path or format.");
+        }
         GameSession gs = new();
-        gs.GamePack = gamePack;
-
-        gs.Elements["player:player"] = new GameElementInfo
+        
+        gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
+        gs.Elements[_playerid] = new GameElementInfo
         {
-            Id = "player:player",
-            Element = new Player()
-            {
-                Id = "player",
-                Name = "Player",
-                Description = "You are the player character."
-            },
-            LocationId = gamePack.InitialSceneMap.GetLocationOf("player:player")
+            
+            Id = _playerid,
+            Element = _gamePack.Player,
+            Location = "scene:" + _gamePack.Player.StartingLocation
         };
-        gs.CurrentScene = gs.GamePack.Scenes[gs.Elements["player:player"].LocationId ?? "default"];
+       
 
 
-        foreach (var s in gs.GamePack.Scenes)
+        foreach (var s in _gamePack.Scenes)
         {
-            gs.Elements[s.Key] = new GameElementInfo
+            var id = $"scene:{s.Key}";
+            gs.Elements[id] = new GameElementInfo
             {
-                Id = $"scene:{s.Key}",
+                Id = id,
                 Element = s.Value,
-                LocationId = null,
-                Exits = s.Value.Exits.ToList()
+                Location = null,
+                Exits = s.Value.Exits.ToList(),
+                State = s.Value.StartingState ?? "default"
             };
-            gs.Elements[s.Key].Exits.ForEach(exit => 
+            gs.Elements[id].Element.Id = id;
+            gs.Elements[id].Exits.ForEach(exit => 
             {
-                exit.Id = $"{s.Value.Id}:{exit.TargetId}";
+                exit.Id = $"exit:{s.Value.Id}:{exit.TargetId}";
             });
         }
 
-        foreach (var i in gs.GamePack.Items)
+        foreach (var i in _gamePack.Items)
         {
-            gs.Elements[i.Key] = new GameElementInfo
+            var id = $"item:{i.Key}";
+            gs.Elements[id] = new GameElementInfo
             {
-                Id = $"item:{i.Key}",
+                Id = id,
                 Element = i.Value,
-                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf($"item:{i.Key}")
+                Location = "scene:" + i.Value.StartingLocation,
+                State = i.Value.StartingState ?? "default"
             };
+            gs.Elements[id].Element.Id = id;
         }
 
-        foreach (var npc in gs.GamePack.Npcs)
+        foreach (var npc in _gamePack.Npcs)
         {
-            gs.Elements[npc.Key] = new GameElementInfo
+            var id = $"npc:{npc.Key}";
+            gs.Elements[id] = new GameElementInfo
             {
-                Id = $"npc:{npc.Key}",
+                Id = id,
                 Element = npc.Value,
-                LocationId = gs.GamePack.InitialSceneMap.GetLocationOf($"npc:{npc.Key}")
+                Location = "scene:" + npc.Value.StartingLocation,
+                State = npc.Value.StartingState ?? "default"
             };
+            gs.Elements[id].Element.Id = id;
         }
 
-
+        gs.CurrentScene = gs.Elements[gs.Elements[_playerid].Location!].Get<Scene>()!;
         gs._actionRegistry.Register(ActionHandlers.HandleLook, "look", "examine", "view","l");
         gs._actionRegistry.Register(ActionHandlers.HandleMove, "move", "go","m", "g");
         gs._actionRegistry.Register(ActionHandlers.HandleHistory, "history", "hist");
@@ -103,10 +113,10 @@ public class GameSession
         
         //Header
         
-        sb.Append(GamePack.Title);
+        sb.Append(GameTitle);
         sb.Append(": ");
         sb.AppendLine(CurrentScene.Name);
-        sb.AppendLine(new string('=', GamePack.Title.Length + CurrentScene.Name.Length + 2));
+        sb.AppendLine(new string('=', GameTitle.Length + CurrentScene.Name.Length + 2));
         sb.AppendLine(actionresult);
 
         return sb.ToString();
