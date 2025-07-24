@@ -439,5 +439,33 @@
       "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective.",
       "States": {}
     }
-  }
+  },
+  "Actions":[
+    {
+      "Id": "open-any-exit",
+      "Name": "Open Door or Exit",
+      "Description": "Opens any closed door, passage, or exit if it is not locked or hidden.",
+      "CanonicalVerb": "open",
+      "Aliases": ["unseal", "pull open"],
+      "Targets": ["exit:*"],
+      "RequiredTargets": 1,
+      "Conditions": [
+        {
+          "GameElementId": "$target",
+          "RequiredStateId": "closed"
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$target",
+          "TargetStateId": "open"
+        }
+      ],
+      "SuccessMessage": "You open the door.",
+      "FailureMessage": "It won't budge. It may be locked, hidden, or already open."
+    }
+  ]
+
+
+  
 }

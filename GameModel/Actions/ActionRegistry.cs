@@ -1,67 +1,82 @@
 using GameModel;
+using GameModel.Model;
+
 namespace GameModel.Actions;
 
-public delegate string ActionHandler(GameSession session, PlayerAction action);
+public delegate string ActionHandler(GameSession session, GameAction gameaction, PlayerAction action);
 
 public class ActionRegistry
 {
-    private readonly Dictionary<string, ActionHandler> _handlers = new(StringComparer.OrdinalIgnoreCase);
+    private List<GameAction> _actions = [];
+    public IReadOnlyList<GameAction> Actions => _actions;
 
-    private readonly List<string> _canonicalVerbs = [];
+    private readonly List<PlayerAction> _history = [];
+    public IReadOnlyList<PlayerAction> History => _history;
 
-    public void Register(ActionHandler handler, params string[] verbs)
+
+
+    public void Register(GameAction action)
     {
-        //First verb is the canonical verb.
-        _canonicalVerbs.Add(verbs[0]);
-        foreach (var verb in verbs)
-            _handlers[verb] = handler;
+        if (action == null) throw new ArgumentNullException(nameof(action));
+        if (string.IsNullOrWhiteSpace(action.Id)) throw new ArgumentException("Action must have a valid Id.", nameof(action));
+        _actions.Add(action);
     }
 
     public bool TryExecute(GameSession session, string input, out string result)
     {
         var action = Parse(input);
-        if (action != null && _handlers.TryGetValue(action.VerbText, out var handler))
+        if (action == null)
         {
-            result = handler(session, action);
-            return true;
+            result = $"I don't know how to '{input}'.";
+            return false;
         }
+    
+        var verbCandidates = _actions
+            .Where(a => a.CanonicalVerb?.Equals(action.VerbText, StringComparison.OrdinalIgnoreCase) == true ||
+                        a.VerbAliases.Any(alias => alias.Equals(action.VerbText, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        //Check the verbCandidates to see if the conditions are met.
 
         result = $"I don't know how to '{input}'.";
         return false;
     }
 
-    /// <summary>
-    /// Parses the input into a PlayerAction, matching the longest registered verb first.
-    /// </summary>
-    private PlayerAction? Parse(string input)
+
+public PlayerAction? Parse(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return null;
+
+    var normalized = input.Trim();
+
+    // Gather all (verb, canonicalVerb) pairs, including aliases, with longest first
+    var verbPairs = _actions
+        .SelectMany(a =>
+            new[] { a.CanonicalVerb }
+                .Concat(a.VerbAliases ?? [])
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(alias => (Alias: alias, Canonical: a.CanonicalVerb ?? alias))
+        )
+        .OrderByDescending(p => p.Alias?.Length)
+        .ToList();
+
+    foreach (var (alias, canonical) in verbPairs)
     {
-        if (string.IsNullOrWhiteSpace(input))
-            return null;
-
-        var normalized = input.Trim();
-
-        // Match the longest registered verb first
-        var sortedVerbs = _handlers.Keys
-            .OrderByDescending(v => v.Length)
-            .ToList();
-
-        foreach (var verb in sortedVerbs)
+        
+        if (normalized.StartsWith(alias! , StringComparison.OrdinalIgnoreCase))
         {
-            if (normalized.StartsWith(verb, StringComparison.OrdinalIgnoreCase))
+            var remainder = normalized.Substring(alias!.Length).Trim();
+
+            var action = new PlayerAction
             {
-                var remainder = normalized.Substring(verb.Length).Trim();
+                VerbText = canonical!, // Always the canonical verb!
+                RawInput = input
+            };
 
-                var action = new PlayerAction
-                {
-                    VerbText = verb,
-                    RawInput = input
-                };
-
-                if (string.IsNullOrWhiteSpace(remainder))
-                    return action;
-
+            if (!string.IsNullOrWhiteSpace(remainder))
+            {
                 var tokens = remainder.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-
                 var clauseIndex = tokens.FindIndex(t => ClauseSeparators.Contains(t.ToLowerInvariant()));
                 if (clauseIndex >= 0)
                 {
@@ -73,17 +88,29 @@ public class ActionRegistry
                 }
                 else
                 {
-                    action.Targets.Add(string.Join(" ", tokens));
+                    if (tokens.Count > 0) action.Targets.Add(tokens[0]);
+                    if (tokens.Count > 1) action.Targets.Add(string.Join(" ", tokens.Skip(1)));
                 }
 
-                return action;
+                // Only support up to 2 targets
+                while (action.Targets.Count > 2)
+                    action.Targets.RemoveAt(2);
             }
-        }
 
-        return null; // No matching verb found
+            return action;
+        }
     }
 
-    public IReadOnlyDictionary<string, ActionHandler> Handlers => _handlers;
+    return null; // No matching verb found
+}
+
+    public void ResolveTargets(GameSession session, PlayerAction action)
+    {
+        
+
+    }
+
+    
     private static readonly string[] ClauseSeparators = ["on", "with", "in", "into"];
 
 }

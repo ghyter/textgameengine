@@ -9,35 +9,99 @@ namespace GameModel;
 public class GameSession
 {
     const string _playerid = "player:player";
-    
+
     public string GameTitle { get; set; } = "Text Game Engine";
 
-    private ActionRegistry _actionRegistry { get; set; } = new();
-       
-    public List<PlayerAction> ActionHistory { get; set; } = [];
+    public ActionRegistry ActionRegistry { get; set; } = new();
 
-    public Scene CurrentScene { get; set; } = new();
+
+    public GameElementInfo? CurrentScene
+    {
+        get
+        {
+            var sceneId = Elements[_playerid].Location ?? string.Empty;
+            return Elements.TryGetValue(sceneId, out var info) ? info : null;
+        }
+
+    }
 
     public GameElements Elements { get; set; } = [];
 
     public static GameSession NewGame(string PackPath)
     {
-        var _gamePack = GamePackLoader.Load(PackPath);
+        GameSession gs = new();
+
+        LoadGamePack(gs, PackPath);
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "look",
+            CanonicalVerb = "look",
+            VerbAliases = new() { "examine", "view", "l" },
+            Handler = ActionHandlers.HandleLook
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "move",
+            CanonicalVerb = "move",
+            VerbAliases = new() { "go", "m", "g" },
+            Handler = ActionHandlers.HandleMove
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "history",
+            CanonicalVerb = "history",
+            VerbAliases = new() { "hist" },
+            Handler = ActionHandlers.HandleHistory
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "inventory",
+            CanonicalVerb = "inventory",
+            VerbAliases = new() { "inv", "i" },
+            Handler = ActionHandlers.HandleInventory
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "get",
+            CanonicalVerb = "get",
+            VerbAliases = new() { "grab", "g" },
+            Handler = ActionHandlers.HandleInventoryGet
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "drop",
+            CanonicalVerb = "drop",
+            VerbAliases = new() { "d" },
+            Handler = ActionHandlers.HandleInventoryDrop
+        });
+
+
+        return gs;
+    }
+
+    private static void LoadGamePack(GameSession gs, string packPath)
+    {
+        var _gamePack = GamePackLoader.Load(packPath);
         if (_gamePack == null)
         {
             throw new ArgumentException("Invalid game pack path or format.");
         }
-        GameSession gs = new();
-        
+
         gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
         gs.Elements[_playerid] = new GameElementInfo
         {
-            
+
             Id = _playerid,
             Element = _gamePack.Player,
-            Location = "scene:" + _gamePack.Player.StartingLocation
+            Location = _gamePack.Player.StartingLocation
         };
-       
+
 
 
         foreach (var s in _gamePack.Scenes)
@@ -48,13 +112,19 @@ public class GameSession
                 Id = id,
                 Element = s.Value,
                 Location = null,
-                Exits = s.Value.Exits.ToList(),
                 State = s.Value.StartingState ?? "default"
             };
             gs.Elements[id].Element.Id = id;
-            gs.Elements[id].Exits.ForEach(exit => 
+            s.Value.Exits.ForEach(exit =>
             {
                 exit.Id = $"exit:{s.Value.Id}:{exit.TargetId}";
+                gs.Elements[exit.Id] = new()
+                {
+                    Id = exit.Id,
+                    Element = exit,
+                    Location = id,
+                    State = exit.StartingState
+                };
             });
         }
 
@@ -65,7 +135,7 @@ public class GameSession
             {
                 Id = id,
                 Element = i.Value,
-                Location = "scene:" + i.Value.StartingLocation,
+                Location = i.Value.StartingLocation,
                 State = i.Value.StartingState ?? "default"
             };
             gs.Elements[id].Element.Id = id;
@@ -78,22 +148,23 @@ public class GameSession
             {
                 Id = id,
                 Element = npc.Value,
-                Location = "scene:" + npc.Value.StartingLocation,
+                Location = npc.Value.StartingLocation,
                 State = npc.Value.StartingState ?? "default"
             };
             gs.Elements[id].Element.Id = id;
         }
 
-        gs.CurrentScene = gs.Elements[gs.Elements[_playerid].Location!].Get<Scene>()!;
-        gs._actionRegistry.Register(ActionHandlers.HandleLook, "look", "examine", "view","l");
-        gs._actionRegistry.Register(ActionHandlers.HandleMove, "move", "go","m", "g");
-        gs._actionRegistry.Register(ActionHandlers.HandleHistory, "history", "hist");
-        gs._actionRegistry.Register(ActionHandlers.HandleInventory, "inventory", "inv", "i");
-        gs._actionRegistry.Register(ActionHandlers.HandleInventoryGet, "get", "grab", "g");
-        gs._actionRegistry.Register(ActionHandlers.HandleInventoryDrop, "drop", "d");
+        //Add the scene prefix for any element that doest start with _
+        foreach (var element in gs.Elements.Values)
+        {
+            if (element.Location != null && !element.Location.StartsWith("_"))
+            {
+                element.Location = $"scene:{element.Location}";
+            }
+        }
 
-        return gs;
     }
+
 
     public IGameElement? GetGameElement(string id)
     {
@@ -109,14 +180,15 @@ public class GameSession
     public string Execute(string input)
     {
         StringBuilder sb = new();
-        var actionresult = _actionRegistry.TryExecute(this, input, out var result) ? result : result;
-        
+        var actionresult = ActionRegistry.TryExecute(this, input, out var result) ? result : result;
+
         //Header
-        
+
         sb.Append(GameTitle);
         sb.Append(": ");
-        sb.AppendLine(CurrentScene.Name);
-        sb.AppendLine(new string('=', GameTitle.Length + CurrentScene.Name.Length + 2));
+        var sceneName = CurrentScene?.Get<Scene>()?.Name ?? "Unknown Scene";
+        sb.AppendLine(sceneName);
+        sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
         sb.AppendLine(actionresult);
 
         return sb.ToString();

@@ -12,9 +12,17 @@ public class Condition
     public string? StateId { get; set; }
 }
 
+
+public enum EffectType
+{
+    Location,
+    State,
+    HitPoints,
+}
+
 public class Effect
 {
     public string GameElementId { get; set; } = string.Empty;
-    public string? TargetLocationId { get; set; }
-    public string? TargetStateId { get; set; }
+    public string TargetField { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
+    public string? TargetValue { get; set; }
 }

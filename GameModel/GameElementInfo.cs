@@ -8,7 +8,7 @@ public class GameElementInfo
     public required IGameElement Element { get; init; }
     public string State { get; set; } = "default";
     public string? Location { get; set; }
-    public List<Exit> Exits { get; set; } = [];
+    //public List<Exit> Exits { get; set; } = [];
 
     public string Description => Element.ToDescription(State);
 
@@ -39,7 +39,7 @@ public static class GameElementsExtensions
 
     public static bool IsInInventory(this GameElements map, string id)
     {
-        return map.GetLocationOf(id) == "inventory";
+        return map.GetLocationOf(id) == "_inventory";
     }
 
     public static bool IsOffMap(this GameElements map, string id)

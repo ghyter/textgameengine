@@ -6,7 +6,7 @@ namespace GameModel.Actions;
 
 public static class ActionHandlers
 {
-    public static string HandleLook(GameSession session, PlayerAction action)
+    public static string HandleLook(GameSession session,GameAction gameaction, PlayerAction action)
     {
         if (action.Targets.Any())
         {
@@ -26,12 +26,12 @@ public static class ActionHandlers
         }
         else
         {
-            return LookScene(session, action, session.CurrentScene);
+            return LookScene(session,gameaction, action, session.CurrentScene.Get<Scene>());
         }
 
     }
 
-    public static string HandleMove(GameSession session, PlayerAction action)
+    public static string HandleMove(GameSession session, GameAction gameaction,PlayerAction action)
     {
         if (action.Targets.Count != 1)
             return "You must specify a single exit to move through.";
@@ -62,12 +62,12 @@ public static class ActionHandlers
         session.CurrentScene = session.GetGameElement<Scene>(exitId.TargetId)!;
         session.Elements["player:player"].Location = session.CurrentScene.Id; 
 
-        return LookScene(session, action, session.CurrentScene);
+        return LookScene(session, gameaction, action, session.CurrentScene);
     }
 
 
 
-    private static string LookScene(GameSession session, PlayerAction action, Scene scene)
+    private static string LookScene(GameSession session, GameAction gameaction, PlayerAction action, Scene scene)
     {
         StringBuilder sb = new();
         int i = 1;
@@ -135,7 +135,7 @@ public static class ActionHandlers
         return sb.ToString();
     }
 
-    public static string HandleInventoryGet(GameSession session, PlayerAction action)
+    public static string HandleInventoryGet(GameSession session, GameAction gameaction, PlayerAction action)
     {
         StringBuilder sb = new();
         if (action.Targets.Count != 1)
@@ -158,7 +158,7 @@ public static class ActionHandlers
         return sb.ToString();
     }
 
-    public static string HandleInventoryDrop(GameSession session, PlayerAction action)
+    public static string HandleInventoryDrop(GameSession session, GameAction gameaction,PlayerAction action)
     { 
         StringBuilder sb = new();
         if (action.Targets.Count != 1)
@@ -182,7 +182,7 @@ public static class ActionHandlers
 
     }
 
-    public static string HandleInventory(GameSession session, PlayerAction action)
+    public static string HandleInventory(GameSession session, GameAction gameaction, PlayerAction action)
     {
         StringBuilder sb = new();
         var inventory = session.Elements.GetInLocation("_inventory", "item");
@@ -203,25 +203,24 @@ public static class ActionHandlers
         return sb.ToString();
     }
 
-    public static string HandleHistory(GameSession session, PlayerAction action)
+    public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
     {
         StringBuilder sb = new();
         sb.AppendLine("Action History:");
-        if (session.ActionHistory.Count == 0)
+        
+        if (session.ActionRegistry.History.Count == 0)
         {
             sb.AppendLine("No actions have been taken yet.");
         }
         else
         {
-            for (int i = 0; i < session.ActionHistory.Count; i++)
+            for (int i = 0; i < session.ActionRegistry.History.Count; i++)
             {
-                var act = session.ActionHistory[i];
+                var act = session.ActionRegistry.History[i];
                 sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
             }
         }
         return sb.ToString();
 
     }
-
-
 }
