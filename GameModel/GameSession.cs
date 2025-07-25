@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace GameModel;
 
+
+
 public class GameSession
 {
     const string _playerid = "player:player";
@@ -13,6 +15,9 @@ public class GameSession
     public string GameTitle { get; set; } = "Text Game Engine";
 
     public ActionRegistry ActionRegistry { get; set; } = new();
+
+    public List<string> SceneOrdinals { get; set; } = [];
+    public List<string> InventoryOrdinals { get; set; } = [];
 
 
     public GameElementInfo? CurrentScene
@@ -36,50 +41,51 @@ public class GameSession
         gs.ActionRegistry.Register(new GameAction
         {
             Id = "look",
+            RequiredTargets = 0,
             CanonicalVerb = "look",
             VerbAliases = new() { "examine", "view", "l" },
             Handler = ActionHandlers.HandleLook
         });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "move",
-            CanonicalVerb = "move",
-            VerbAliases = new() { "go", "m", "g" },
-            Handler = ActionHandlers.HandleMove
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "move",
+        //     CanonicalVerb = "move",
+        //     VerbAliases = new() { "go", "m", "g" },
+        //     Handler = ActionHandlers.HandleMove
+        // });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "history",
-            CanonicalVerb = "history",
-            VerbAliases = new() { "hist" },
-            Handler = ActionHandlers.HandleHistory
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "history",
+        //     CanonicalVerb = "history",
+        //     VerbAliases = new() { "hist" },
+        //     Handler = ActionHandlers.HandleHistory
+        // });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "inventory",
-            CanonicalVerb = "inventory",
-            VerbAliases = new() { "inv", "i" },
-            Handler = ActionHandlers.HandleInventory
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "inventory",
+        //     CanonicalVerb = "inventory",
+        //     VerbAliases = new() { "inv", "i" },
+        //     Handler = ActionHandlers.HandleInventory
+        // });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "get",
-            CanonicalVerb = "get",
-            VerbAliases = new() { "grab", "g" },
-            Handler = ActionHandlers.HandleInventoryGet
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "get",
+        //     CanonicalVerb = "get",
+        //     VerbAliases = new() { "grab", "g" },
+        //     Handler = ActionHandlers.HandleInventoryGet
+        // });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "drop",
-            CanonicalVerb = "drop",
-            VerbAliases = new() { "d" },
-            Handler = ActionHandlers.HandleInventoryDrop
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "drop",
+        //     CanonicalVerb = "drop",
+        //     VerbAliases = new() { "d" },
+        //     Handler = ActionHandlers.HandleInventoryDrop
+        // });
 
 
         return gs;
@@ -101,8 +107,6 @@ public class GameSession
             Element = _gamePack.Player,
             Location = _gamePack.Player.StartingLocation
         };
-
-
 
         foreach (var s in _gamePack.Scenes)
         {
@@ -194,6 +198,79 @@ public class GameSession
         return sb.ToString();
     }
 
+    public void PopulateOrdinals()
+    {
+        SceneOrdinals.Clear();
+        SceneOrdinals.AddRange(Elements.Values
+            .Where(e =>
+                e.Id.StartsWith("exit:")
+                && e.Location != null
+                && e.Location.Equals(CurrentScene?.Id)
+                )
+            .OrderBy(e => e.Element.Name)
+            .Select(e => e.Id));
+        SceneOrdinals.AddRange(Elements.Values
+            .Where(e =>
+                e.Id.StartsWith("npc:")
+                && e.Location != null
+                && e.Location.Equals(CurrentScene?.Id)
+                )
+            .OrderBy(e => e.Element.Name)
+            .Select(e => e.Id));
+        SceneOrdinals.AddRange(Elements.Values
+            .Where(e =>
+                e.Id.StartsWith("item:")
+                && e.Location != null
+                && e.Location.Equals(CurrentScene?.Id)
+                )
+            .OrderBy(e => e.Element.Name)
+            .Select(e => e.Id));
 
+
+        InventoryOrdinals.Clear();
+        InventoryOrdinals.AddRange(Elements.Values
+            .Where(e => e.Location != null && e.Location.Equals("_inventory"))
+            .OrderBy(e => e.Element.Name)
+            .Select(e => "I" + e.Id));
+
+    }
+
+    public string PrintSceneOrdinals()
+    {
+        StringBuilder sb = new();
+        int i = 0;
+        if (SceneOrdinals.Any(s => s.StartsWith("exit:")))
+        {
+            sb.AppendLine("Exits:");
+            foreach (var exit in SceneOrdinals.Where(s => s.StartsWith("exit:")))
+            {
+                var scene = GetGameElement<Exit>(exit);
+                var name = scene?.Name ?? exit;
+                sb.AppendLine($"{++i}. {name} ({exit})");
+            }
+        }
+        if (SceneOrdinals.Any(s => s.StartsWith("npc:")))
+        {
+
+            sb.AppendLine("Characters:");
+            foreach (var npc in SceneOrdinals.Where(s => s.StartsWith("npc:")))
+            {
+                var npcElement = GetGameElement<Npc>(npc);
+                var name = npcElement?.Name ?? npc;
+                sb.AppendLine($"{++i}. {name} ({npc})");
+            }
+        }
+        if (SceneOrdinals.Any(s => s.StartsWith("item:")))
+        {
+            sb.AppendLine("Items:");
+            foreach (var item in SceneOrdinals.Where(s => s.StartsWith("item:")))
+            {
+                var itemElement = GetGameElement<Item>(item);
+                var name = itemElement?.Name ?? item;
+                sb.AppendLine($"{++i}. {name} ({item})");
+            }
+        }
+        return sb.ToString();
+    }
 
 }

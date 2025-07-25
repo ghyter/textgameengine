@@ -1,5 +1,15 @@
 namespace GameModel.Model;
 
+public enum PropertyType
+{
+    Location,
+    State,
+    HitPoints,
+  
+}
+
+
+
 //Check to see if the game element is in a specific location, has a specific state, or is in the inventory
 //This is used to determine if a condition is met for an action to be performed
 //If the condition is met, the action can be performed
@@ -8,21 +18,17 @@ namespace GameModel.Model;
 public class Condition
 {
     public string GameElementId { get; set; } = string.Empty;
-    public string? LocationId { get; set; }
-    public string? StateId { get; set; }
+    public string Property { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
+    public string Comparison { get; set; } = string.Empty; // e.g., "equals", "contains", "startsWith", "endsWith"
+    public string? Value { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
+
 }
 
 
-public enum EffectType
-{
-    Location,
-    State,
-    HitPoints,
-}
 
 public class Effect
 {
     public string GameElementId { get; set; } = string.Empty;
-    public string TargetField { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
-    public string? TargetValue { get; set; }
+    public string Property { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
+    public string? NewValue { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
 }
