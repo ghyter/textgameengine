@@ -18,10 +18,12 @@
       "Id": "study",
       "Name": "Study",
       "Description": "A dimly lit study lined with aged bookshelves and a large, claw-footed desk. Dust lingers in the air and a single green-shaded lamp flickers softly. A faint draft suggests a hidden passage might lie nearby.",
+      "IsVisible": false,
       "Exits": [
         {
           "Name":"South",
           "TargetId": "library",
+          
           "DefaultState": "open",
           "States": {
             "open": "The exit to the library is open.",
@@ -83,6 +85,7 @@
     "lounge": {
       "Id": "lounge",
       "Name": "Lounge",
+      "IsVisible": false,
       "Description": "A richly decorated sitting room with velvet curtains, high-backed chairs, and the lingering scent of cigar smoke. The room feels like it was made for secrets and whispers.",
       "Exits": [
         {
@@ -119,6 +122,7 @@
     "dining-room": {
       "Id": "dining-room",
       "Name": "Dining Room",
+      "IsVisible": false,
       "Description": "A long mahogany table stretches beneath a flickering chandelier. The silverware is still set, as if dinner had been interrupted — or never started at all.",
       "Exits": [
         {
@@ -145,6 +149,7 @@
     "kitchen": {
       "Id": "kitchen",
       "Name": "Kitchen",
+      "IsVisible": false,
       "Description": "Pots dangle from wrought-iron racks above stone counters. The smell of old spices and something more metallic lingers in the air. Knives rest suspiciously out of place.",
       "Exits": [
         {
@@ -181,6 +186,7 @@
     "ballroom": {
       "Id": "ballroom",
       "Name": "Ballroom",
+      "IsVisible": false,
       "Description": "An echoing chamber with a polished parquet floor and towering windows. Chandeliers overhead sway slightly, though there is no wind. Footsteps seem to follow your own.",
       "Exits": [
         {
@@ -207,6 +213,7 @@
     "conservatory": {
       "Id": "conservatory",
       "Name": "Conservatory",
+      "IsVisible": false,
       "Description": "Tall glass walls rise into a domed ceiling, letting moonlight bathe rows of exotic plants. Leaves rustle even when you’re still, and the air is thick with humidity.",
       "Exits": [
         {
@@ -231,6 +238,7 @@
           "Name": "Secret Passage",
           "TargetId": "lounge",
           "DefaultState": "hidden",
+          "IsVisible": false,
           "States": {
             "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the lounge is open.",
@@ -243,6 +251,7 @@
     "billiard-room": {
       "Id": "billiard-room",
       "Name": "Billiard Room",
+      "IsVisible": false,
       "Description": "Faded green felt lines the billiard table at the center. Chalk dust covers the cues and a forgotten drink rests on a side table, still half full. Someone left in a hurry.",
       "Exits": [
         {
@@ -268,6 +277,7 @@
     "library": {
       "Id": "library",
       "Name": "Library",
+      "IsVisible": false,
       "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
       "Exits": [
         {
@@ -441,29 +451,7 @@
     }
   },
   "Actions":[
-    {
-      "Id": "open-any-exit",
-      "Name": "Open Door or Exit",
-      "Description": "Opens any closed door, passage, or exit if it is not locked or hidden.",
-      "CanonicalVerb": "open",
-      "Aliases": ["unseal", "pull open"],
-      "Targets": ["exit:*"],
-      "RequiredTargets": 1,
-      "Conditions": [
-        {
-          "GameElementId": "$target",
-          "RequiredStateId": "closed"
-        }
-      ],
-      "Effects": [
-        {
-          "GameElementId": "$target",
-          "TargetStateId": "open"
-        }
-      ],
-      "SuccessMessage": "You open the door.",
-      "FailureMessage": "It won't budge. It may be locked, hidden, or already open."
-    }
+
   ]
 
 

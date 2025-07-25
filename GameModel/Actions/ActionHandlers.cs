@@ -16,10 +16,17 @@ public static class ActionHandlers
             }
 
             var targetId = action.Targets[0];
-            var target = session.GetGameElement(targetId);
+            var target = session.Elements.Where(e =>
+            {
+                return
+                    e.Value.Location == session.CurrentScene?.Id &&
+                    e.Value.Id.Equals(targetId, StringComparison.OrdinalIgnoreCase);
+
+            }).FirstOrDefault().Value;
+
             if (target == null)
             {
-                return $"I do not see a '{targetId}'.";
+                return $"I do not see a '{targetId}' here.";
             }
             return $"{target.Description} ({target.Id})";
 

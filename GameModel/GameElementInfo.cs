@@ -7,6 +7,7 @@ public class GameElementInfo
     public required string Id { get; init; }
     public required IGameElement Element { get; init; }
     public string State { get; set; } = "default";
+    public bool IsVisible { get; set; }
     public string? Location { get; set; }
     //public List<Exit> Exits { get; set; } = [];
 
@@ -23,7 +24,7 @@ public static class GameElementsExtensions
 {
     public static IEnumerable<GameElementInfo> GetInLocation(this GameElements map, string location, string? type = null)
     {
-        return map.Values.Where(o => o.Location == location && (type == null || o.Id.StartsWith($"{type}:") ));
+        return map.Values.Where(o => o.Location == location && o.IsVisible && (type == null || o.Id.StartsWith($"{type}:") ));
     }
     
     public static string? GetLocationOf(this GameElements map, string id)

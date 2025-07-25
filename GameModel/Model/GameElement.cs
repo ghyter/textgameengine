@@ -8,6 +8,8 @@ public abstract class GameElement : IGameElement
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
+    public bool IsVisible { get; set; } = true;
+
     // This is a dictionary of states and their descriptions
     // The default state is the one that is used if no other state is specified
     public Dictionary<string, string> States { get; set; } = [];

@@ -47,6 +47,15 @@ public class GameSession
             Handler = ActionHandlers.HandleLook
         });
 
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "look",
+            RequiredTargets = 1,
+            CanonicalVerb = "look",
+            VerbAliases = new() { "examine", "view", "l" },
+            Handler = ActionHandlers.HandleLook
+        });
+
         // gs.ActionRegistry.Register(new GameAction
         // {
         //     Id = "move",
@@ -116,6 +125,7 @@ public class GameSession
                 Id = id,
                 Element = s.Value,
                 Location = null,
+                IsVisible = s.Value.IsVisible,
                 State = s.Value.StartingState ?? "default"
             };
             gs.Elements[id].Element.Id = id;
@@ -125,6 +135,7 @@ public class GameSession
                 gs.Elements[exit.Id] = new()
                 {
                     Id = exit.Id,
+                    IsVisible = s.Value.IsVisible,
                     Element = exit,
                     Location = id,
                     State = exit.StartingState
@@ -139,6 +150,7 @@ public class GameSession
             {
                 Id = id,
                 Element = i.Value,
+                IsVisible = i.Value.IsVisible,
                 Location = i.Value.StartingLocation,
                 State = i.Value.StartingState ?? "default"
             };
@@ -152,6 +164,7 @@ public class GameSession
             {
                 Id = id,
                 Element = npc.Value,
+                IsVisible = npc.Value.IsVisible,
                 Location = npc.Value.StartingLocation,
                 State = npc.Value.StartingState ?? "default"
             };
@@ -207,6 +220,7 @@ public class GameSession
         SceneOrdinals.AddRange(Elements.Values
             .Where(e =>
                 e.Id.StartsWith("exit:")
+                && e.IsVisible
                 && e.Location != null
                 && e.Location.Equals(CurrentScene?.Id)
                 )
@@ -215,6 +229,7 @@ public class GameSession
         SceneOrdinals.AddRange(Elements.Values
             .Where(e =>
                 e.Id.StartsWith("npc:")
+                && e.IsVisible
                 && e.Location != null
                 && e.Location.Equals(CurrentScene?.Id)
                 )
@@ -223,6 +238,7 @@ public class GameSession
         SceneOrdinals.AddRange(Elements.Values
             .Where(e =>
                 e.Id.StartsWith("item:")
+                && e.IsVisible
                 && e.Location != null
                 && e.Location.Equals(CurrentScene?.Id)
                 )
@@ -232,7 +248,11 @@ public class GameSession
 
         InventoryOrdinals.Clear();
         InventoryOrdinals.AddRange(Elements.Values
-            .Where(e => e.Location != null && e.Location.Equals("_inventory"))
+            .Where(
+                e => e.Location != null
+                && e.IsVisible
+                && e.Location.Equals("_inventory")
+                )
             .OrderBy(e => e.Element.Name)
             .Select(e => "I" + e.Id));
 
@@ -245,11 +265,25 @@ public class GameSession
         if (SceneOrdinals.Any(s => s.StartsWith("exit:")))
         {
             sb.AppendLine("Exits:");
-            foreach (var exit in SceneOrdinals.Where(s => s.StartsWith("exit:")))
+            foreach (var exitId in SceneOrdinals.Where(s => s.StartsWith("exit:")))
             {
-                var scene = GetGameElement<Exit>(exit);
-                var name = scene?.Name ?? exit;
-                sb.AppendLine($"{++i}. {name} ({exit})");
+
+                var exit = Elements[exitId];
+                var name = exit.Element.Name ?? exitId;
+                //Since this is getting the exit from the game element, the prefix hasn't been added yet.
+                var targetScene = "scene:"+ GetGameElement<Exit>(exitId)?.TargetId;
+                //Only show the target of the exit if the target scene is visible.
+               //Whem moving through an exit the first time, the scene should be set to visible.
+                var scene = Elements[targetScene!];
+                if (scene?.IsVisible ?? false)
+                {
+                    sb.AppendLine($"{++i}. {name} ({scene.Element.Name})");
+                }
+                else
+                {
+                sb.AppendLine($"{++i}. {name}");    
+                }
+                
             }
         }
         if (SceneOrdinals.Any(s => s.StartsWith("npc:")))
