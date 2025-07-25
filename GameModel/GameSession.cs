@@ -161,7 +161,10 @@ public class GameSession
         //Add the scene prefix for any element that doest start with _
         foreach (var element in gs.Elements.Values)
         {
-            if (element.Location != null && !element.Location.StartsWith("_"))
+            if (element.Location != null
+                && !element.Location.StartsWith("_")
+                && !element.Location.StartsWith("scene:")
+              )
             {
                 element.Location = $"scene:{element.Location}";
             }

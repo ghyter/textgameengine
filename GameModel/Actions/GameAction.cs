@@ -23,7 +23,7 @@ public class GameAction
     public List<Condition> Conditions { get; set; } = [];
     public List<Effect> Effects { get; set; } = [];
 
-    public ActionHandler? Handler { get; set; }
+    public ActionHandler Handler { get; set; } = ActionHandlers.HandleDataAction;
     public override string ToString() => $"{Name} ({Id})";
 
     public string? SuccessMessage { get; set; } = "You successfully perform the action.";

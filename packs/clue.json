@@ -315,7 +315,7 @@
       "Id": "lead-pipe",
       "Name": "Lead Pipe",
       "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
-      "StartingLocation": "conservatory",
+      "StartingLocation": "hall",
       "DefaultState": "clean",
       "States": {
         "clean": "The lead pipe is free of any marks except for rust.",

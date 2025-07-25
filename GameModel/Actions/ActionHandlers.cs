@@ -6,7 +6,7 @@ namespace GameModel.Actions;
 
 public static class ActionHandlers
 {
-    public static string HandleLook(GameSession session,GameAction gameaction, PlayerAction action)
+    public static string HandleLook(GameSession session, GameAction gameaction, PlayerAction action)
     {
         if (action.Targets.Any())
         {
@@ -34,6 +34,12 @@ public static class ActionHandlers
             return sb.ToString();
         }
 
+    }
+
+
+    public static string HandleDataAction(GameSession session, GameAction gameaction, PlayerAction action)
+    { 
+        return "This action is not implemented yet.";
     }
 
     // public static string HandleMove(GameSession session, GameAction gameaction,PlayerAction action)
@@ -212,7 +218,7 @@ public static class ActionHandlers
     // {
     //     StringBuilder sb = new();
     //     sb.AppendLine("Action History:");
-        
+
     //     if (session.ActionRegistry.History.Count == 0)
     //     {
     //         sb.AppendLine("No actions have been taken yet.");
