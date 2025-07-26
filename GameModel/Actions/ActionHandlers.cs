@@ -8,28 +8,15 @@ public static class ActionHandlers
 {
     public static string HandleLook(GameSession session, GameAction gameaction, PlayerAction action)
     {
+        //It will only route here if there is 1 target.
         if (action.Targets.Any())
         {
-            if (action.Targets.Count != 1)
-            {
-                return "You can only look at one thing at a time.";
-            }
-
             var targetId = action.Targets[0];
-            var target = session.Elements.Where(e =>
+            if (!session.Elements.TryGetValue(targetId, out var target))
             {
-                return
-                    e.Value.Location == session.CurrentScene?.Id &&
-                    e.Value.Id.Equals(targetId, StringComparison.OrdinalIgnoreCase);
-
-            }).FirstOrDefault().Value;
-
-            if (target == null)
-            {
-                return $"I do not see a '{targetId}' here.";
+                return $"I don't see that item here.";
             }
             return $"{target.Description} ({target.Id})";
-
         }
         else
         {
@@ -40,12 +27,28 @@ public static class ActionHandlers
             sb.AppendLine(session.PrintSceneOrdinals());
             return sb.ToString();
         }
+    }
 
+    public static string HandleInventory(GameSession session, GameAction gameaction, PlayerAction action)
+    {
+        //This is the scene description.
+        StringBuilder sb = new();
+        session.PopulateOrdinals();
+
+        var i = 0;
+        foreach (var id in session.InventoryOrdinals)
+        {
+            if (session.Elements.TryGetValue(id, out var element))
+            {
+                sb.AppendLine($"I{++i} {element.Element.Name} ({element.Id})");
+            }
+        }
+        return sb.ToString();
     }
 
 
     public static string HandleDataAction(GameSession session, GameAction gameaction, PlayerAction action)
-    { 
+    {
         return "This action is not implemented yet.";
     }
 
@@ -221,24 +224,24 @@ public static class ActionHandlers
     //     return sb.ToString();
     // }
 
-    // public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
-    // {
-    //     StringBuilder sb = new();
-    //     sb.AppendLine("Action History:");
+    public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
+    {
+        StringBuilder sb = new();
+        sb.AppendLine("Action History:");
 
-    //     if (session.ActionRegistry.History.Count == 0)
-    //     {
-    //         sb.AppendLine("No actions have been taken yet.");
-    //     }
-    //     else
-    //     {
-    //         for (int i = 0; i < session.ActionRegistry.History.Count; i++)
-    //         {
-    //             var act = session.ActionRegistry.History[i];
-    //             sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
-    //         }
-    //     }
-    //     return sb.ToString();
+        if (session.ActionRegistry.History.Count == 0)
+        {
+            sb.AppendLine("No actions have been taken yet.");
+        }
+        else
+        {
+            for (int i = 0; i < session.ActionRegistry.History.Count; i++)
+            {
+                var act = session.ActionRegistry.History[i];
+                sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
+            }
+        }
+        return sb.ToString();
 
-    // }
+    }
 }

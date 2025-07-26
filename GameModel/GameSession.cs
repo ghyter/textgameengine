@@ -51,10 +51,22 @@ public class GameSession
         {
             Id = "look",
             RequiredTargets = 1,
+            Target1 = "*",
             CanonicalVerb = "look",
+            Conditions = new()
+            {
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.InLocation,
+                    Value = "$Inventory,$Location"
+                }
+            },
             VerbAliases = new() { "examine", "view", "l" },
             Handler = ActionHandlers.HandleLook
         });
+
+
 
         // gs.ActionRegistry.Register(new GameAction
         // {
@@ -64,21 +76,21 @@ public class GameSession
         //     Handler = ActionHandlers.HandleMove
         // });
 
-        // gs.ActionRegistry.Register(new GameAction
-        // {
-        //     Id = "history",
-        //     CanonicalVerb = "history",
-        //     VerbAliases = new() { "hist" },
-        //     Handler = ActionHandlers.HandleHistory
-        // });
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "history",
+            CanonicalVerb = "history",
+            VerbAliases = new() { "hist" },
+            Handler = ActionHandlers.HandleHistory
+        });
 
-        // gs.ActionRegistry.Register(new GameAction
-        // {
-        //     Id = "inventory",
-        //     CanonicalVerb = "inventory",
-        //     VerbAliases = new() { "inv", "i" },
-        //     Handler = ActionHandlers.HandleInventory
-        // });
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "inventory",
+            CanonicalVerb = "inventory",
+            VerbAliases = new() { "inv", "i" },
+            Handler = ActionHandlers.HandleInventory
+        });
 
         // gs.ActionRegistry.Register(new GameAction
         // {
@@ -254,7 +266,7 @@ public class GameSession
                 && e.Location.Equals("_inventory")
                 )
             .OrderBy(e => e.Element.Name)
-            .Select(e => "I" + e.Id));
+            .Select(e => e.Id));
 
     }
 

@@ -24,7 +24,7 @@
           "Name":"South",
           "TargetId": "library",
           
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the library is open.",
             "closed": "The exit to the library is closed."
@@ -33,7 +33,7 @@
         {
           "Name": "East",
           "TargetId": "hall",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the hall is open.",
             "closed": "The exit to the hall is closed."
@@ -42,7 +42,7 @@
         {
           "Name": "Secret Passage",
           "TargetId": "kitchen",
-          "DefaultState": "hidden",
+          "StartingState": "hidden",
           "States": {
             "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the kitchen is open.",
@@ -60,7 +60,7 @@
         {
           "Name": "West",
           "TargetId": "study",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the study is open.",
             "closed": "The exit to the study is closed."
@@ -69,14 +69,14 @@
         {
           "Name": "East",
           "TargetId": "lounge",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the lounge is open.",
             "closed": "The exit to the lounge is closed."
           }
         }
       ],
-      "DefaultState": "initial",
+      "StartingState": "initial",
       "States": {
         "initial": "All is normal here.",
         "post-bomb": "All of the furniture is destroyed and bits of wood and shards of glass litter the floor."
@@ -91,7 +91,7 @@
         {
           "Name": "West",
           "TargetId": "hall",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the hall is open.",
             "closed": "The exit to the hall is closed."
@@ -100,7 +100,7 @@
         {
           "Name": "South",
           "TargetId": "dining-room",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the dining room is open.",
             "closed": "The exit to the dining room is closed."
@@ -109,7 +109,7 @@
         {
           "Name": "Secret",
           "TargetId": "conservatory",
-          "DefaultState": "hidden",
+          "StartingState": "hidden",
           "States": {
             "hidden": "",
             "open": "The exit to the conservatory is open.",
@@ -128,7 +128,7 @@
         {
           "Name": "North",
           "TargetId": "lounge",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the lounge is open.",
             "closed": "The exit to the lounge is closed."
@@ -137,7 +137,7 @@
         {
           "Name": "South",
           "TargetId": "kitchen",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the kitchen is open.",
             "closed": "The exit to the kitchen is closed."
@@ -155,7 +155,7 @@
         {
           "Name": "North",
           "TargetId": "dining-room",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the dining room is open.",
             "closed": "The exit to the dining room is closed."
@@ -164,7 +164,7 @@
         {
           "Name": "West",
           "TargetId": "ballroom",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the ballroom is open.",
             "closed": "The exit to the ballroom is closed."
@@ -173,7 +173,7 @@
         {
           "Name": "Secret Passage",
           "TargetId": "study",
-          "DefaultState": "hidden",
+          "StartingState": "hidden",
           "States": {
             "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the study is open.",
@@ -192,7 +192,7 @@
         {
           "Name": "East",
           "TargetId": "kitchen",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the kitchen is open.",
             "closed": "The exit to the kitchen is closed."
@@ -201,7 +201,7 @@
         {
           "Name": "West",
           "TargetId": "conservatory",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the conservatory is open.",
             "closed": "The exit to the conservatory is closed."
@@ -219,7 +219,7 @@
         {
           "Name": "East",
           "TargetId": "ballroom",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the ballroom is open.",
             "closed": "The exit to the ballroom is closed."
@@ -228,7 +228,7 @@
         {
           "Name": "North",
           "TargetId": "billiard-room",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the ballroom is open.",
             "closed": "The exit to the ballroom is closed."
@@ -237,7 +237,7 @@
         {
           "Name": "Secret Passage",
           "TargetId": "lounge",
-          "DefaultState": "hidden",
+          "StartingState": "hidden",
           "IsVisible": false,
           "States": {
             "hidden": "There is a knocking sound from behind the wall.",
@@ -257,7 +257,7 @@
         {
           "Name": "North",
           "TargetId": "library",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the library is open.",
             "closed": "The exit to the library is closed."
@@ -265,7 +265,7 @@
         },
         {
           "TargetId": "conservatory",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the conservatory is open.",
             "closed": "The exit to the conservatory is closed."
@@ -283,7 +283,7 @@
         {
           "Name": "North",
           "TargetId": "study",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the study is open.",
             "closed": "The exit to the study is closed."
@@ -292,7 +292,7 @@
         {
           "Name": "South",
           "TargetId": "billiard-room",
-          "DefaultState": "open",
+          "StartingState": "open",
           "States": {
             "open": "The exit to the billiard room is open.",
             "closed": "The exit to the billiard room is closed."
@@ -315,7 +315,7 @@
       "Name": "Dagger",
       "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use.",
       "StartingLocation": "dining-room",
-      "DefaultState": "clean",
+      "StartingState": "clean",
       "States": {
         "clean": "The dagger's blade gleams, free of any stains.",
         "bloody": "The dagger's blade is stained with fresh blood."
@@ -326,7 +326,7 @@
       "Name": "Lead Pipe",
       "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
       "StartingLocation": "hall",
-      "DefaultState": "clean",
+      "StartingState": "clean",
       "States": {
         "clean": "The lead pipe is free of any marks except for rust.",
         "bloody": "The lead pipe is smeared with blood."
@@ -337,7 +337,7 @@
       "Name": "Revolver",
       "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired.",
       "StartingLocation": "study",
-      "DefaultState": "loaded",
+      "StartingState": "loaded",
       "States": {
         "loaded": "The revolver is loaded and ready to fire.",
         "unloaded": "The revolver is empty, its chamber clicking hollowly.",
@@ -349,8 +349,7 @@
       "Name": "Rope",
       "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension.",
       "StartingLocation": "cabinet",
-      "StartingState": "open",
-      "DefaultState": "coiled",
+      "StartingState": "coiled",
       "States": {
         "coiled": "The rope is neatly coiled and ready for use.",
         "tied": "The rope is tied securely around something.",
@@ -362,7 +361,7 @@
       "Name": "Wrench",
       "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands.",
       "StartingLocation": "kitchen",
-      "DefaultState": "clean",
+      "StartingState": "clean",
       "States": {
         "clean": "The wrench is clean and shiny.",
         "bloody": "The wrench is smeared with blood."
@@ -373,7 +372,7 @@
       "Name": "Black and Decker Flashlight",
       "Description": "Powerful and reliable, this flashlight cuts through the darkness with a beam that feels almost alive. The batteries are fresh, and it hums softly when switched on.",
       "StartingLocation": "_inventory",
-      "DefaultState": "default",
+      "StartingState": "default",
       "States": {
         "default": "The flashlight is off, waiting to be used.",
         "on": "The flashlight is on, illuminating the room with a steady beam.",
@@ -386,7 +385,7 @@
       "IsMovable": false,
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
       "StartingLocation": "billiard-room",
-      "DefaultState": "locked",
+      "StartingState": "locked",
       "States": {
         "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",
         "unlocked": "The cabinet stands unlocked, its contents waiting to be revealed.",

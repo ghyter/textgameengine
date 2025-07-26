@@ -8,11 +8,13 @@ public delegate string ActionHandler(GameSession session, GameAction gameaction,
 
 public class ActionRegistry
 {
+    private static readonly string[] ClauseSeparators = ["on", "with", "in", "into"];
+
     private List<GameAction> _actions = [];
     public IReadOnlyList<GameAction> Actions => _actions;
 
-    private readonly List<PlayerAction> _history = [];
-    public IReadOnlyList<PlayerAction> History => _history;
+    private List<PlayerAction> _history = [];
+    public List<PlayerAction> History => _history;
 
 
 
@@ -35,11 +37,13 @@ public class ActionRegistry
         }
         //Call resolve to update the targets to ids.
         action = ResolveTargets(session, action);
-    
+
         GameAction? gameAction = FindAction(session, action);
 
+        session.ActionRegistry.History.Add(action);
+
         result = gameAction?.Execute(session, action) ?? $"I don't know how to '{input}'.";
-        
+
         return false;
     }
 
@@ -119,64 +123,118 @@ public class ActionRegistry
 
         foreach (var target in action.Targets)
         {
-            //If the target is already a full id, we are done.
-            if (session.Elements.ContainsKey(target)) { results.Targets.Add(target); continue; }
+            string? resolved = null;
 
-            //Check to see if the target matches (prefix):{id}
-            if (target.Contains(':'))
+            // 1. Direct match
+            if (session.Elements.ContainsKey(target))
+            {
+                resolved = target;
+            }
+
+            // 2. Prefix format: item:flashlight
+            else if (target.Contains(':'))
             {
                 var parts = target.Split(':', 2);
                 if (parts.Length == 2 && session.Elements.TryGetValue(parts[1], out var elementInfo))
                 {
-
-                    results.Targets.Add(elementInfo.Id);
-                    continue;
+                    resolved = elementInfo.Id; // resolved as "item:flashlight"
                 }
             }
-            //If the value is an ordinal, we can resolve it from the SceneOrdinals or InventoryOrdinals.
-            //Remove the I prefix and parse the ordinal position.  Get the Id from the corresponding list index.
-            if (Regex.IsMatch(target, @"^I\d+$"))
+
+            // 3. Inventory ordinal
+            else if (Regex.IsMatch(target, @"^I\d+$"))
             {
-                var index = int.Parse(target.Substring(1)) - 1; // Convert to 0-based index
+                var index = int.Parse(target.Substring(1)) - 1;
                 if (index >= 0 && index < session.InventoryOrdinals.Count)
                 {
-                    results.Targets.Add(session.InventoryOrdinals[index]);
-                    continue;
+                    resolved = session.InventoryOrdinals[index]; // correct id
                 }
             }
+
+            // 4. Scene ordinal
             else if (int.TryParse(target, out var ordinalIndex))
             {
-                ordinalIndex--; // Convert to 0-based index
+                ordinalIndex--; // Convert to 0-based
                 if (ordinalIndex >= 0 && ordinalIndex < session.SceneOrdinals.Count)
                 {
-
-                    results.Targets.Add(session.SceneOrdinals[ordinalIndex]);
-                    continue;
+                    resolved = session.SceneOrdinals[ordinalIndex];
                 }
             }
-            //If we reach here, the target is not a valid id or ordinal.
-            //We will leave it unchanged.
-            //This allows for invalid ordinals to be passed through.
-            //This is useful for user input that may not match any known elements.
-            //This allows for user input to be flexible.
-            results.Targets.Add(target);
 
+            // 5. Fallback — unresolved input (preserve raw)
+            results.Targets.Add(resolved ?? target);
         }
+
         return results;
     }
 
-    public GameAction? FindAction(GameSession session, PlayerAction action)
+    public GameAction? FindAction(GameSession session, PlayerAction playerAction)
     {
-        //Find the action that matches the verb and targets.
-        var matchingAction = _actions.FirstOrDefault(a =>
-            a.CanonicalVerb?.Equals(action.VerbText, StringComparison.OrdinalIgnoreCase) == true ||
-            a.VerbAliases.Any(alias => alias.Equals(action.VerbText, StringComparison.OrdinalIgnoreCase)));
+        var candidates = _actions
+            .Where(a => string.Equals(a.CanonicalVerb, playerAction.VerbText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
-        return matchingAction;
+        var scored = candidates
+            .Select(action => new
+            {
+                Action = action,
+                Score = MatchActionScore(action, playerAction),
+                //ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, playerAction)) ?? 0
+            });
+
+        Console.WriteLine(scored.Any());
+
+        var result = scored
+        .Where(x => x.Score >= 0)
+        .OrderByDescending(x => x.Score)
+        //.ThenByDescending(x => x.ConditionsMet)
+        .FirstOrDefault();
+
+        return result?.Action;
     }
 
+    private int MatchActionScore(GameAction action, PlayerAction playerAction)
+    {
+        // First, ensure the player provided the expected number of targets
+        if (action.RequiredTargets != playerAction.Targets.Count)
+        {
+            return -1;
+        }
 
-    private static readonly string[] ClauseSeparators = ["on", "with", "in", "into"];
+        string target1 = playerAction.Targets.ElementAtOrDefault(0) ?? "";
+        string target2 = playerAction.Targets.ElementAtOrDefault(1) ?? "";
 
+        // Disqualify if the action doesn't support a given position
+        if (playerAction.Targets.Count >= 1 && string.IsNullOrEmpty(action.Target1))
+        {
+            return -1;
+        }
+
+        if (playerAction.Targets.Count >= 2 && string.IsNullOrEmpty(action.Target2))
+        {
+            return -1;
+        }
+
+        int score1 = MatchTargetScore(action.Target1, target1);
+        int score2 = MatchTargetScore(action.Target2, target2);
+
+        return score1 + score2;
+    }
+
+    private int MatchTargetScore(string? pattern, string actual)
+    {
+        if (string.IsNullOrEmpty(pattern))
+            return string.IsNullOrEmpty(actual) ? 4 : -1;
+
+        if (pattern == "*") return 2;
+
+        if (pattern.EndsWith(":*"))
+        {
+            var typePrefix = pattern[..^1]; // Remove '*'
+            return actual.StartsWith(typePrefix, StringComparison.OrdinalIgnoreCase) ? 3 : -1;
+        }
+
+        return string.Equals(pattern, actual, StringComparison.OrdinalIgnoreCase) ? 4 : -1;
+    }
 }
 
