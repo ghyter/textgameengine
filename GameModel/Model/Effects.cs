@@ -1,0 +1,91 @@
+using System;
+using System.Text;
+using GameModel.Actions;
+using GameModel.Helpers;
+
+namespace GameModel.Model;
+
+
+
+public enum EffectType
+{
+    ChangeState, // Change the state of a GameElement
+    ChangeLocation, // Move a GameElement to a new location
+    AddToInventory, // Add a GameElement to the player's inventory
+    RemoveFromInventory, // Remove a GameElement from the player's inventory
+    SetProperty, // Set a property of a GameElement
+    IncrementProperty, // Set a property of a GameElement
+    DecrementProperty, // Set a property of a GameElement
+    Custom // Custom effect defined by the game logic
+}
+
+
+public enum EffectGroupType
+{
+    All,
+    FirstMatch,
+    RandomChoice
+}
+
+public class EffectGroup
+{
+    public EffectGroupType Type { get; set; }
+
+
+}
+
+public class Effect
+{
+    public string GameElementId { get; set; } = string.Empty;
+    public EffectType Type { get; set; }
+    public string Property { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
+    public string? NewValue { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
+    public string? SuccessMessage { get; set;}
+}
+public static class EffectExtensions
+{
+    public static bool ApplyEffect(this GameSession session, Effect effect, PlayerAction action, out string result)
+    {
+        if (effect == null || string.IsNullOrEmpty(effect.GameElementId))
+        {
+            result = string.Empty;
+            return false; // No effect to apply
+        }
+
+        if (session.Elements.TryGetValue(effect.GameElementId.ResolvePlaceholders(session, action), out var element))
+        {
+            switch (effect.Type)
+            {
+                case EffectType.ChangeState:
+                    if (!string.IsNullOrEmpty(effect.NewValue))
+                    {
+                        element.Element.States[effect.Property] = effect.NewValue;
+
+                    }
+                    break;
+                case EffectType.ChangeLocation:
+                    if (!string.IsNullOrEmpty(effect.NewValue))
+                    {
+                        element.Location = effect.NewValue.ResolvePlaceholders(session, action);
+                    }
+                    break;
+                case EffectType.AddToInventory:
+                    session.InventoryOrdinals.Add(element.Id);
+                    break;
+                case EffectType.RemoveFromInventory:
+                    session.InventoryOrdinals.Remove(element.Id);
+                    break;
+                case EffectType.SetProperty:
+                    Console.WriteLine($"Setting property {effect.Property} to {effect.NewValue} on {element.Id}");
+                    break;
+                case EffectType.Custom:
+                    // Custom logic can be implemented here
+                    break;
+            }
+            result = effect.SuccessMessage ?? string.Empty;
+            return true;
+        }
+        result = "Nothing to apply.";
+        return false;
+    }
+}

@@ -6,8 +6,6 @@ using System.Linq;
 
 namespace GameModel;
 
-
-
 public class GameSession
 {
     const string _playerid = "player:player";
@@ -66,15 +64,32 @@ public class GameSession
             Handler = ActionHandlers.HandleLook
         });
 
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "move",
+            CanonicalVerb = "move",
+            RequiredTargets = 1,
+            Target1 = "exit:*",
+            Conditions = new()
+            {
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.InLocation,
+                    Value = "$Location"
+                },
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.StateValue,
+                    Value = "open"
+                }
+            },
+            VerbAliases = new() { "go", "m", "g" },
+            Handler = ActionHandlers.HandleMove
+            
 
-
-        // gs.ActionRegistry.Register(new GameAction
-        // {
-        //     Id = "move",
-        //     CanonicalVerb = "move",
-        //     VerbAliases = new() { "go", "m", "g" },
-        //     Handler = ActionHandlers.HandleMove
-        // });
+        });
 
         gs.ActionRegistry.Register(new GameAction
         {
@@ -147,7 +162,7 @@ public class GameSession
                 gs.Elements[exit.Id] = new()
                 {
                     Id = exit.Id,
-                    IsVisible = s.Value.IsVisible,
+                    IsVisible = exit.IsVisible,
                     Element = exit,
                     Location = id,
                     State = exit.StartingState
@@ -283,9 +298,9 @@ public class GameSession
                 var exit = Elements[exitId];
                 var name = exit.Element.Name ?? exitId;
                 //Since this is getting the exit from the game element, the prefix hasn't been added yet.
-                var targetScene = "scene:"+ GetGameElement<Exit>(exitId)?.TargetId;
+                var targetScene = "scene:" + GetGameElement<Exit>(exitId)?.TargetId;
                 //Only show the target of the exit if the target scene is visible.
-               //Whem moving through an exit the first time, the scene should be set to visible.
+                //Whem moving through an exit the first time, the scene should be set to visible.
                 var scene = Elements[targetScene!];
                 if (scene?.IsVisible ?? false)
                 {
@@ -293,9 +308,9 @@ public class GameSession
                 }
                 else
                 {
-                sb.AppendLine($"{++i}. {name}");    
+                    sb.AppendLine($"{++i}. {name}");
                 }
-                
+
             }
         }
         if (SceneOrdinals.Any(s => s.StartsWith("npc:")))

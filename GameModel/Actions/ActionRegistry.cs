@@ -182,7 +182,6 @@ public class ActionRegistry
                 //ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, playerAction)) ?? 0
             });
 
-        Console.WriteLine(scored.Any());
 
         var result = scored
         .Where(x => x.Score >= 0)

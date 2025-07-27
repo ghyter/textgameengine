@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using GameModel.Actions;
+using GameModel.Helpers;
 
 namespace GameModel.Model;
 
@@ -35,7 +36,7 @@ public class Condition
 
     public bool IsMet(GameSession session, PlayerAction action, out string result)
     {
-        var resolvedId = ResolveElementId(GameElementId, action);
+        var resolvedId = GameElementId.ResolvePlaceholders(session, action);
         result = string.Empty;
 
         if (string.IsNullOrEmpty(resolvedId))
@@ -66,25 +67,11 @@ public class Condition
         return PassesRules;
     }
 
-    private static string? ResolveElementId(string? id, PlayerAction action)
-    {
-        if (string.IsNullOrWhiteSpace(id))
-            return null;
-
-        return id switch
-        {
-            "$Player" => "player:player",
-            "$Target1" => action.Targets.ElementAtOrDefault(0),
-            "$Target2" => action.Targets.ElementAtOrDefault(1),
-            _ => id
-        };
-    }
+  
 
 private bool EvaluateInLocation(GameElementInfo element, GameSession session, PlayerAction action, out string result)
 {
-    var resolved = (Value ?? "")
-        .Replace("$Inventory", "_inventory")
-        .Replace("$Location", session.CurrentScene?.Id ?? string.Empty);
+    var resolved = (Value ?? "").ResolvePlaceholders(session, action);
 
     var allowed = resolved.Split(new[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     var isValid = allowed.Contains(element.Location, StringComparer.OrdinalIgnoreCase);
@@ -99,24 +86,4 @@ private bool EvaluateInLocation(GameElementInfo element, GameSession session, Pl
     return isValid;
 }
 
-}
-
-
-public enum EffectType
-{
-    ChangeState, // Change the state of a GameElement
-    ChangeLocation, // Move a GameElement to a new location
-    AddToInventory, // Add a GameElement to the player's inventory
-    RemoveFromInventory, // Remove a GameElement from the player's inventory
-    SetProperty, // Set a property of a GameElement
-    Custom // Custom effect defined by the game logic
-}
-
-
-public class Effect
-{
-    public string GameElementId { get; set; } = string.Empty;
-    public EffectType Type { get; set; }
-    public string Property { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
-    public string? NewValue { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
 }

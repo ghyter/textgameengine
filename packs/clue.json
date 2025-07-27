@@ -42,9 +42,9 @@
         {
           "Name": "Secret Passage",
           "TargetId": "kitchen",
-          "StartingState": "hidden",
+          "IsVisible": false,
+          "StartingState": "closed",
           "States": {
-            "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the kitchen is open.",
             "closed": "The exit to the kitchen is closed."
           }
@@ -107,11 +107,11 @@
           }
         },
         {
-          "Name": "Secret",
+          "Name": "Secret Passage",
           "TargetId": "conservatory",
-          "StartingState": "hidden",
+          "StartingState": "closed",
+          "IsVisible": false,
           "States": {
-            "hidden": "",
             "open": "The exit to the conservatory is open.",
             "closed": "The exit to the conservatory is closed."
           }
@@ -173,9 +173,9 @@
         {
           "Name": "Secret Passage",
           "TargetId": "study",
-          "StartingState": "hidden",
+          "IsVisible": false,
+          "StartingState": "closed",
           "States": {
-            "hidden": "There is a knocking sound from behind the wall.",
             "open": "The exit to the study is open.",
             "closed": "The exit to the study is closed."
           }
