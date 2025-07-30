@@ -11,14 +11,19 @@ public static class ActionHandlers
     {
         //By the time we get here, conditions have been met.
         //It is time to apply the effects.
+        StringBuilder sb = new();
 
         gameaction.Effects.ForEach(ef => {
-
-            _ = session.ApplyEffect(ef, action, out var result);
+             if (session.ApplyEffect(ef, action, out var result))
+            {
+                if (result != null && result != string.Empty)
+                sb.AppendLine(result);
+            }
+            ;
         });
 
-
-        return "This action is not implemented yet.";
+        sb.AppendLine(gameaction.SuccessMessage);
+        return sb.ToString();
     }
 
     public static string HandleLook(GameSession session, GameAction gameaction, PlayerAction action)

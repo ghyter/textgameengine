@@ -44,6 +44,8 @@ public class ActionRegistry
 
         result = gameAction?.Execute(session, action) ?? $"I don't know how to '{input}'.";
 
+        session.PopulateOrdinals();
+
         return false;
     }
 
@@ -204,12 +206,17 @@ public class ActionRegistry
         string target2 = playerAction.Targets.ElementAtOrDefault(1) ?? "";
 
         // Disqualify if the action doesn't support a given position
-        if (playerAction.Targets.Count >= 1 && string.IsNullOrEmpty(action.Target1))
+        if (playerAction.Targets.Count == 1 && string.IsNullOrEmpty(action.Target1))
         {
             return -1;
         }
 
-        if (playerAction.Targets.Count >= 2 && string.IsNullOrEmpty(action.Target2))
+        if (playerAction.Targets.Count == 2
+            && (
+                string.IsNullOrEmpty(action.Target1)
+                ||string.IsNullOrEmpty(action.Target2)
+                )
+            )
         {
             return -1;
         }

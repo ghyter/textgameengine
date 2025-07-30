@@ -264,6 +264,7 @@
           }
         },
         {
+          "Name": "South",
           "TargetId": "conservatory",
           "StartingState": "open",
           "States": {

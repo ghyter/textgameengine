@@ -107,21 +107,68 @@ public class GameSession
             Handler = ActionHandlers.HandleInventory
         });
 
-        // gs.ActionRegistry.Register(new GameAction
-        // {
-        //     Id = "get",
-        //     CanonicalVerb = "get",
-        //     VerbAliases = new() { "grab", "g" },
-        //     Handler = ActionHandlers.HandleInventoryGet
-        // });
+        
 
-        // gs.ActionRegistry.Register(new GameAction
-        // {
-        //     Id = "drop",
-        //     CanonicalVerb = "drop",
-        //     VerbAliases = new() { "d" },
-        //     Handler = ActionHandlers.HandleInventoryDrop
-        // });
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "get",
+            RequiredTargets = 1,
+            CanonicalVerb = "get",
+            Target1 = "item:*",
+            VerbAliases = new() { "grab", "g", "pick up" },
+            Conditions = [
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.InLocation,
+                    Value = "$Location"
+                },
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.IsMovable,
+                    FailMessage = "You cannot move that"
+                }
+
+            ],
+            Effects = [
+                new(){
+                    GameElementId = "$Target1",
+                    Type= EffectType.ChangeLocation,
+                    NewValue = "$Inventory",
+                    SuccessMessage = "Taken"
+                }
+            ],
+            SuccessMessage = ""
+        });
+
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "drop",
+            RequiredTargets = 1,
+            CanonicalVerb = "drop",
+            Target1 = "item:*",
+            VerbAliases = new() { "put down", "d"},
+            Conditions = [
+                new Condition
+                {
+                    GameElementId = "$Target1",
+                    Rule = ConditionRuleType.InLocation,
+                    Value = "$Inventory"
+                }
+            ],
+            Effects = [
+                new(){
+                    GameElementId = "$Target1",
+                    Type= EffectType.ChangeLocation,
+                    NewValue = "$Location",
+                    SuccessMessage = "Dropped"
+                }
+            ],
+            SuccessMessage = ""
+        });
+
+        
 
 
         return gs;

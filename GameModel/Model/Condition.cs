@@ -14,6 +14,8 @@ public enum ConditionRuleType
     HasAttribute, // Checks if the GameElement has a specific attribute
     PropertyValue,
     HasProperty,
+    IsVisible,
+    IsMovable,
 
 }
 
@@ -61,6 +63,8 @@ public class Condition
             ConditionRuleType.HasAttribute => false,
             ConditionRuleType.PropertyValue => false,
             ConditionRuleType.HasProperty => false,
+            ConditionRuleType.IsVisible => element.IsVisible,
+            ConditionRuleType.IsMovable => element.Get<Item>()?.IsMovable ?? false,
             _ => false,
         };
         
