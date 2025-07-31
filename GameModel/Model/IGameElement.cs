@@ -11,8 +11,10 @@ public interface IGameElement
 
     public bool IsVisible { get; set; }
     public string StartingState { get; set; }
+    public Dictionary<string, int> Attributes { get; set; }
     public Dictionary<string, string> States { get; set; }
     public string StartingLocation { get; set; }
+    
     public string ToDescription(string stateId);
     
 }

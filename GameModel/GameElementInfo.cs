@@ -2,6 +2,14 @@ using GameModel.Model;
 
 namespace GameModel;
 
+
+public enum RollType
+{
+    Disadvantage,
+    Regular,
+    Advantage
+}
+
 public class GameElementInfo
 {
     public required string Id { get; init; }
@@ -9,7 +17,9 @@ public class GameElementInfo
     public string State { get; set; } = "default";
     public bool IsVisible { get; set; }
     public string? Location { get; set; }
-    //public List<Exit> Exits { get; set; } = [];
+    public RollType RollType { get; set; } = RollType.Regular;
+
+    public Dictionary<string, int> Attributes { get; set; } = [];
 
     public string Description => Element.ToDescription(State);
 

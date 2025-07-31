@@ -2,12 +2,16 @@
   "Title": "Clue Mansion",
   "Player": {
     "Id": "player:player",
-    "Name": "Player",
+    "Name": "Det. Boddy",
     "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
     "StartingLocation": "hall",
     "StartingState": "default",
     "HitPoints": 10,
     "ArmorClass": 10,
+    "Attributes": {
+      "Luck": 10,
+      "Strength": 5
+    },
     "States": {
       "default": "You are ready to explore the mansion.",
       "injured": "You are injured and need to find a way to heal."
@@ -21,9 +25,8 @@
       "IsVisible": false,
       "Exits": [
         {
-          "Name":"South",
+          "Name": "South",
           "TargetId": "library",
-          
           "StartingState": "open",
           "States": {
             "open": "The exit to the library is open.",
@@ -60,10 +63,12 @@
         {
           "Name": "West",
           "TargetId": "study",
-          "StartingState": "open",
+          "StartingState": "locked",
           "States": {
             "open": "The exit to the study is open.",
-            "closed": "The exit to the study is closed."
+            "closed": "The exit to the study is closed.",
+            "locked": "The door to the Study is locked tight."
+
           }
         },
         {
@@ -303,7 +308,7 @@
       "States": {}
     }
   },
- "Items": {
+  "Items": {
     "candlestick": {
       "Id": "candlestick",
       "Name": "Candlestick",
@@ -450,10 +455,40 @@
       "States": {}
     }
   },
-  "Actions":[
-
+  "Actions": [
+    {
+      "Id": "open_locked_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Open Locked Door",
+      "Description": "Attempts to open a locked door using strength.",
+      "Difficulty": "Difficult",
+      "AttributeCheck": "Strength",
+      "CanonicalVerb": "open",
+      "VerbAliases": [
+        "unlock",
+        "force",
+        "break in"
+      ],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "HasState",
+          "Comparison": "equals",
+          "Value": "locked",
+          "FailMessage": "The door is not locked."
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "door",
+          "Type": "ChangeState",
+          "TargetStateId": "open"
+        }
+      ],
+      "SuccessMessage": "You strain and the lock gives way. The door swings open.",
+      "FailureMessage": "You struggle, but the door doesn’t budge."
+    }
   ]
-
-
-  
 }

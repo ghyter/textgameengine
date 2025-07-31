@@ -17,12 +17,13 @@ public class GameSession
     public List<string> SceneOrdinals { get; set; } = [];
     public List<string> InventoryOrdinals { get; set; } = [];
 
+    public GameElementInfo Player {get => Elements[_playerid];}
 
     public GameElementInfo? CurrentLocation
     {
         get
         {
-            var sceneId = Elements[_playerid].Location ?? string.Empty;
+            var sceneId = Player.Location ?? string.Empty;
             return Elements.TryGetValue(sceneId, out var info) ? info : null;
         }
 
@@ -35,136 +36,8 @@ public class GameSession
         GameSession gs = new();
 
         LoadGamePack(gs, PackPath);
+        StandardActions.Register(gs);
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "look",
-            RequiredTargets = 0,
-            CanonicalVerb = "look",
-            VerbAliases = new() { "examine", "view", "l" },
-            Handler = ActionHandlers.HandleLook
-        });
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "look",
-            RequiredTargets = 1,
-            Target1 = "*",
-            CanonicalVerb = "look",
-            Conditions = new()
-            {
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.InLocation,
-                    Value = "$Inventory,$CurrentLocation"
-                }
-            },
-            VerbAliases = new() { "examine", "view", "l" },
-            Handler = ActionHandlers.HandleLook
-        });
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "move",
-            CanonicalVerb = "move",
-            RequiredTargets = 1,
-            Target1 = "exit:*",
-            Conditions = new()
-            {
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.InLocation,
-                    Value = "$CurrentLocation"
-                },
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.StateValue,
-                    Value = "open"
-                }
-            },
-            VerbAliases = new() { "go", "m", "g" },
-            Handler = ActionHandlers.HandleMove
-            
-
-        });
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "history",
-            CanonicalVerb = "history",
-            VerbAliases = new() { "hist" },
-            Handler = ActionHandlers.HandleHistory
-        });
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "inventory",
-            CanonicalVerb = "inventory",
-            VerbAliases = new() { "inv", "i" },
-            Handler = ActionHandlers.HandleInventory
-        });
-
-        
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "get",
-            RequiredTargets = 1,
-            CanonicalVerb = "get",
-            Target1 = "item:*",
-            VerbAliases = new() { "grab", "g", "pick up" },
-            Conditions = [
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.InLocation,
-                    Value = "$CurrentLocation"
-                },
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.IsMovable,
-                    FailMessage = "You cannot move $Target1.Name"
-                }
-
-            ],
-            Effects = [
-                new(){
-                    GameElementId = "$Target1",
-                    Type= EffectType.ChangeLocation,
-                    NewValue = "$Inventory",
-                    SuccessMessage = "$Target1.Name: Taken"
-                }
-            ]
-        });
-
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "drop",
-            RequiredTargets = 1,
-            CanonicalVerb = "drop",
-            Target1 = "item:*",
-            VerbAliases = new() { "put down", "d"},
-            Conditions = [
-                new Condition
-                {
-                    GameElementId = "$Target1",
-                    Rule = ConditionRuleType.InLocation,
-                    Value = "$Inventory"
-                }
-            ],
-            Effects = [
-                new(){
-                    GameElementId = "$Target1",
-                    Type= EffectType.ChangeLocation,
-                    NewValue = "$CurrentLocation",
-                    SuccessMessage = "$Target1.Name: Dropped"
-                }
-            ]
-        });
         return gs;
     }
 
@@ -182,7 +55,9 @@ public class GameSession
 
             Id = _playerid,
             Element = _gamePack.Player,
-            Location = _gamePack.Player.StartingLocation
+            Location = _gamePack.Player.StartingLocation,
+            Attributes = _gamePack.Player.Attributes, //Load the initial state of the attributes.
+
         };
 
         foreach (var s in _gamePack.Scenes)
@@ -249,6 +124,12 @@ public class GameSession
             {
                 element.Location = $"scene:{element.Location}";
             }
+        }
+
+        //Add the data driven actions.
+        foreach (var action in _gamePack.Actions)
+        {
+            gs.ActionRegistry.Register(action);
         }
 
     }
