@@ -5,6 +5,7 @@
 /// A <see cref="GameAction"/> defines the structure and requirements for an action, such as the number of required targets,
 /// the canonical verb and its aliases, conditions that must be met, and effects that occur upon execution.
 /// </remarks>
+using GameModel.Helpers;
 using GameModel.Model;
 namespace GameModel.Actions;
 
@@ -26,8 +27,8 @@ public class GameAction
     public ActionHandler Handler { get; set; } = ActionHandlers.DefaultActionHandler;
     public override string ToString() => $"{Name} ({Id})";
 
-    public string? SuccessMessage { get; set; } = "You successfully perform the action.";
-    public string? FailureMessage { get; set; } = "You fail to perform the action";
+    public string? SuccessMessage { get; set; } = string.Empty;
+    public string? FailureMessage { get; set; } = string.Empty;
 
 
     public string Execute(GameSession session, PlayerAction action)
@@ -36,11 +37,11 @@ public class GameAction
         if (!ConditionsMet(session, action, out var message))
         {
             //Otherwise return the message from the condition check
-            return message;
+            return message.ResolvePlaceholders(session,action);
         }
         //The handler may be null.
         //Call the handler to execute the action
-        return Handler(session, this, action);
+        return Handler(session, this, action).ResolvePlaceholders(session,action);
     }
 
     public bool ConditionsMet(GameSession session, PlayerAction action, out string message)

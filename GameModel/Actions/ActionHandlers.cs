@@ -42,7 +42,7 @@ public static class ActionHandlers
         {
             //This is the scene description.
             StringBuilder sb = new();
-            sb.AppendLine(session.CurrentScene?.Description);
+            sb.AppendLine(session.CurrentLocation?.Description);
             session.PopulateOrdinals();
             sb.AppendLine(session.PrintSceneOrdinals());
             return sb.ToString();
@@ -92,55 +92,6 @@ public static class ActionHandlers
         return HandleLook(session,gameaction,new PlayerAction(){VerbText = "Look"});
 
     }
-
-  
-    // public static string HandleInventoryGet(GameSession session, GameAction gameaction, PlayerAction action)
-    // {
-    //     StringBuilder sb = new();
-    //     if (action.Targets.Count != 1)
-    //     {
-    //         return "You must specify a single item to get.";
-    //     }
-    //     var itemId = action.Targets[0];
-    //     // Check if the item exists in the current scene
-    //     var item = session.Elements.GetInLocation(session.CurrentScene.Id, "item")
-    //         .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
-    //     if (item == null)
-    //     {
-    //         return $"There is no item with ID '{itemId}'.";
-    //     }
-    //     session.Elements[item.Id].Location = "_inventory";
-    //     if (session.Elements.TryGetValue(item.Id, out var info))
-    //         info.Location = "_inventory";
-    //     var Item = session.GetGameElement<Item>(itemId);
-    //     sb.AppendLine($"You have picked up {Item?.Name} ({Item?.Id}).");
-    //     return sb.ToString();
-    // }
-
-    // public static string HandleInventoryDrop(GameSession session, GameAction gameaction,PlayerAction action)
-    // { 
-    //     StringBuilder sb = new();
-    //     if (action.Targets.Count != 1)
-    //     {
-    //         return "You must specify a single item to drop.";
-    //     }
-    //     var itemId = action.Targets[0];
-    //     // Check if the item exists in the player's inventory
-    //     var item = session.Elements.GetInLocation("_inventory", "item")
-    //         .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
-    //     if (item == null)
-    //     {
-    //         return $"You are not carrying an item with ID '{itemId}'.";
-    //     }
-    //     session.Elements[item.Id].Location = session.CurrentScene.Id;
-    //     if (session.Elements.TryGetValue(item.Id, out var info))
-    //         info.Location = session.CurrentScene.Id;
-    //     var Item = session.GetGameElement<Item>(itemId);
-    //     sb.AppendLine($"You have dropped {Item?.Name} ({Item?.Id}).");
-    //     return sb.ToString();
-
-    // }
-
    
     public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
     {

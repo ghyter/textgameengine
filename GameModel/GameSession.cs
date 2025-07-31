@@ -18,7 +18,7 @@ public class GameSession
     public List<string> InventoryOrdinals { get; set; } = [];
 
 
-    public GameElementInfo? CurrentScene
+    public GameElementInfo? CurrentLocation
     {
         get
         {
@@ -57,7 +57,7 @@ public class GameSession
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$Inventory,$Location"
+                    Value = "$Inventory,$CurrentLocation"
                 }
             },
             VerbAliases = new() { "examine", "view", "l" },
@@ -76,7 +76,7 @@ public class GameSession
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$Location"
+                    Value = "$CurrentLocation"
                 },
                 new Condition
                 {
@@ -121,13 +121,13 @@ public class GameSession
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$Location"
+                    Value = "$CurrentLocation"
                 },
                 new Condition
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.IsMovable,
-                    FailMessage = "You cannot move that"
+                    FailMessage = "You cannot move $Target1.Name"
                 }
 
             ],
@@ -136,10 +136,9 @@ public class GameSession
                     GameElementId = "$Target1",
                     Type= EffectType.ChangeLocation,
                     NewValue = "$Inventory",
-                    SuccessMessage = "Taken"
+                    SuccessMessage = "$Target1.Name: Taken"
                 }
-            ],
-            SuccessMessage = ""
+            ]
         });
 
         gs.ActionRegistry.Register(new GameAction
@@ -161,16 +160,11 @@ public class GameSession
                 new(){
                     GameElementId = "$Target1",
                     Type= EffectType.ChangeLocation,
-                    NewValue = "$Location",
-                    SuccessMessage = "Dropped"
+                    NewValue = "$CurrentLocation",
+                    SuccessMessage = "$Target1.Name: Dropped"
                 }
-            ],
-            SuccessMessage = ""
+            ]
         });
-
-        
-
-
         return gs;
     }
 
@@ -280,7 +274,7 @@ public class GameSession
 
         sb.Append(GameTitle);
         sb.Append(": ");
-        var sceneName = CurrentScene?.Get<Scene>()?.Name ?? "Unknown Scene";
+        var sceneName = CurrentLocation?.Get<Scene>()?.Name ?? "Unknown Scene";
         sb.AppendLine(sceneName);
         sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
         sb.AppendLine(actionresult);
@@ -296,7 +290,7 @@ public class GameSession
                 e.Id.StartsWith("exit:")
                 && e.IsVisible
                 && e.Location != null
-                && e.Location.Equals(CurrentScene?.Id)
+                && e.Location.Equals(CurrentLocation?.Id)
                 )
             .OrderBy(e => e.Element.Name)
             .Select(e => e.Id));
@@ -305,7 +299,7 @@ public class GameSession
                 e.Id.StartsWith("npc:")
                 && e.IsVisible
                 && e.Location != null
-                && e.Location.Equals(CurrentScene?.Id)
+                && e.Location.Equals(CurrentLocation?.Id)
                 )
             .OrderBy(e => e.Element.Name)
             .Select(e => e.Id));
@@ -314,7 +308,7 @@ public class GameSession
                 e.Id.StartsWith("item:")
                 && e.IsVisible
                 && e.Location != null
-                && e.Location.Equals(CurrentScene?.Id)
+                && e.Location.Equals(CurrentLocation?.Id)
                 )
             .OrderBy(e => e.Element.Name)
             .Select(e => e.Id));

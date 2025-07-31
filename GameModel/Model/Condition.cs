@@ -81,7 +81,7 @@ private bool EvaluateInLocation(GameElementInfo element, GameSession session, Pl
     var isValid = allowed.Contains(element.Location, StringComparer.OrdinalIgnoreCase);
     if (!isValid)
     {
-        result = $"You cannot see {element.Id} here.";
+        result = $"You cannot see $Target1.Name here.";
     }
     else
     {

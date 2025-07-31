@@ -181,7 +181,7 @@ public class ActionRegistry
             {
                 Action = action,
                 Score = MatchActionScore(action, playerAction),
-                //ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, playerAction)) ?? 0
+                ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, playerAction, out _)) ?? 0
             });
 
 
