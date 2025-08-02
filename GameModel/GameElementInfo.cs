@@ -1,25 +1,33 @@
+using GameModel.Enums;
 using GameModel.Model;
 
 namespace GameModel;
 
 
-public enum RollType
-{
-    Disadvantage,
-    Regular,
-    Advantage
-}
+
 
 public class GameElementInfo
 {
+    
     public required string Id { get; init; }
     public required IGameElement Element { get; init; }
     public string State { get; set; } = "default";
-    public bool IsVisible { get; set; }
+    public bool IsVisible { 
+        get {
+            if (Flags.TryGetValue("IsVisible", out bool flag))
+            {
+                return flag;
+            }
+            return true;
+        }
+        set => Flags["IsVisible"] = value;
+     }
     public string? Location { get; set; }
     public RollType RollType { get; set; } = RollType.Regular;
 
     public Dictionary<string, int> Attributes { get; set; } = [];
+    public Dictionary<string, string> Properties { get; set; } = [];
+    public Dictionary<string, bool> Flags { get; set; } = [];
 
     public string Description => Element.ToDescription(State);
 
@@ -28,7 +36,6 @@ public class GameElementInfo
 
 
 public class GameElements : Dictionary<string, GameElementInfo>;
-
 
 public static class GameElementsExtensions
 {
