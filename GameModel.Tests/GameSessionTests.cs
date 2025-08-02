@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameModel;
 using GameModel.Actions;
 using GameModel.Models;
+using GameModel.Session;
 
 namespace GameEngine.Tests;
 

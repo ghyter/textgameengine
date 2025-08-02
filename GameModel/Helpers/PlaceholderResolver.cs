@@ -1,7 +1,6 @@
-using GameModel;
-using GameModel.Actions;
 using GameModel.Models;
 using GameModel.Models.Constants;
+using GameModel.Session;
 using System.Text.RegularExpressions;
 
 namespace GameModel.Helpers;
@@ -19,7 +18,7 @@ public static class PlaceholderResolver
 
     public static string ResolvePlaceholders(this string? input, GameSession session, PlayerAction action)
     {
-        if (string.IsNullOrEmpty(input)) return "";
+        if (string.IsNullOrEmpty(input)) return string.Empty;
 
         var results = PlaceholderPattern.Replace(input, match =>
         {

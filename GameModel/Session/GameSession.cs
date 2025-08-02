@@ -5,7 +5,7 @@ using GameModel.Models;
 using System.Linq;
 using GameModel.Models.Constants;
 
-namespace GameModel;
+namespace GameModel.Session;
 
 public class GameSession
 {
@@ -13,10 +13,61 @@ public class GameSession
 
     public ActionRegistry ActionRegistry { get; set; } = new();
 
-    public List<string> SceneOrdinals { get; set; } = [];
-    public List<string> InventoryOrdinals { get; set; } = [];
+    public List<GameRound> GameLog { get; set; } = [];
 
-    public GameElementState Player {get => Elements[GameConstants.PlayerId];}
+    private Dictionary<string, List<string>> Ordinals { get; set; } = new();
+
+    public List<string> SceneOrdinals
+    {
+        get
+        {
+            var exists = Ordinals.TryGetValue(GameConstants.ScenePrefix, out var result);
+            if (!exists)
+            {
+                Ordinals[GameConstants.ScenePrefix] = [];
+            }
+            return result ?? [];
+
+        }
+        set
+        {
+            Ordinals[GameConstants.ScenePrefix] = value;
+        }
+    }
+    //public List<string> InventoryOrdinals { get; set; } = [];
+    
+    public List<string> InventoryOrdinals
+    {
+        get
+        {
+            var exists = Ordinals.TryGetValue(GameConstants.InventoryId, out var result);
+            if (!exists)
+            {
+                Ordinals[GameConstants.InventoryId] = [];
+            }
+            return result ?? [];
+
+        }
+        set
+        {
+            Ordinals[GameConstants.InventoryId] = value;
+        }
+    }
+
+    public GameElementState Player { get => Elements[GameConstants.PlayerId]; }
+
+    public string Header {get
+        {
+            StringBuilder sb = new();
+                sb.Append(GameTitle);
+                sb.Append(": ");
+                var sceneName = CurrentLocation?.Get<Scene>()?.Name ?? "Unknown Scene";
+                sb.AppendLine(sceneName);
+                sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
+            return sb.ToString();
+        }
+    }
+
 
     public GameElementState? CurrentLocation
     {
@@ -30,108 +81,9 @@ public class GameSession
 
     public GameElements Elements { get; set; } = [];
 
-    public static GameSession NewGame(string PackPath)
-    {
-        GameSession gs = new();
+    public static GameSession NewGame(string PackPath) => GameInitializer.NewGame(PackPath);
 
-        LoadGamePack(gs, PackPath);
-        StandardActions.Register(gs);
-
-        return gs;
-    }
-
-    private static void LoadGamePack(GameSession gs, string packPath)
-    {
-        var _gamePack = GamePackLoader.Load(packPath);
-        if (_gamePack == null)
-        {
-            throw new ArgumentException("Invalid game pack path or format.");
-        }
-
-        gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
-        gs.Elements[GameConstants.PlayerId] = new GameElementState
-        {
-
-            Id = GameConstants.PlayerId,
-            Element = _gamePack.Player,
-            Location = _gamePack.Player.StartingLocation,
-            Attributes = _gamePack.Player.Attributes, //Load the initial state of the attributes.
-
-        };
-
-        foreach (var s in _gamePack.Scenes)
-        {
-            var id = $"scene:{s.Key}";
-            gs.Elements[id] = new GameElementState
-            {
-                Id = id,
-                Element = s.Value,
-                Location = null,
-                IsVisible = s.Value.IsVisible,
-                State = s.Value.StartingState ?? "default"
-            };
-            gs.Elements[id].Element.Id = id;
-            s.Value.Exits.ForEach(exit =>
-            {
-                exit.Id = $"exit:{s.Value.Id}:{exit.TargetId}";
-                gs.Elements[exit.Id] = new()
-                {
-                    Id = exit.Id,
-                    IsVisible = exit.IsVisible,
-                    Element = exit,
-                    Location = id,
-                    State = exit.StartingState
-                };
-            });
-        }
-
-        foreach (var i in _gamePack.Items)
-        {
-            var id = $"item:{i.Key}";
-            gs.Elements[id] = new GameElementState
-            {
-                Id = id,
-                Element = i.Value,
-                IsVisible = i.Value.IsVisible,
-                Location = i.Value.StartingLocation,
-                State = i.Value.StartingState ?? "default"
-            };
-            gs.Elements[id].Element.Id = id;
-        }
-
-        foreach (var npc in _gamePack.Npcs)
-        {
-            var id = $"npc:{npc.Key}";
-            gs.Elements[id] = new GameElementState
-            {
-                Id = id,
-                Element = npc.Value,
-                IsVisible = npc.Value.IsVisible,
-                Location = npc.Value.StartingLocation,
-                State = npc.Value.StartingState ?? "default"
-            };
-            gs.Elements[id].Element.Id = id;
-        }
-
-        //Add the scene prefix for any element that doest start with _
-        foreach (var element in gs.Elements.Values)
-        {
-            if (element.Location != null
-                && !element.Location.StartsWith("_")
-                && !element.Location.StartsWith("scene:")
-              )
-            {
-                element.Location = $"scene:{element.Location}";
-            }
-        }
-
-        //Add the data driven actions.
-        foreach (var action in _gamePack.Actions)
-        {
-            gs.ActionRegistry.Register(action);
-        }
-
-    }
+    public GameRound Execute(string input) => GameRoundResolver.Execute(this, input);
 
 
     public IGameElement? GetGameElement(string id)
@@ -142,24 +94,6 @@ public class GameSession
     public T? GetGameElement<T>(string id) where T : class, IGameElement
     {
         return Elements.TryGetValue(id, out var info) ? info.Get<T>() : null;
-    }
-
-
-    public string Execute(string input)
-    {
-        StringBuilder sb = new();
-        var actionresult = ActionRegistry.TryExecute(this, input, out var result) ? result : result;
-
-        //Header
-
-        sb.Append(GameTitle);
-        sb.Append(": ");
-        var sceneName = CurrentLocation?.Get<Scene>()?.Name ?? "Unknown Scene";
-        sb.AppendLine(sceneName);
-        sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
-        sb.AppendLine(actionresult);
-
-        return sb.ToString();
     }
 
     public void PopulateOrdinals()

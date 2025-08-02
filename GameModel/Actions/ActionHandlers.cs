@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using GameModel.Models;
 using GameModel.Models.Constants;
+using GameModel.Session;
 
 namespace GameModel.Actions;
 
@@ -37,7 +38,7 @@ public static class ActionHandlers
             {
                 return $"I don't see that item here.";
             }
-            return $"{target.Description} ({target.Id})";
+            return $"{target.Description}";
         }
         else
         {
@@ -61,7 +62,7 @@ public static class ActionHandlers
         {
             if (session.Elements.TryGetValue(id, out var element))
             {
-                sb.AppendLine($"I{++i} {element.Element.Name} ({element.Id})");
+                sb.AppendLine($"I{++i} {element.Element.Name}");
             }
         }
         return sb.ToString();
@@ -94,24 +95,24 @@ public static class ActionHandlers
 
     }
    
-    public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
-    {
-        StringBuilder sb = new();
-        sb.AppendLine("Action History:");
+    // public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
+    // {
+    //     StringBuilder sb = new();
+    //     sb.AppendLine("Action History:");
 
-        if (session.ActionRegistry.History.Count == 0)
-        {
-            sb.AppendLine("No actions have been taken yet.");
-        }
-        else
-        {
-            for (int i = 0; i < session.ActionRegistry.History.Count; i++)
-            {
-                var act = session.ActionRegistry.History[i];
-                sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
-            }
-        }
-        return sb.ToString();
+    //     if (session.ActionRegistry.History.Count == 0)
+    //     {
+    //         sb.AppendLine("No actions have been taken yet.");
+    //     }
+    //     else
+    //     {
+    //         for (int i = 0; i < session.ActionRegistry.History.Count; i++)
+    //         {
+    //             var act = session.ActionRegistry.History[i];
+    //             sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
+    //         }
+    //     }
+    //     return sb.ToString();
 
-    }
+    // }
 }

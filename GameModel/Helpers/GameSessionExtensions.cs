@@ -1,15 +1,15 @@
 using System;
 using GameModel.Modes.Enums;
 using GameModel.Models;
+using GameModel.Session;
 
 namespace GameModel.Actions;
 
-public static class StandardActions
+public static class GameSessionExtensions
 {
 
-    public static void  Register(GameSession gs)
+    public static void  RegisterStandardActions(this GameSession gs)
     {
-        
         gs.ActionRegistry.Register(new GameAction
         {
             Id = "look",
@@ -31,7 +31,8 @@ public static class StandardActions
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$Inventory,$CurrentLocation"
+                    Value = "$Inventory,$CurrentLocation",
+                    FailMessage = "You do not see $Target1.Name here"
                 }
             },
             VerbAliases = new() { "examine", "view", "l" },
@@ -50,14 +51,15 @@ public static class StandardActions
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$CurrentLocation"
+                    Value = "$CurrentLocation",
+                    FailMessage = "$Target1.Name is not here."
                 },
                 new Condition
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.StateValue,
                     Value = "open",
-                    FailMessage = "$Target1 is not open."
+                    FailMessage = "$Target1.Name is not open."
                 }
             },
             VerbAliases = new() { "go", "m", "g" },
@@ -66,13 +68,13 @@ public static class StandardActions
 
         });
 
-        gs.ActionRegistry.Register(new GameAction
-        {
-            Id = "history",
-            CanonicalVerb = "history",
-            VerbAliases = new() { "hist" },
-            Handler = ActionHandlers.HandleHistory
-        });
+        // gs.ActionRegistry.Register(new GameAction
+        // {
+        //     Id = "history",
+        //     CanonicalVerb = "history",
+        //     VerbAliases = new() { "hist" },
+        //     Handler = ActionHandlers.HandleHistory
+        // });
 
         gs.ActionRegistry.Register(new GameAction
         {
@@ -96,7 +98,8 @@ public static class StandardActions
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$CurrentLocation"
+                    Value = "$CurrentLocation",
+                    FailMessage = "$Target1.Name is not here"
                 },
                 new Condition
                 {
@@ -128,7 +131,8 @@ public static class StandardActions
                 {
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.InLocation,
-                    Value = "$Inventory"
+                    Value = "$Inventory",
+                    FailMessage = "$Target1.Name is not in inventory"
                 }
             ],
             Effects = [
@@ -140,9 +144,5 @@ public static class StandardActions
                 }
             ]
         });
-
-
-
     }
-
 }

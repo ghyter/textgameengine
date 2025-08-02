@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using GameModel.Actions;
 using GameModel.Modes.Enums;
 using GameModel.Helpers;
+using GameModel.Session;
 
 namespace GameModel.Models;
 
@@ -20,7 +20,6 @@ public class Condition
     public string? Value { get; set; } // e.g., "scene:hall", "state:locked", GameConstants.InventoryId
 
     public string? FailMessage { get; set; } // Optional message to display if the condition fails
-
 
     public bool IsMet(GameSession session, PlayerAction action, out string result)
     {
@@ -44,16 +43,20 @@ public class Condition
         {
             ConditionRuleType.HasState => element.Element.States.ContainsKey(Value ?? string.Empty),
             ConditionRuleType.StateValue => element.State == Value,
-            ConditionRuleType.InLocation => EvaluateInLocation(element, session, action,out result),
+            ConditionRuleType.InLocation =>  EvaluateInLocation(element, session, action,out result),
             ConditionRuleType.InHistory => false,
             ConditionRuleType.HasAttribute => false,
             ConditionRuleType.PropertyValue => false,
             ConditionRuleType.HasProperty => false,
             ConditionRuleType.IsVisible => element.IsVisible,
-            ConditionRuleType.IsMovable => element.Get<Item>()?.IsMovable ?? false,
+            ConditionRuleType.IsMovable => element.Get<Item>()?.IsMovable ?? true,
             _ => false,
         };
-        
+        if (!PassesRules)
+        {
+            result = FailMessage.ResolvePlaceholders(session, action) ?? string.Empty;
+        }
+
         return PassesRules;
     }
 

@@ -1,4 +1,3 @@
-using GameModel.Actions;
 namespace GameModel.Models;
 
 public class GamePack

@@ -1,9 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameModel;
 using GameModel.Actions;
 using GameModel.Models;
 using System.Collections.Generic;
 using GameModel.Models.Constants;
+using GameModel.Session;
 
 namespace GameEngine.Tests;
 
