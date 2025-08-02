@@ -59,7 +59,7 @@ public class Condition
 
   
 
-private bool EvaluateInLocation(GameElementInfo element, GameSession session, PlayerAction action, out string result)
+private bool EvaluateInLocation(GameElementState element, GameSession session, PlayerAction action, out string result)
 {
     var resolved = (Value ?? "").ResolvePlaceholders(session, action);
 

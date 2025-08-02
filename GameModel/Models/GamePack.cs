@@ -1,6 +1,5 @@
-using GameModel.Models;
 using GameModel.Actions;
-namespace GameModel.Pack;
+namespace GameModel.Models;
 
 public class GamePack
 {

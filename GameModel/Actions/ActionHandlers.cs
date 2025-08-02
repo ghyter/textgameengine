@@ -73,7 +73,7 @@ public static class ActionHandlers
     {
         var exit = action.Targets[0];
         var player = session.Elements["player:player"];
-        if (session.Elements.TryGetValue(exit, out GameElementInfo? exitElement))
+        if (session.Elements.TryGetValue(exit, out GameElementState? exitElement))
         {
             if (exitElement == null)
             {
@@ -82,7 +82,7 @@ public static class ActionHandlers
 
             var targetExit = exitElement.Get<Exit>();
             //Find the target scene.
-            if (session.Elements.TryGetValue("scene:"+targetExit!.TargetId, out GameElementInfo? targetScene))
+            if (session.Elements.TryGetValue("scene:"+targetExit!.TargetId, out GameElementState? targetScene))
             {
                 targetScene.IsVisible = true;
                 player.Location = targetScene.Id;

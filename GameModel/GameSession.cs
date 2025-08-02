@@ -17,9 +17,9 @@ public class GameSession
     public List<string> SceneOrdinals { get; set; } = [];
     public List<string> InventoryOrdinals { get; set; } = [];
 
-    public GameElementInfo Player {get => Elements[_playerid];}
+    public GameElementState Player {get => Elements[_playerid];}
 
-    public GameElementInfo? CurrentLocation
+    public GameElementState? CurrentLocation
     {
         get
         {
@@ -50,7 +50,7 @@ public class GameSession
         }
 
         gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
-        gs.Elements[_playerid] = new GameElementInfo
+        gs.Elements[_playerid] = new GameElementState
         {
 
             Id = _playerid,
@@ -63,7 +63,7 @@ public class GameSession
         foreach (var s in _gamePack.Scenes)
         {
             var id = $"scene:{s.Key}";
-            gs.Elements[id] = new GameElementInfo
+            gs.Elements[id] = new GameElementState
             {
                 Id = id,
                 Element = s.Value,
@@ -89,7 +89,7 @@ public class GameSession
         foreach (var i in _gamePack.Items)
         {
             var id = $"item:{i.Key}";
-            gs.Elements[id] = new GameElementInfo
+            gs.Elements[id] = new GameElementState
             {
                 Id = id,
                 Element = i.Value,
@@ -103,7 +103,7 @@ public class GameSession
         foreach (var npc in _gamePack.Npcs)
         {
             var id = $"npc:{npc.Key}";
-            gs.Elements[id] = new GameElementInfo
+            gs.Elements[id] = new GameElementState
             {
                 Id = id,
                 Element = npc.Value,

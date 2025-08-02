@@ -1,12 +1,8 @@
 using GameModel.Enums;
-using GameModel.Models;
 
-namespace GameModel;
+namespace GameModel.Models;
 
-
-
-
-public class GameElementInfo
+public class GameElementState
 {
     
     public required string Id { get; init; }
@@ -35,11 +31,11 @@ public class GameElementInfo
 }
 
 
-public class GameElements : Dictionary<string, GameElementInfo>;
+public class GameElements : Dictionary<string, GameElementState>;
 
 public static class GameElementsExtensions
 {
-    public static IEnumerable<GameElementInfo> GetInLocation(this GameElements map, string location, string? type = null)
+    public static IEnumerable<GameElementState> GetInLocation(this GameElements map, string location, string? type = null)
     {
         return map.Values.Where(o => o.Location == location && o.IsVisible && (type == null || o.Id.StartsWith($"{type}:") ));
     }
