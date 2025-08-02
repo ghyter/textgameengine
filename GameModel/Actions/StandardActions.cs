@@ -1,6 +1,6 @@
 using System;
 using GameModel.Enums;
-using GameModel.Model;
+using GameModel.Models;
 
 namespace GameModel.Actions;
 

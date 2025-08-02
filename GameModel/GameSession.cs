@@ -1,7 +1,7 @@
 using System.Text;
 using GameModel.Pack;
 using GameModel.Actions;
-using GameModel.Model;
+using GameModel.Models;
 using System.Linq;
 
 namespace GameModel;

@@ -1,6 +1,6 @@
 using System;
 
-namespace GameModel.Model;
+namespace GameModel.Models;
 
 public interface IGameElement
 {

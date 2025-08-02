@@ -2,7 +2,7 @@ using GameModel.Actions;
 using GameModel.Enums;
 using GameModel.Helpers;
 
-namespace GameModel.Model;
+namespace GameModel.Models;
 
 public class Effect
 {

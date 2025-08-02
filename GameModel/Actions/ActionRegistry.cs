@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using GameModel;
-using GameModel.Model;
+using GameModel.Models;
 
 namespace GameModel.Actions;
 

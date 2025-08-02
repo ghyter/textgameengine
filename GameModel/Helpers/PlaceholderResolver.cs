@@ -1,6 +1,6 @@
 using GameModel;
 using GameModel.Actions;
-using GameModel.Model;
+using GameModel.Models;
 using System.Text.RegularExpressions;
 
 namespace GameModel.Helpers;

@@ -7,7 +7,7 @@
 /// </remarks>
 using GameModel.Enums;
 using GameModel.Helpers;
-using GameModel.Model;
+using GameModel.Models;
 namespace GameModel.Actions;
 
 

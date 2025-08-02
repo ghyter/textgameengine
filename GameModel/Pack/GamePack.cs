@@ -1,4 +1,4 @@
-using GameModel.Model;
+using GameModel.Models;
 using GameModel.Actions;
 namespace GameModel.Pack;
 

@@ -3,7 +3,7 @@ using GameModel.Actions;
 using GameModel.Enums;
 using GameModel.Helpers;
 
-namespace GameModel.Model;
+namespace GameModel.Models;
 
 
 //Check to see if the game element is in a specific location, has a specific state, or is in the inventory

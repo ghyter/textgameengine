@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace GameModel.Model;
+namespace GameModel.Models;
 
 public class Scene : GameElement
 {

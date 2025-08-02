@@ -1,6 +1,6 @@
 using GameModel.Enums;
 
-namespace GameModel.Model;
+namespace GameModel.Models;
 
 public class EffectGroup
 {
