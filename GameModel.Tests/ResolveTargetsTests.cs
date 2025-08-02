@@ -3,6 +3,7 @@ using GameModel;
 using GameModel.Actions;
 using GameModel.Models;
 using System.Collections.Generic;
+using GameModel.Models.Constants;
 
 namespace GameEngine.Tests;
 
@@ -22,13 +23,13 @@ public class ResolveTargetsTests
         _session.Elements["scene:hall"] = new GameElementState { Id = "scene:hall", Element = new Scene { Id = "hall", Name = "Great Hall" }, Location = null };
         _session.Elements["item:silverkey"] = new GameElementState { Id = "item:silverkey", Element = new Item { Id = "item:silverkey", Name = "Silver Key" }, Location = "scene:hall" };
         _session.Elements["npc:guard"] = new GameElementState { Id = "npc:guard", Element = new Npc { Id = "npc:guard", Name = "Guard" }, Location = "scene:hall" };
-        _session.Elements["item:goldcoin"] = new GameElementState { Id = "item:goldcoin", Element = new Item { Id = "item:goldcoin", Name = "Gold Coin" }, Location = "_inventory" };
+        _session.Elements["item:goldcoin"] = new GameElementState { Id = "item:goldcoin", Element = new Item { Id = "item:goldcoin", Name = "Gold Coin" }, Location = GameConstants.InventoryId };
 
         // Set up player in "scene:hall"
-        _session.Elements["player:player"] = new GameElementState
+        _session.Elements[GameConstants.PlayerId] = new GameElementState
         {
-            Id = "player:player",
-            Element = new Player { Id = "player:player", Name = "Hero" },
+            Id = GameConstants.PlayerId,
+            Element = new Player { Id = GameConstants.PlayerId, Name = "Hero" },
             Location = "scene:hall"
         };
 

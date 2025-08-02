@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 using GameModel.Actions;
-using GameModel.Enums;
+using GameModel.Modes.Enums;
 using GameModel.Helpers;
 
 namespace GameModel.Models;
@@ -17,7 +17,7 @@ public class Condition
     public ConditionRuleType Rule { get; set; }
     public string? Target { get; set; } = string.Empty; // e.g., varies by rule.  Attribute Name for HasAttribute, command for InHistory
     public string? Comparison { get; set; } = string.Empty; // e.g., "equals", "contains", "startsWith", "endsWith"
-    public string? Value { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
+    public string? Value { get; set; } // e.g., "scene:hall", "state:locked", GameConstants.InventoryId
 
     public string? FailMessage { get; set; } // Optional message to display if the condition fails
 

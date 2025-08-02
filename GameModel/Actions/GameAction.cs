@@ -5,7 +5,7 @@
 /// A <see cref="GameAction"/> defines the structure and requirements for an action, such as the number of required targets,
 /// the canonical verb and its aliases, conditions that must be met, and effects that occur upon execution.
 /// </remarks>
-using GameModel.Enums;
+using GameModel.Modes.Enums;
 using GameModel.Helpers;
 using GameModel.Models;
 namespace GameModel.Actions;

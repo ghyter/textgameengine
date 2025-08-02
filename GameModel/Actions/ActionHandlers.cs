@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using GameModel.Models;
+using GameModel.Models.Constants;
 
 namespace GameModel.Actions;
 
@@ -72,7 +73,7 @@ public static class ActionHandlers
     public static string HandleMove(GameSession session, GameAction gameaction, PlayerAction action)
     {
         var exit = action.Targets[0];
-        var player = session.Elements["player:player"];
+        var player = session.Elements[GameConstants.PlayerId];
         if (session.Elements.TryGetValue(exit, out GameElementState? exitElement))
         {
             if (exitElement == null)

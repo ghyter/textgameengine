@@ -1,5 +1,5 @@
 using System;
-using GameModel.Enums;
+using GameModel.Modes.Enums;
 using GameModel.Models;
 
 namespace GameModel.Actions;

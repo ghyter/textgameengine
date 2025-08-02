@@ -1,5 +1,5 @@
 using GameModel.Actions;
-using GameModel.Enums;
+using GameModel.Modes.Enums;
 using GameModel.Helpers;
 
 namespace GameModel.Models;
@@ -8,8 +8,8 @@ public class Effect
 {
     public string GameElementId { get; set; } = string.Empty;
     public EffectType Type { get; set; }
-    public string Property { get; set; } = string.Empty; // e.g., "location", "state", "inventory"
-    public string? NewValue { get; set; } // e.g., "scene:hall", "state:locked", "_inventory"
+    public string Property { get; set; } = string.Empty; // e.g., "location", "state", GameConstants.InventoryId
+    public string? NewValue { get; set; } // e.g., "scene:hall", "state:locked", GameConstants.InventoryId
     public string? SuccessMessage { get; set;}
 }
 public static class EffectExtensions

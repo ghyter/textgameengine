@@ -1,4 +1,4 @@
-using GameModel.Enums;
+using GameModel.Modes.Enums;
 
 namespace GameModel.Models;
 

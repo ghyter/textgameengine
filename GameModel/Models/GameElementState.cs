@@ -1,4 +1,5 @@
-using GameModel.Enums;
+using GameModel.Models.Constants;
+using GameModel.Modes.Enums;
 
 namespace GameModel.Models;
 
@@ -53,7 +54,7 @@ public static class GameElementsExtensions
 
     public static bool IsInInventory(this GameElements map, string id)
     {
-        return map.GetLocationOf(id) == "_inventory";
+        return map.GetLocationOf(id) == GameConstants.InventoryId;
     }
 
     public static bool IsOffMap(this GameElements map, string id)

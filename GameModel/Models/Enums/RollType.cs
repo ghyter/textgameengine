@@ -1,7 +1,7 @@
 ﻿
 using System.Text.Json.Serialization;
 
-namespace GameModel.Enums;
+namespace GameModel.Modes.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum RollType
 {

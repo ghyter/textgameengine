@@ -1,6 +1,7 @@
 using GameModel;
 using GameModel.Actions;
 using GameModel.Models;
+using GameModel.Models.Constants;
 using System.Text.RegularExpressions;
 
 namespace GameModel.Helpers;
@@ -25,12 +26,12 @@ public static class PlaceholderResolver
 
             return match.Value switch
             {
-                "$Player.Name" => session.Elements.GetValueOrDefault("player:player")?.Element.Name ?? string.Empty,
+                "$Player.Name" => session.Elements.GetValueOrDefault(GameConstants.PlayerId)?.Element.Name ?? string.Empty,
                 "$CurrentLocation.Name" => session.Elements.GetValueOrDefault(session.CurrentLocation?.Id ?? string.Empty)?.Element.Name ?? string.Empty,
                 "$Target1.Name" => session.Elements.GetValueOrDefault(action.Targets.ElementAtOrDefault(0) ?? string.Empty)?.Element.Name ?? string.Empty,
                 "$Target2.Name" => session.Elements.GetValueOrDefault(action.Targets.ElementAtOrDefault(1) ?? string.Empty)?.Element.Name ?? string.Empty,
-                "$Player" => "player:player",
-                "$Inventory" => "_inventory",
+                "$Player" => GameConstants.PlayerId,
+                "$Inventory" => GameConstants.InventoryId,
                 "$Target1" => action.Targets.ElementAtOrDefault(0) ?? string.Empty,
                 "$Target2" => action.Targets.ElementAtOrDefault(1) ?? string.Empty,
                 "$CurrentLocation" => session.CurrentLocation?.Id ?? string.Empty,

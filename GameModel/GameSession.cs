@@ -3,13 +3,12 @@ using GameModel.Pack;
 using GameModel.Actions;
 using GameModel.Models;
 using System.Linq;
+using GameModel.Models.Constants;
 
 namespace GameModel;
 
 public class GameSession
 {
-    const string _playerid = "player:player";
-
     public string GameTitle { get; set; } = "Text Game Engine";
 
     public ActionRegistry ActionRegistry { get; set; } = new();
@@ -17,7 +16,7 @@ public class GameSession
     public List<string> SceneOrdinals { get; set; } = [];
     public List<string> InventoryOrdinals { get; set; } = [];
 
-    public GameElementState Player {get => Elements[_playerid];}
+    public GameElementState Player {get => Elements[GameConstants.PlayerId];}
 
     public GameElementState? CurrentLocation
     {
@@ -50,10 +49,10 @@ public class GameSession
         }
 
         gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
-        gs.Elements[_playerid] = new GameElementState
+        gs.Elements[GameConstants.PlayerId] = new GameElementState
         {
 
-            Id = _playerid,
+            Id = GameConstants.PlayerId,
             Element = _gamePack.Player,
             Location = _gamePack.Player.StartingLocation,
             Attributes = _gamePack.Player.Attributes, //Load the initial state of the attributes.
@@ -200,7 +199,7 @@ public class GameSession
             .Where(
                 e => e.Location != null
                 && e.IsVisible
-                && e.Location.Equals("_inventory")
+                && e.Location.Equals(GameConstants.InventoryId)
                 )
             .OrderBy(e => e.Element.Name)
             .Select(e => e.Id));
