@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using GameModel.Helpers;
 using GameModel.Models;
 using GameModel.Models.Constants;
+using GameModel.Modes.Enums;
 
 namespace GameModel.Session;
 
@@ -27,7 +28,7 @@ public static class GameRoundResolver
         round.Log.Add($"Parsed and Resovled: {round.PlayerAction.ToString()} ");
 
         //Find the action that will be used.       
-        round.GameAction = FindAction(session, round.PlayerAction);
+        round.GameAction = FindAction(session, round);
         if (round.GameAction == null)
         {
             round.Outcome = GameRound.RoundOutcome.Invalid;
@@ -44,26 +45,45 @@ public static class GameRoundResolver
         var unmetConditions = conditions.Select(c =>
             {
                 var passed = c.IsMet(session, round.PlayerAction, out var result);
-                round.Log.Add($"Evaluate Condition ${c.ToString()} ({passed})");
+                round.Log.Add($"Evaluate Condition {c.ToString()} ({passed})");
                 return passed ? null : result;
             })
             .Where(msg => !string.IsNullOrEmpty(msg))
             .ToList();
         if (unmetConditions.Count > 0)
         {
-            round.Outcome = GameRound.RoundOutcome.Invalid;
+
+            round.Outcome = GameRound.RoundOutcome.Failure;
             round.Log.Add($"No action matches this verb and target combination");
-            round.Body = string.Join('\n',unmetConditions);
+            unmetConditions.ForEach(umc => round.Log.Add($"-- {umc}"));
+            round.Body = unmetConditions.First();
             return round;
         }
 
-        //Run the dice checks.
+        //Maybe this should be in a handler method that checks regular difficulty. 
+        
+        //Run the difficulty checks on action.
+        if (!EvaluateDifficultyCheck(session, round, out var roleResult))
+        {
+            round.Log.Add(roleResult.ToString());
+            round.Outcome = GameRound.RoundOutcome.Failure;
+            round.Body = $"{round.GameAction.FailureMessage} ({roleResult.ToString()}";
+            return round;
+        }
+        round.Log.Add(roleResult.ToString());
+        
 
+        //Success, run the effects!
         //Now run the resolver.  (Soon to change)
-        round.Body = round.GameAction.Handler(session, round.GameAction, round.PlayerAction).ResolvePlaceholders(session, round.PlayerAction);
+        round.Body = round.GameAction.Handler(session, round).ResolvePlaceholders(session, round.PlayerAction);
+
+        //Now run any triggers that occur following effects.
+
+
         round.Header = session.Header;
         round.Outcome = GameRound.RoundOutcome.Success;
         session.PopulateOrdinals();
+        session.GameLog.Add(round);
         return round;
     }
 
@@ -186,18 +206,18 @@ public static class GameRoundResolver
         return results;
     }
 
-    public static GameAction? FindAction(GameSession session, PlayerAction playerAction)
+    public static GameAction? FindAction(GameSession session, GameRound round)
     {
         var candidates = session.ActionRegistry.Actions
-            .Where(a => string.Equals(a.CanonicalVerb, playerAction.VerbText, StringComparison.OrdinalIgnoreCase))
+            .Where(a => string.Equals(a.CanonicalVerb, round.PlayerAction!.VerbText, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         var scored = candidates
             .Select(action => new
             {
                 Action = action,
-                Score = MatchActionScore(action, playerAction),
-                ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, playerAction, out _)) ?? 0
+                Score = MatchActionScore(action, round.PlayerAction!),
+                ConditionsMet = action.Conditions?.Count(c => c.IsMet(session, round.PlayerAction!, out _)) ?? 0
             });
 
 
@@ -258,4 +278,38 @@ public static class GameRoundResolver
 
         return string.Equals(pattern, actual, StringComparison.OrdinalIgnoreCase) ? 4 : -1;
     }
+
+    
+    public static bool EvaluateDifficultyCheck(GameSession session, GameRound round, out RollResult rollResult)
+    {
+        rollResult = new();
+
+        // Roll a d20 (or support d20a/d20d if you wish)
+        string diceExpr = session.Player.RollType switch
+        {
+            RollType.Advantage => "d20a",
+            RollType.Disadvantage => "d20d",
+            _ => "d20"
+        };
+        rollResult.DiceExpression = diceExpr;
+        rollResult.Roll = DiceHelper.Roll(diceExpr);
+        // Get attribute bonus if present
+        rollResult.Bonus = 0;
+        if (!string.IsNullOrEmpty(round.GameAction?.AttributeCheck))
+        {
+            if (session.Player.Attributes.TryGetValue(round.GameAction.AttributeCheck, out int attributeScore))
+            {
+                rollResult.Bonus = (attributeScore - 10) / 2;
+            }
+        }
+
+        // (Optionally add item/gear bonuses here)
+
+        rollResult.Total = rollResult.Roll + rollResult.Bonus;
+        rollResult.Threshold = (int)round.GameAction!.Difficulty;
+        if (rollResult.Roll == 20) { return true; }
+        if (rollResult.Roll == 1) { return false; }
+        return rollResult.Total >= rollResult.Threshold;
+    }
+
 }

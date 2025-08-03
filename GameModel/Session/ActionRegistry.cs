@@ -3,7 +3,7 @@ using GameModel.Models;
 
 namespace GameModel.Session;
 
-public delegate string ActionHandler(GameSession session, GameAction gameaction, PlayerAction action);
+public delegate string ActionHandler(GameSession session, GameRound round);
 
 public class ActionRegistry
 {

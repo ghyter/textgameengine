@@ -59,7 +59,7 @@ public static class GameSessionExtensions
                     GameElementId = "$Target1",
                     Rule = ConditionRuleType.StateValue,
                     Value = "open",
-                    FailMessage = "$Target1.Name is not open."
+                    FailMessage = "$Target1.Name is $Target1.State."
                 }
             },
             VerbAliases = new() { "go", "m", "g" },
@@ -75,6 +75,13 @@ public static class GameSessionExtensions
         //     VerbAliases = new() { "hist" },
         //     Handler = ActionHandlers.HandleHistory
         // });
+        gs.ActionRegistry.Register(new GameAction
+        {
+            Id = "debug",
+            CanonicalVerb = "debug",
+            VerbAliases = new() { "log" },
+            Handler = ActionHandlers.HandleDebug
+        });
 
         gs.ActionRegistry.Register(new GameAction
         {

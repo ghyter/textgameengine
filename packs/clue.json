@@ -10,7 +10,7 @@
     "ArmorClass": 10,
     "Attributes": {
       "Luck": 10,
-      "Strength": 5
+      "Strength": 10
     },
     "States": {
       "default": "You are ready to explore the mansion.",
@@ -465,11 +465,10 @@
       "Description": "Attempts to open a locked door using strength.",
       "Difficulty": "Difficult",
       "AttributeCheck": "Strength",
-      "CanonicalVerb": "open",
+      "CanonicalVerb": "force",
       "VerbAliases": [
-        "unlock",
-        "force",
-        "break in"
+        "bash",
+        "break door"
       ],
       "Conditions": [
         {
@@ -477,18 +476,83 @@
           "Rule": "HasState",
           "Comparison": "equals",
           "Value": "locked",
-          "FailMessage": "The door is not locked."
+          "FailMessage": "$Target1.Name does not have a lock."
+        },
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "locked",
+          "FailMessage": "$Target1.Name is $Target1.State."
         }
       ],
       "Effects": [
         {
-          "GameElementId": "door",
+          "GameElementId": "$Target1",
           "Type": "ChangeState",
-          "TargetStateId": "open"
+          "NewValue": "open"
         }
       ],
       "SuccessMessage": "You strain and the lock gives way. The door swings open.",
       "FailureMessage": "You struggle, but the door doesn’t budge."
+    },
+     {
+      "Id": "open_closed_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Open Closed Door",
+      "Description": "Attempts to open a closed door.",
+      "Difficulty": "Trivial",
+      "CanonicalVerb": "open",
+      "VerbAliases": [],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "closed",
+          "FailMessage": "Cannot open $Target1.Name. It is $Target1.State"
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$Target1",
+          "Type": "ChangeState",
+          "NewValue": "open"
+        }
+      ],
+      "SuccessMessage": "You open the door.",
+      "FailureMessage": "You cannot open $Target1.Name."
+    },
+     {
+      "Id": "close_opened_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Close Open Door",
+      "Description": "Attempts to close an open door.",
+      "Difficulty": "Trivial",
+      "CanonicalVerb": "close",
+      "VerbAliases": ["shut"],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "open",
+          "FailMessage": "$Target1.Name is $Target1.State"
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$Target1",
+          "Type": "ChangeState",
+          "NewValue": "closed"
+        }
+      ],
+      "SuccessMessage": "You close the door.",
+      "FailureMessage": "You cannot close $Target1.Name."
     }
   ]
 }

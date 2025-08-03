@@ -9,31 +9,33 @@ namespace GameModel.Actions;
 public static class ActionHandlers
 {
 
-    public static string DefaultActionHandler(GameSession session, GameAction gameaction, PlayerAction action)
+    public static string DefaultActionHandler(GameSession session, GameRound round)
     {
         //By the time we get here, conditions have been met.
         //It is time to apply the effects.
         StringBuilder sb = new();
+        round.Log.Add("Default Action Handler");
 
-        gameaction.Effects.ForEach(ef => {
-             if (session.ApplyEffect(ef, action, out var result))
+        round.GameAction!.Effects.ForEach(ef =>
+        {
+            if (session.ApplyEffect(ef, round, out var result))
             {
                 if (result != null && result != string.Empty)
-                sb.AppendLine(result);
+                    sb.AppendLine(result);
             }
             ;
         });
 
-        sb.AppendLine(gameaction.SuccessMessage);
+        sb.AppendLine(round.GameAction.SuccessMessage);
         return sb.ToString();
     }
 
-    public static string HandleLook(GameSession session, GameAction gameaction, PlayerAction action)
+    public static string HandleLook(GameSession session, GameRound round)
     {
         //It will only route here if there is 1 target.
-        if (action.Targets.Any())
+        if (round.PlayerAction!.Targets.Any())
         {
-            var targetId = action.Targets[0];
+            var targetId = round.PlayerAction!.Targets[0];
             if (!session.Elements.TryGetValue(targetId, out var target))
             {
                 return $"I don't see that item here.";
@@ -51,7 +53,7 @@ public static class ActionHandlers
         }
     }
 
-    public static string HandleInventory(GameSession session, GameAction gameaction, PlayerAction action)
+    public static string HandleInventory(GameSession session, GameRound round)
     {
         //This is the scene description.
         StringBuilder sb = new();
@@ -71,9 +73,9 @@ public static class ActionHandlers
 
 
 
-    public static string HandleMove(GameSession session, GameAction gameaction, PlayerAction action)
+    public static string HandleMove(GameSession session, GameRound round)
     {
-        var exit = action.Targets[0];
+        var exit = round.PlayerAction!.Targets[0];
         var player = session.Elements[GameConstants.PlayerId];
         if (session.Elements.TryGetValue(exit, out GameElementState? exitElement))
         {
@@ -84,15 +86,32 @@ public static class ActionHandlers
 
             var targetExit = exitElement.Get<Exit>();
             //Find the target scene.
-            if (session.Elements.TryGetValue("scene:"+targetExit!.TargetId, out GameElementState? targetScene))
+            if (session.Elements.TryGetValue("scene:" + targetExit!.TargetId, out GameElementState? targetScene))
             {
                 targetScene.IsVisible = true;
                 player.Location = targetScene.Id;
             }
         }
 
-        return HandleLook(session,gameaction,new PlayerAction(){VerbText = "Look"});
 
+        return session.Execute("look").Body ?? string.Empty;
+
+    }
+
+    public static string HandleDebug(GameSession session, GameRound round)
+    {
+        StringBuilder sb = new();
+
+        session.GameLog.ForEach(l =>
+        {
+            sb.AppendLine("--------------------------");
+            sb.AppendLine($"Player Input: {l.PlayerInput}");
+            sb.AppendLine($"Player Action: {l.PlayerAction?.ToString()}");
+            sb.AppendLine($"Game Action: {l.GameAction?.ToCommandString()}");
+            l.Log.ForEach(ll => sb.AppendLine("--" + ll));
+            sb.AppendLine($"Outcome: {l.Outcome.ToString()}");
+        });
+        return sb.ToString();
     }
    
     // public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)

@@ -176,7 +176,7 @@ public class GameSession
             {
                 var npcElement = GetGameElement<Npc>(npc);
                 var name = npcElement?.Name ?? npc;
-                sb.AppendLine($"{++i}. {name} ({npc})");
+                sb.AppendLine($"{++i}. {name}");
             }
         }
         if (SceneOrdinals.Any(s => s.StartsWith("item:")))
@@ -186,7 +186,7 @@ public class GameSession
             {
                 var itemElement = GetGameElement<Item>(item);
                 var name = itemElement?.Name ?? item;
-                sb.AppendLine($"{++i}. {name} ({item})");
+                sb.AppendLine($"{++i}. {name}");
             }
         }
         return sb.ToString();

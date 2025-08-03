@@ -14,36 +14,47 @@ public class Effect
 }
 public static class EffectExtensions
 {
-    public static bool ApplyEffect(this GameSession session, Effect effect, PlayerAction action, out string result)
+    public static bool ApplyEffect(this GameSession session, Effect effect, GameRound round, out string result)
     {
+        round.Log.Add($"Effect: {effect!.Type.ToString()}");
         if (effect == null || string.IsNullOrEmpty(effect.GameElementId))
         {
             result = string.Empty;
+            round.Log.Add("No Effect");
             return false; // No effect to apply
         }
 
-        if (session.Elements.TryGetValue(effect.GameElementId.ResolvePlaceholders(session, action), out var element))
+        if (session.Elements.TryGetValue(effect.GameElementId.ResolvePlaceholders(session, round.PlayerAction!), out var element))
         {
             switch (effect.Type)
             {
                 case EffectType.ChangeState:
                     if (!string.IsNullOrEmpty(effect.NewValue))
                     {
-                        element.Element.States[effect.Property] = effect.NewValue;
-
+                        round.Log.Add($"Change State: {element.Element.Name} from {element.State} to {effect.NewValue} ");
+                        element.State = effect.NewValue;
                     }
                     break;
                 case EffectType.ChangeLocation:
-                    if (!string.IsNullOrEmpty(effect.NewValue))
+                    var newLocationId = effect.NewValue.ResolvePlaceholders(session, round.PlayerAction!);
+                    if (!string.IsNullOrEmpty(newLocationId))
                     {
-                        element.Location = effect.NewValue.ResolvePlaceholders(session, action);
+                        if (session.Elements.TryGetValue(newLocationId, out var newLocation))
+                        {
+                            element.Location = newLocation.Id;
+                            round.Log.Add($"Moved Player from {element.Element.Name} to {newLocation.Element.Name} ");
+                        }
+                        else
+                        {
+                            round.Log.Add($"Could not find location {newLocationId}");
+                        }
                     }
                     break;
                 case EffectType.AddToInventory:
-                    session.InventoryOrdinals.Add(element.Id);
+                    //session.InventoryOrdinals.Add(element.Id);
                     break;
                 case EffectType.RemoveFromInventory:
-                    session.InventoryOrdinals.Remove(element.Id);
+                    //session.InventoryOrdinals.Remove(element.Id);
                     break;
                 case EffectType.SetProperty:
                     Console.WriteLine($"Setting property {effect.Property} to {effect.NewValue} on {element.Id}");
