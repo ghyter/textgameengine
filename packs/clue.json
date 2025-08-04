@@ -6,11 +6,11 @@
     "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
     "StartingLocation": "hall",
     "StartingState": "default",
-    "HitPoints": 10,
-    "ArmorClass": 10,
     "Attributes": {
       "Luck": 10,
-      "Strength": 10
+      "Strength": 10,
+      "HitPoints": 10,
+      "ArmorClass": 10
     },
     "States": {
       "default": "You are ready to explore the mansion.",
@@ -403,8 +403,10 @@
     "scarlet": {
       "Id": "scarlet",
       "Name": "Miss Scarlet",
-      "HitPoints": 10,
-      "ArmorClass": 10,
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
       "StartingLocation": "lounge",
       "Description": "Miss Scarlet exudes charm and mystery. Draped in crimson silk, she glides through rooms like a whisper of perfume and suspicion. Her smile rarely reaches her eyes.",
       "States": {}
@@ -412,8 +414,10 @@
     "mustard": {
       "Id": "mustard",
       "Name": "Colonel Mustard",
-      "HitPoints": 10,
-      "ArmorClass": 10,
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
       "StartingLocation": "hall",
       "Description": "Colonel Mustard stands tall and broad-shouldered, his military uniform still crisp despite his retirement. He speaks in clipped commands and never turns his back to a door.",
       "States": {}
@@ -421,8 +425,10 @@
     "white": {
       "Id": "white",
       "Name": "Mrs. White",
-      "HitPoints": 10,
-      "ArmorClass": 10,
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
       "StartingLocation": "hall",
       "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets.",
       "States": {}
@@ -430,17 +436,21 @@
     "green": {
       "Id": "green",
       "Name": "Mr. Green",
-      "HitPoints": 10,
-      "ArmorClass": 10,
-      "StartingLocation": "hall",
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "conservitory",
       "Description": "Mr. Green fidgets nervously, adjusting his tie far too often. He speaks in practiced pleasantries, but his darting eyes suggest he's hiding more than gossip.",
       "States": {}
     },
     "peacock": {
       "Id": "peacock",
       "Name": "Mrs. Peacock",
-      "HitPoints": 10,
-      "ArmorClass": 10,
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
       "StartingLocation": "hall",
       "Description": "Mrs. Peacock is regal and razor-tongued, adorned in sapphire feathers and too much jewelry. She always knows who last entered the room — and why they shouldn't have.",
       "States": {}
@@ -448,8 +458,10 @@
     "plum": {
       "Id": "plum",
       "Name": "Professor Plum",
-      "HitPoints": 10,
-      "ArmorClass": 10,
+      "Attributes":{
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
       "StartingLocation": "hall",
       "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective.",
       "States": {}
