@@ -1,0 +1,31 @@
+﻿@using GameEditor.Client.Services
+@inject ThemeService ThemeService
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@ThemeService.CurrentTheme" />
+
+<MudAppBar Color="Color.Primary" Elevation="1">
+    <MudText Typo="Typo.h6">GameEditor</MudText>
+    <MudSpacer />
+    <MudIconButton Icon="@(ThemeService.IsDarkMode 
+                                           ? Icons.Material.Filled.LightMode 
+                                           : Icons.Material.Filled.DarkMode)"
+        OnClick="@(() => ThemeService.IsDarkMode = !ThemeService.IsDarkMode)" />
+
+</MudAppBar>
+
+<MudMainContent>
+    @Body
+</MudMainContent>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeService.PropertyChanged += (_, __) => StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ThemeService.PropertyChanged -= (_, __) => StateHasChanged();
+    }
+}

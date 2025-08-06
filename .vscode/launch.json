@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GameEditor.Client – Hot Reload (No Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/GameEditor.Client/GameEditor.Client.csproj",
+                "--no-launch-profile"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "stopAtEntry": false
+            
+        },
+        {
+            "name": "GameEditor.Client – Debug (No Hot Reload)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/GameEditor.Client/GameEditor.Client.csproj"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "stopAtEntry": false
+        },
+        {
+            "name": "GameEditor.Client – Hot Reload + Debug (Auto-Kill)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/GameEditor.Client/GameEditor.Client.csproj",
+                "--no-launch-profile"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "stopAtEntry": false,
+            "postDebugTask": "kill-dotnet"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+﻿@using MudBlazor
+@using MudBlazor.Services
+@using GameEditor.Client.Services
+@inject ThemeService ThemeService
+
+<MudThemeProvider Theme="@ThemeService.CurrentTheme"
+                  @bind-IsDarkMode="@ThemeService.IsDarkMode" />
+
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <MudText Typo="Typo.h6">Sorry, there's nothing at this address.</MudText>
+        </LayoutView>
+    </NotFound>
+</Router>
