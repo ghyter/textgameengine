@@ -2,6 +2,9 @@
 @using MudBlazor.Services
 @using GameEditor.Client.Services
 @inject ThemeService ThemeService
+@inject IGamePackService PackSvc
+
+@using RoutingNav = Microsoft.AspNetCore.Components.Routing.NavigationContext
 
 <MudThemeProvider Theme="@ThemeService.CurrentTheme"
                   @bind-IsDarkMode="@ThemeService.IsDarkMode" />
@@ -10,7 +13,7 @@
 <MudSnackbarProvider />
 <MudPopoverProvider />
 
-<Router AppAssembly="@typeof(App).Assembly">
+<Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="Bootstrap">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -21,3 +24,19 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+  private bool _booted;
+
+  private async Task Bootstrap(RoutingNav _)
+  {
+    if (_booted) return;
+
+    await PackSvc.InitializeAsync();
+
+    // If you want to force the user into a selection screen,
+    // you could redirect here—but with auto‐create you probably
+    // just go straight to "/".
+    _booted = true;
+  }
+}

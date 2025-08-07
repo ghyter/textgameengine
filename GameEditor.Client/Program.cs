@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using GameEditor.Client;
 
+
 // var builder = WebAssemblyHostBuilder.CreateDefault(args);
 // builder.RootComponents.Add<App>("#app");
 // builder.RootComponents.Add<HeadOutlet>("head::after"); 
@@ -13,12 +14,15 @@ using GameEditor.Client;
 
 using MudBlazor.Services;
 using GameEditor.Client.Services;
+using Blazor.IndexedDB;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 
-builder.Services.AddSingleton<ThemeService>();
+builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddMudServices();
+builder.Services.AddScoped<IIndexedDbFactory, IndexedDbFactory>();
+builder.Services.AddScoped<IGamePackService, GamePackService>();
 
 await builder.Build().RunAsync();
