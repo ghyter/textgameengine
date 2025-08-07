@@ -1,0 +1,93 @@
+﻿@page "/packs"
+@using GameEditor.Client.Data
+@using MudBlazor
+@using System.Text.Json
+@using GameModel.Models
+@inject IGamePackService GamePackService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h5">Game Packs</MudText>
+    <MudDivider Class="my-2" />
+
+    <InputFile OnChange="OnFileSelected" accept=".json" />
+    <MudButton Class="ml-2" Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadPacks">Refresh List</MudButton>
+
+    <MudTable Items="packs" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Pack.Id</MudTd>
+            <MudTd DataLabel="Title">@context.Pack.Title</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeletePack(context.Id)">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<GamePackRecord> packs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPacks();
+    }
+
+    private async Task LoadPacks()
+    {
+        packs = await GamePackService.ListPacksAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var filename = Path.GetFileNameWithoutExtension(file.Name);
+
+        // Check if pack with same id exists
+        var existing = await GamePackService.GetPackByIdAsync(filename);
+        if (existing != null)
+        {
+            Snackbar.Add($"A pack with id '{filename}' already exists.", Severity.Warning);
+            // Optionally ask for confirmation to overwrite
+            return;
+        }
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+        using var reader = new StreamReader(stream);
+        var json = await reader.ReadToEndAsync();
+        try
+        {
+            var pack = JsonSerializer.Deserialize<GamePack>(json);
+            if (pack is null)
+            {
+                Snackbar.Add("Failed to parse GamePack JSON.", Severity.Error);
+                return;
+            }
+
+            // Override id and name based on filename
+            pack.Id = filename;
+            if (string.IsNullOrWhiteSpace(pack.Title))
+                pack.Title = filename;
+
+            await GamePackService.SaveCurrentPackAsync(pack);
+            Snackbar.Add($"Pack '{filename}' uploaded successfully.", Severity.Success);
+            await LoadPacks();
+        }
+        catch (JsonException ex)
+        {
+            Snackbar.Add($"JSON error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeletePack(string id)
+    {
+        await GamePackService.DeletePackAsync(id);
+        Snackbar.Add($"Pack '{id}' deleted.", Severity.Info);
+        await LoadPacks();
+    }
+}

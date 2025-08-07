@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameEditor.Shared\GameEditor.Shared.csproj" />
     <ProjectReference Include="..\GameModel\GameModel.csproj" />
   </ItemGroup>
 

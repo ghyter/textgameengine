@@ -2,6 +2,7 @@ namespace GameModel.Models;
 
 public class GamePack
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Title { get; set; } = string.Empty;
     public Player Player { get; set; } = new();
     public Dictionary<string, Scene> Scenes { get; set; } = new();

@@ -1,7 +1,9 @@
 using Blazor.IndexedDB;
 using GameEditor.Client.Data;
 using GameModel.Models;
+using System.Linq;
 using Microsoft.JSInterop;
+using System.Text.Json;
 
 public interface IGamePackService
 {
@@ -12,7 +14,7 @@ public interface IGamePackService
     Task InitializeAsync();
     
     /// <summary>Returns the list of available pack keys.</summary>
-    Task<string[]> ListPacksAsync();
+    Task<List<GamePackRecord>> ListPacksAsync();
     
     /// <summary>Create a new blank pack with an optional title, returns its key.</summary>
     Task<string> CreateNewPackAsync(string? title = null);
@@ -55,12 +57,12 @@ public class GamePackService : IGamePackService
         }
     }
 
-    public async Task<string[]> ListPacksAsync()
+    public async Task<List<GamePackRecord>> ListPacksAsync()
     {
         using var db = await _factory.Create<GameEditorDb>();
-        return db.GamePacks
-                 .Select(p => p.Id)
-                 .ToArray();
+        var records = db.GamePacks.AsEnumerable().ToList();
+
+        return records;
     }
 
     public async Task<string> CreateNewPackAsync(string? title = null)
