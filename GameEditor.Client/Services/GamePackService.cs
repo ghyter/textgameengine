@@ -1,131 +1,115 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Blazor.IndexedDB;
 using GameEditor.Client.Data;
 using GameModel.Models;
-using System.Linq;
-using Microsoft.JSInterop;
-using System.Text.Json;
 
 public interface IGamePackService
 {
-    GamePack      Current     { get; set; }
-    string?       CurrentKey  { get; }
-    
-    /// <summary>Call once at app startup to wire up the DB and load the current pack (if any).</summary>
+    GamePack?      Current      { get; }
+    string?        CurrentKey   { get; }
+
     Task InitializeAsync();
-    
-    /// <summary>Returns the list of available pack keys.</summary>
-    Task<List<GamePackRecord>> ListPacksAsync();
-    
-    /// <summary>Create a new blank pack with an optional title, returns its key.</summary>
-    Task<string> CreateNewPackAsync(string? title = null);
-    
-    /// <summary>Save the current pack under its CurrentKey (or throws if none).</summary>
-    Task SaveCurrentPackAsync();
-    
-    /// <summary>Switch to an existing pack by key (loads it into Current).</summary>
-    Task<bool> SwitchPackAsync(string key);
+
+    // CRUD:
+    Task<string>           CreateAsync(string id, GamePack pack);
+    Task<GamePackRecord?>        ReadAsync(string id);
+    Task<List<GamePackRecord>>   ReadAllAsync();
+    Task<bool>             UpdateAsync(string id, GamePack pack);
+    Task<bool>             DeleteAsync(string id);
+
+    // Helpers:
+    Task<bool>             SwitchAsync(string id);
 }
 
 public class GamePackService : IGamePackService
 {
     private readonly IIndexedDbFactory _factory;
+    private const string Store = nameof(GameEditorDb.GamePacks);
 
-    public GamePack  Current    { get; set; } = new GamePack();
-    public string?   CurrentKey { get; private set; }
+    public GamePack?   Current    { get; private set; }
+    public string?     CurrentKey { get; private set; }
 
-    public GamePackService(IJSRuntime js, IIndexedDbFactory factory)
-    {
-        _factory = factory;
-    }
+    public GamePackService(IIndexedDbFactory factory)
+        => _factory = factory;
 
     public async Task InitializeAsync()
     {
-        // 1) Create (and open) the DB
         using var db = await _factory.Create<GameEditorDb>();
-
-        // 2) Load “currentProject” from Settings store
-        var settings = db.Settings.ToArray();
-        CurrentKey   = settings.FirstOrDefault(s => s.Key == "currentProject")?.Value;
-
-        // 3) If there is a key, load that pack
+        CurrentKey = db.Settings.SingleOrDefault(s => s.Key == "currentProject")?.Value;
         if (CurrentKey != null)
-        {
-            var packs = db.GamePacks.ToArray();
-            var rec   = packs.SingleOrDefault(p => p.Id == CurrentKey);
-            if (rec != null)
-                Current = rec.Pack;
-        }
+            Current = db.GamePacks.SingleOrDefault(p => p.Id == CurrentKey)?.Pack;
     }
 
-    public async Task<List<GamePackRecord>> ListPacksAsync()
+    public async Task<string> CreateAsync(string id, GamePack pack)
     {
-        using var db = await _factory.Create<GameEditorDb>();
-        var records = db.GamePacks.AsEnumerable().ToList();
-
-        return records;
-    }
-
-    public async Task<string> CreateNewPackAsync(string? title = null)
-    {
-        var key = Guid.NewGuid().ToString("N");
-        var record = new GamePackRecord {
-            Id   = key,
-            Pack = new GamePack { Title = title ?? "New GamePack" }
-        };
-
-        using (var db = await _factory.Create<GameEditorDb>())
-        {
-            db.GamePacks.Add(record);
-            await db.SaveChanges();           // Persist the new pack
-        }
-
-        // Switch to it
-        await SwitchPackAsync(key);
-        return key;
-    }
-
-    public async Task SaveCurrentPackAsync()
-    {
-        if (CurrentKey == null)
-            throw new InvalidOperationException("No pack selected.");
+        var record = new GamePackRecord { Id = id, Pack = pack };
 
         using var db = await _factory.Create<GameEditorDb>();
+        db.GamePacks.Add(record);
+        await db.SaveChanges();
+        return id;
+    }
 
-        // Remove the old record
-        var existing = db.GamePacks.Single(p => p.Id == CurrentKey);
+    public async Task<GamePackRecord?> ReadAsync(string id)
+    {
+        using var db = await _factory.Create<GameEditorDb>();
+        return db.GamePacks.SingleOrDefault(p => p.Id == id);
+    }
+
+    public async Task<List<GamePackRecord>> ReadAllAsync()
+    {
+        using var db = await _factory.Create<GameEditorDb>();
+        return db.GamePacks.ToList();
+    }
+
+    public async Task<bool> UpdateAsync(string id, GamePack pack)
+    {
+        using var db = await _factory.Create<GameEditorDb>();
+        var existing = db.GamePacks.SingleOrDefault(p => p.Id == id);
+        if (existing == null) return false;
+
+        existing.Pack = pack;
+        try
+        {
+            await db.SaveChanges();
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(string id)
+    {
+        using var db = await _factory.Create<GameEditorDb>();
+        var existing = db.GamePacks.SingleOrDefault(p => p.Id == id);
+        if (existing == null) return false;
+
         db.GamePacks.Remove(existing);
-
-        // Add the updated one
-        db.GamePacks.Add(new GamePackRecord {
-            Id   = CurrentKey,
-            Pack = Current
-        });
-
-        await db.SaveChanges();             // Commit
+        await db.SaveChanges();
+        return true;
     }
 
-    public async Task<bool> SwitchPackAsync(string key)
+    public async Task<bool> SwitchAsync(string id)
     {
+        if (!(await ReadAsync(id).ConfigureAwait(false) is GamePackRecord packrecord)) 
+            return false;
+
+        // Save “currentProject” setting
         using var db = await _factory.Create<GameEditorDb>();
-
-        var rec = db.GamePacks.SingleOrDefault(p => p.Id == key);
-        if (rec == null) return false;
-
-        // Load into memory
-        Current    = rec.Pack;
-        CurrentKey = key;
-
-        // Persist “currentProject” setting
         var old = db.Settings.SingleOrDefault(s => s.Key == "currentProject");
-        if (old != null)
-            db.Settings.Remove(old);
+        if (old != null) db.Settings.Remove(old);
 
-        db.Settings.Add(new SettingRecord {
-            Key   = "currentProject",
-            Value = key
-        });
+        db.Settings.Add(new SettingRecord { Key = "currentProject", Value = id });
+        await db.SaveChanges();
 
-        await db.SaveChanges();             // Commit
+        Current    = packrecord.Pack;
+        CurrentKey = id;
         return true;
     }
 }

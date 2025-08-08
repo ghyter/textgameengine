@@ -3,6 +3,7 @@
 @using MudBlazor
 @using System.Text.Json
 @using GameModel.Models
+@using System.Diagnostics
 @inject IGamePackService GamePackService
 @inject ISnackbar Snackbar
 
@@ -24,6 +25,7 @@
             <MudTd DataLabel="Title">@context.Pack.Title</MudTd>
             <MudTd DataLabel="Actions">
                 <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeletePack(context.Id)">Delete</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="() => SelectPack(context.Id)">Select Pack</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -37,9 +39,13 @@
         await LoadPacks();
     }
 
+    private async Task SelectPack(string id){
+        
+    }
+
     private async Task LoadPacks()
     {
-        packs = await GamePackService.ListPacksAsync();
+        packs = await GamePackService.ReadAllAsync();
         StateHasChanged();
     }
 
@@ -49,7 +55,7 @@
         var filename = Path.GetFileNameWithoutExtension(file.Name);
 
         // Check if pack with same id exists
-        var existing = await GamePackService.GetPackByIdAsync(filename);
+        var existing = await GamePackService.ReadAsync(filename);
         if (existing != null)
         {
             Snackbar.Add($"A pack with id '{filename}' already exists.", Severity.Warning);
@@ -73,8 +79,11 @@
             pack.Id = filename;
             if (string.IsNullOrWhiteSpace(pack.Title))
                 pack.Title = filename;
+               
+            if (!await GamePackService.UpdateAsync(pack.Id,pack)){
+                await GamePackService.CreateAsync(pack.Id,pack);
+            };
 
-            await GamePackService.SaveCurrentPackAsync(pack);
             Snackbar.Add($"Pack '{filename}' uploaded successfully.", Severity.Success);
             await LoadPacks();
         }
@@ -86,7 +95,7 @@
 
     private async Task DeletePack(string id)
     {
-        await GamePackService.DeletePackAsync(id);
+        await GamePackService.DeleteAsync(id);
         Snackbar.Add($"Pack '{id}' deleted.", Severity.Info);
         await LoadPacks();
     }

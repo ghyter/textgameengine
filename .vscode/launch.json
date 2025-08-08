@@ -1,19 +1,42 @@
 {
   "version": "0.2.0",
   "configurations": [
+    // 1) Launch your Blazor client via `dotnet run`
     {
-      "name": ".NET Core Attach to GameEditor",
+      "name": "Run Blazor Client",
       "type": "coreclr",
-      "request": "attach",
-      "processId": "${command:pickProcess}",
-      "justMyCode": true
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/GameEditor.Client/GameEditor.Client.csproj"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "integratedTerminal"
     },
+
+    // 2) Launch Chrome and attach its debugger to localhost:5096
     {
-      "name": "Launch Front-end (Chrome)",
+      "name": "Debug in Chrome",
       "type": "pwa-chrome",
       "request": "launch",
-      "url": "http://localhost:5000",
-      "webRoot": "${workspaceFolder}/GameEditor.Client"
+      "url": "http://localhost:5096",
+      "webRoot": "${workspaceFolder}/GameEditor.Client",
+      "breakOnLoad": true
+    }
+  ],
+
+  // Compound lets you run both configs together with one “Play”
+  "compounds": [
+    {
+      "name": "Blazor WASM 🔗 Debug",
+      "configurations": [
+        "Run Blazor Client",
+        "Debug in Chrome"
+      ]
     }
   ]
 }

@@ -2,6 +2,7 @@ using System;
 using GameModel.Modes.Enums;
 using GameModel.Models;
 using GameModel.Session;
+using GameModel.Models.Enums;
 
 namespace GameModel.Actions;
 
@@ -16,7 +17,8 @@ public static class GameSessionExtensions
             RequiredTargets = 0,
             CanonicalVerb = "look",
             VerbAliases = new() { "examine", "view", "l" },
-            Handler = ActionHandlers.HandleLook
+            Handler = ActionHandlers.HandleLook,
+            EffectHandler = Models.Enums.EffectHandlers.HandleLook
         });
 
         gs.ActionRegistry.Register(new GameAction
@@ -36,7 +38,8 @@ public static class GameSessionExtensions
                 }
             },
             VerbAliases = new() { "examine", "view", "l" },
-            Handler = ActionHandlers.HandleLook
+            Handler = ActionHandlers.HandleLook,
+            EffectHandler = Models.Enums.EffectHandlers.HandleLook
         });
 
         gs.ActionRegistry.Register(new GameAction
@@ -63,7 +66,8 @@ public static class GameSessionExtensions
                 }
             },
             VerbAliases = new() { "go", "m", "g" },
-            Handler = ActionHandlers.HandleMove
+            Handler = ActionHandlers.HandleMove,
+            EffectHandler = Models.Enums.EffectHandlers.HandleMove
             
 
         });
@@ -80,7 +84,9 @@ public static class GameSessionExtensions
             Id = "debug",
             CanonicalVerb = "debug",
             VerbAliases = new() { "log" },
-            Handler = ActionHandlers.HandleDebug
+            Handler = ActionHandlers.HandleDebug,
+            EffectHandler = EffectHandlers.HandleDebug
+
         });
 
         gs.ActionRegistry.Register(new GameAction
@@ -88,7 +94,8 @@ public static class GameSessionExtensions
             Id = "inventory",
             CanonicalVerb = "inventory",
             VerbAliases = new() { "inv", "i" },
-            Handler = ActionHandlers.HandleInventory
+            Handler = ActionHandlers.HandleInventory,
+            EffectHandler = EffectHandlers.HandleInventory
         });
 
         

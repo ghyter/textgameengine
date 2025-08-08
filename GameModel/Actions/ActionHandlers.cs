@@ -2,12 +2,25 @@ using System;
 using System.Text;
 using GameModel.Models;
 using GameModel.Models.Constants;
+using GameModel.Models.Enums;
 using GameModel.Session;
 
 namespace GameModel.Actions;
 
+
+
 public static class ActionHandlers
 {
+    public static ActionHandler GetHandler(EffectHandlers effect)
+    {
+        return effect switch
+        {   EffectHandlers.HandleDebug => HandleDebug,
+            EffectHandlers.HandleLook => HandleLook,
+            EffectHandlers.HandleInventory => HandleInventory,
+            EffectHandlers.HandleMove => HandleMove,
+            _ => DefaultActionHandler
+        };
+    }
 
     public static string DefaultActionHandler(GameSession session, GameRound round)
     {
@@ -113,25 +126,6 @@ public static class ActionHandlers
         });
         return sb.ToString();
     }
-   
-    // public static string HandleHistory(GameSession session, GameAction gameaction, PlayerAction action)
-    // {
-    //     StringBuilder sb = new();
-    //     sb.AppendLine("Action History:");
 
-    //     if (session.ActionRegistry.History.Count == 0)
-    //     {
-    //         sb.AppendLine("No actions have been taken yet.");
-    //     }
-    //     else
-    //     {
-    //         for (int i = 0; i < session.ActionRegistry.History.Count; i++)
-    //         {
-    //             var act = session.ActionRegistry.History[i];
-    //             sb.AppendLine($"{i + 1}: {act.VerbText} {string.Join(" ", act.Targets)}");
-    //         }
-    //     }
-    //     return sb.ToString();
 
-    // }
 }

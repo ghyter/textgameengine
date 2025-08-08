@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using GameModel.Actions;
 using GameModel.Helpers;
 using GameModel.Models;
 using GameModel.Models.Constants;
@@ -71,11 +72,12 @@ public static class GameRoundResolver
             return round;
         }
         round.Log.Add(roleResult.ToString());
-        
+
 
         //Success, run the effects!
         //Now run the resolver.  (Soon to change)
-        round.Body = round.GameAction.Handler(session, round).ResolvePlaceholders(session, round.PlayerAction);
+        var handler = ActionHandlers.GetHandler(round.GameAction.EffectHandler);
+        round.Body =  handler(session, round).ResolvePlaceholders(session, round.PlayerAction);
 
         //Now run any triggers that occur following effects.
 

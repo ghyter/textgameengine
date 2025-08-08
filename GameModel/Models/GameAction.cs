@@ -9,6 +9,8 @@ using GameModel.Modes.Enums;
 using GameModel.Helpers;
 using GameModel.Session;
 using GameModel.Actions;
+using System.Text.Json.Serialization;
+using GameModel.Models.Enums;
 namespace GameModel.Models;
 
 
@@ -30,7 +32,11 @@ public class GameAction
     public List<Condition> Conditions { get; set; } = [];
     public List<Effect> Effects { get; set; } = [];
 
+    [JsonIgnore]   
     public ActionHandler Handler { get; set; } = ActionHandlers.DefaultActionHandler;
+
+    public EffectHandlers EffectHandler { get; set; } = EffectHandlers.DefaultActionHandler;
+
     public override string ToString() => $"{Name} ({Description})";
     public string ToCommandString() => $"{CanonicalVerb} {Target1} {Target2}";
 
