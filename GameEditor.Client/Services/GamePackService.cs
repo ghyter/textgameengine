@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using Blazor.IndexedDB;
 using GameEditor.Client.Data;
 using GameModel.Models;
 
-public interface IGamePackService
+public interface IGamePackService: INotifyPropertyChanged
 {
     GamePack?      Current      { get; }
     string?        CurrentKey   { get; }
@@ -26,6 +23,7 @@ public interface IGamePackService
 
 public class GamePackService : IGamePackService
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IIndexedDbFactory _factory;
     private const string Store = nameof(GameEditorDb.GamePacks);
 
@@ -39,8 +37,10 @@ public class GamePackService : IGamePackService
     {
         using var db = await _factory.Create<GameEditorDb>();
         CurrentKey = db.Settings.SingleOrDefault(s => s.Key == "currentProject")?.Value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentKey)));
         if (CurrentKey != null)
             Current = db.GamePacks.SingleOrDefault(p => p.Id == CurrentKey)?.Pack;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Current)));
     }
 
     public async Task<string> CreateAsync(string id, GamePack pack)
@@ -109,7 +109,9 @@ public class GamePackService : IGamePackService
         await db.SaveChanges();
 
         Current    = packrecord.Pack;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Current)));
         CurrentKey = id;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentKey)));
         return true;
     }
 }

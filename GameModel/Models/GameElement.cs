@@ -5,7 +5,7 @@ namespace GameModel.Models;
 public abstract class GameElement : IGameElement
 {
     public virtual string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+    public virtual string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
     public bool IsVisible { get; set; } = true;

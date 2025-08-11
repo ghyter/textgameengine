@@ -109,8 +109,6 @@ public static class GameRoundResolver
 
         foreach (var (alias, canonical) in verbPairs)
         {
-
-
             var pattern = $@"^{Regex.Escape(alias!)}(\s|$)";
             //if (normalized.StartsWith(alias!, StringComparison.OrdinalIgnoreCase))
             if (Regex.IsMatch(normalized, pattern, RegexOptions.IgnoreCase))
@@ -144,7 +142,6 @@ public static class GameRoundResolver
                     while (action.Targets.Count > 2)
                         action.Targets.RemoveAt(2);
                 }
-
                 return action;
             }
         }

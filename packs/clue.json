@@ -26,6 +26,7 @@
       "Exits": [
         {
           "Name": "South",
+          "Direction": "South",
           "TargetId": "library",
           "StartingState": "open",
           "States": {
@@ -35,6 +36,7 @@
         },
         {
           "Name": "East",
+          "Direction": "East",
           "TargetId": "hall",
           "StartingState": "open",
           "States": {
@@ -43,6 +45,8 @@
           }
         },
         {
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "kitchen",
           "IsVisible": false,
@@ -61,6 +65,7 @@
       "Description": "A long entrance hall with polished marble floors, twin staircases sweeping upward, and antique portraits staring down from every wall. You feel as if the house itself is watching.",
       "Exits": [
         {
+          "Direction": "West",
           "Name": "West",
           "TargetId": "study",
           "StartingState": "locked",
@@ -72,6 +77,7 @@
           }
         },
         {
+          "Direction": "East",
           "Name": "East",
           "TargetId": "lounge",
           "StartingState": "open",
@@ -94,6 +100,7 @@
       "Description": "A richly decorated sitting room with velvet curtains, high-backed chairs, and the lingering scent of cigar smoke. The room feels like it was made for secrets and whispers.",
       "Exits": [
         {
+          "Direction": "West",
           "Name": "West",
           "TargetId": "hall",
           "StartingState": "open",
@@ -103,6 +110,7 @@
           }
         },
         {
+          "Direction" :"South",
           "Name": "South",
           "TargetId": "dining-room",
           "StartingState": "open",
@@ -112,6 +120,8 @@
           }
         },
         {
+          "Direction": "Custom",
+          "CustomDirection":"Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "conservatory",
           "StartingState": "closed",
@@ -131,6 +141,7 @@
       "Description": "A long mahogany table stretches beneath a flickering chandelier. The silverware is still set, as if dinner had been interrupted — or never started at all.",
       "Exits": [
         {
+          "Direction": "North",
           "Name": "North",
           "TargetId": "lounge",
           "StartingState": "open",
@@ -140,6 +151,7 @@
           }
         },
         {
+          "Direction": "South",
           "Name": "South",
           "TargetId": "kitchen",
           "StartingState": "open",
@@ -158,6 +170,7 @@
       "Description": "Pots dangle from wrought-iron racks above stone counters. The smell of old spices and something more metallic lingers in the air. Knives rest suspiciously out of place.",
       "Exits": [
         {
+          "Direction": "North",
           "Name": "North",
           "TargetId": "dining-room",
           "StartingState": "open",
@@ -167,6 +180,7 @@
           }
         },
         {
+          "Direction": "West",
           "Name": "West",
           "TargetId": "ballroom",
           "StartingState": "open",
@@ -176,6 +190,8 @@
           }
         },
         {
+          "Direction": "Custom",
+          "CustomDirection":"Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "study",
           "IsVisible": false,
@@ -195,6 +211,7 @@
       "Description": "An echoing chamber with a polished parquet floor and towering windows. Chandeliers overhead sway slightly, though there is no wind. Footsteps seem to follow your own.",
       "Exits": [
         {
+          "Direction": "East",
           "Name": "East",
           "TargetId": "kitchen",
           "StartingState": "open",
@@ -204,6 +221,7 @@
           }
         },
         {
+          "Direction":"West",
           "Name": "West",
           "TargetId": "conservatory",
           "StartingState": "open",
@@ -222,6 +240,7 @@
       "Description": "Tall glass walls rise into a domed ceiling, letting moonlight bathe rows of exotic plants. Leaves rustle even when you’re still, and the air is thick with humidity.",
       "Exits": [
         {
+          "Direction": "East",
           "Name": "East",
           "TargetId": "ballroom",
           "StartingState": "open",
@@ -231,6 +250,7 @@
           }
         },
         {
+          "Direction":"North",
           "Name": "North",
           "TargetId": "billiard-room",
           "StartingState": "open",
@@ -240,6 +260,8 @@
           }
         },
         {
+          "Direction":"Custom",
+          "CustomDirection":"Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "lounge",
           "StartingState": "hidden",
@@ -260,6 +282,7 @@
       "Description": "Faded green felt lines the billiard table at the center. Chalk dust covers the cues and a forgotten drink rests on a side table, still half full. Someone left in a hurry.",
       "Exits": [
         {
+          "Direction": "North",
           "Name": "North",
           "TargetId": "library",
           "StartingState": "open",
@@ -269,6 +292,7 @@
           }
         },
         {
+          "Direction":"South",
           "Name": "South",
           "TargetId": "conservatory",
           "StartingState": "open",
@@ -287,6 +311,7 @@
       "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
       "Exits": [
         {
+          "Direction":"North",
           "Name": "North",
           "TargetId": "study",
           "StartingState": "open",
@@ -296,6 +321,7 @@
           }
         },
         {
+          "Direction": "South",
           "Name": "South",
           "TargetId": "billiard-room",
           "StartingState": "open",

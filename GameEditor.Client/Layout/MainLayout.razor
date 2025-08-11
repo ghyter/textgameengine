@@ -1,12 +1,28 @@
 ﻿@using GameEditor.Client.Services
 @inject ThemeService ThemeService
+@inject IGamePackService GamePackService
+@inject NavigationManager Nav
 @inherits LayoutComponentBase
 
 <MudThemeProvider Theme="@ThemeService.CurrentTheme" />
 
 <MudAppBar Color="Color.Primary" Elevation="1">
-    <MudText Typo="Typo.h6">GameEditor</MudText>
+    <MudText Typo="Typo.h6">GameEditor
+        @if (GamePackService.Current is not null)
+        {
+            <span> — @GamePackService.Current.Title</span>
+        }
+
+    </MudText>
     <MudSpacer />
+
+<!-- Menu Button -->
+    <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.BottomRight">
+        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
+        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
+        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
+    </MudMenu>
+
     <MudIconButton Icon="@(ThemeService.IsDarkMode 
                                            ? Icons.Material.Filled.LightMode 
                                            : Icons.Material.Filled.DarkMode)"
@@ -19,13 +35,31 @@
 </MudMainContent>
 
 @code {
+
     protected override void OnInitialized()
     {
         ThemeService.PropertyChanged += (_, __) => StateHasChanged();
+        GamePackService.PropertyChanged += (_, __) => StateHasChanged();
     }
 
     public void Dispose()
     {
         ThemeService.PropertyChanged -= (_, __) => StateHasChanged();
+        GamePackService.PropertyChanged -= (_, __) => StateHasChanged();
     }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // Don't redirect if we're already on /packs (allow /packs or /packs?x=... or trailing slash)
+        var path = Nav.ToBaseRelativePath(Nav.Uri);
+        var route = path.Split('?', 2)[0].TrimEnd('/');
+
+        var isOnPacks = string.Equals(route, "packs", StringComparison.OrdinalIgnoreCase);
+
+        if (!isOnPacks && GamePackService.Current is null)
+        {
+            // forceLoad avoids weirdness with client-side routing if nothing is mounted yet
+            Nav.NavigateTo("/packs", forceLoad: true);
+        }
+    }    
 }

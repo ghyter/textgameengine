@@ -3,7 +3,7 @@ using GameModel.Pack;
 using GameModel.Session;
 using static GameModel.Models.GameRound;
 
-var session = GameSession.NewGame("/workspaces/textgameengine/packs/clue.json");
+var session = GameSession.NewGame("../packs/clue.json");
 var startRound = session.Execute("look");
 Console.Clear();
 Console.WriteLine(startRound.Header);
@@ -20,6 +20,7 @@ while (true)
     var result = session.Execute(input);
     Console.Clear();
     Console.WriteLine(result.Header);
+    Console.WriteLine(new string('=', result.Header.Length ));
     
     if (result.Outcome == RoundOutcome.Invalid)
         Console.ForegroundColor = ConsoleColor.Red;

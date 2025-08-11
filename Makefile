@@ -10,3 +10,7 @@ clean:
 	
 buildEditor:
 	dotnet build GameEditor/GameEditor.Server
+
+watch:
+	ASPNETCORE_URLS=http://0.0.0.0:5085 dotnet watch --project GameEditor.Client run
+

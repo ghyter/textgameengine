@@ -63,7 +63,7 @@ public class GameSession
                 sb.Append(": ");
                 var sceneName = CurrentLocation?.Get<Scene>()?.Name ?? "Unknown Scene";
                 sb.AppendLine(sceneName);
-                sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
+                //sb.AppendLine(new string('=', GameTitle.Length + sceneName.Length + 4));
             return sb.ToString();
         }
     }
@@ -82,6 +82,7 @@ public class GameSession
     public GameElements Elements { get; set; } = [];
 
     public static GameSession NewGame(string PackPath) => GameInitializer.NewGame(PackPath);
+    public static GameSession NewGame(GamePack pack) => GameInitializer.NewGame(pack);
 
     public GameRound Execute(string input) => GameRoundResolver.Execute(this, input);
 

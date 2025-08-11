@@ -1,4 +1,5 @@
 ﻿@page "/packs"
+@using GameEditor.Client.Components
 @using GameEditor.Client.Data
 @using MudBlazor
 @using System.Text.Json
@@ -6,28 +7,71 @@
 @using System.Diagnostics
 @inject IGamePackService GamePackService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudPaper Class="pa-4">
-    <MudText Typo="Typo.h5">Game Packs</MudText>
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Game Packs</MudText>
+
+        <MudStack Row Spacing="1">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                OnClick="OpenNewPackDialog">New Pack</MudButton>
+
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
+                OnClick="LoadPacks">Refresh</MudButton>
+        </MudStack>
+    </MudStack>
+
     <MudDivider Class="my-2" />
 
-    <InputFile OnChange="OnFileSelected" accept=".json" />
-    <MudButton Class="ml-2" Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadPacks">Refresh List</MudButton>
+    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+        <InputFile OnChange="OnFileSelected" accept=".json" />
+        <MudText Typo="Typo.caption" Class="ml-2">
+            Upload a .json GamePack (key becomes the filename without extension)
+        </MudText>
+    </MudStack>
 
-    <MudTable Items="packs" Dense="true" Hover="true" Class="mt-4">
+    <MudTable Items="packs" Dense="true" Hover="true" Class="mt-4" Elevation="0">
         <HeaderContent>
+            <MudTh Style="width: 48px;"></MudTh>
             <MudTh>Id</MudTh>
             <MudTh>Name</MudTh>
-            <MudTh>Actions</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh Style="width: 280px;">Actions</MudTh>
         </HeaderContent>
+
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.Pack.Id</MudTd>
-            <MudTd DataLabel="Title">@context.Pack.Title</MudTd>
+            <MudTd>
+                @if (IsSelected(context.Id))
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Title="Selected" />
+                }
+            </MudTd>
+            <MudTd DataLabel="Id">
+                <MudText>@context.Pack.Id</MudText>
+            </MudTd>
+            <MudTd DataLabel="Title">
+                <MudText>@context.Pack.Title</MudText>
+            </MudTd>
+            <MudTd DataLabel="Description">
+                <MudText Truncate="true" MaxLines="2">@context.Pack.Description</MudText>
+            </MudTd>
             <MudTd DataLabel="Actions">
-                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeletePack(context.Id)">Delete</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="() => SelectPack(context.Id)">Select Pack</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
+                    Disabled="@(IsSelected(context.Id))" OnClick="() => SelectPack(context.Id)">
+                    Select
+                </MudButton>
+
+                <MudButton Variant="Variant.Text" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete"
+                    OnClick="() => DeletePack(context.Id)">
+                    Delete
+                </MudButton>
             </MudTd>
         </RowTemplate>
+
+        <NoRecordsContent>
+            <MudText Typo="Typo.body2" Class="pa-4">No packs found. Create a new one or upload a JSON file.</MudText>
+        </NoRecordsContent>
     </MudTable>
 </MudPaper>
 
@@ -39,8 +83,14 @@
         await LoadPacks();
     }
 
-    private async Task SelectPack(string id){
-        
+    private bool IsSelected(string id)
+    => GamePackService.Current?.Id == id;
+
+    private async Task SelectPack(string id)
+    {
+        await GamePackService.SwitchAsync(id);
+        Snackbar.Add($"Selected pack '{id}'.", Severity.Success);
+        StateHasChanged();
     }
 
     private async Task LoadPacks()
@@ -49,17 +99,32 @@
         StateHasChanged();
     }
 
+    private async Task OpenNewPackDialog()
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<NewPackDialog>("New Game Pack", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is GamePack newPack)
+        {
+            // If the key exists, Update; else Create
+            if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
+                await GamePackService.CreateAsync(newPack.Id, newPack);
+
+            Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
+            await LoadPacks();
+        }
+    }
+
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         var file = e.File;
         var filename = Path.GetFileNameWithoutExtension(file.Name);
 
-        // Check if pack with same id exists
         var existing = await GamePackService.ReadAsync(filename);
         if (existing != null)
         {
             Snackbar.Add($"A pack with id '{filename}' already exists.", Severity.Warning);
-            // Optionally ask for confirmation to overwrite
             return;
         }
 
@@ -75,14 +140,12 @@
                 return;
             }
 
-            // Override id and name based on filename
             pack.Id = filename;
             if (string.IsNullOrWhiteSpace(pack.Title))
                 pack.Title = filename;
-               
-            if (!await GamePackService.UpdateAsync(pack.Id,pack)){
-                await GamePackService.CreateAsync(pack.Id,pack);
-            };
+
+            if (!await GamePackService.UpdateAsync(pack.Id, pack))
+                await GamePackService.CreateAsync(pack.Id, pack);
 
             Snackbar.Add($"Pack '{filename}' uploaded successfully.", Severity.Success);
             await LoadPacks();

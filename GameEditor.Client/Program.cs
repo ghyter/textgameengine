@@ -25,4 +25,11 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IIndexedDbFactory, IndexedDbFactory>();
 builder.Services.AddScoped<IGamePackService, GamePackService>();
 
-await builder.Build().RunAsync();
+
+var host = builder.Build();
+
+var gamePackService = host.Services.GetRequiredService<IGamePackService>();
+await gamePackService.InitializeAsync();
+
+
+await host.RunAsync();

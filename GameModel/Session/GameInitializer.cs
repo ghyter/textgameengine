@@ -10,34 +10,38 @@ public class GameInitializer
 {
     public static GameSession NewGame(string PackPath)
     {
+        var _gamePack = GamePackLoader.Load(PackPath);
+        if (_gamePack == null)
+        {
+            throw new ArgumentException("Invalid game pack path or format.");
+        }
+        return NewGame(_gamePack);
+    }
+
+    public static GameSession NewGame(GamePack pack)
+    {
         GameSession gs = new();
 
-        LoadGamePack(gs, PackPath);
+        LoadGamePack(gs, pack);
         gs.RegisterStandardActions();
 
         return gs;
     }
 
-    private static void LoadGamePack(GameSession gs, string packPath)
+    private static void LoadGamePack(GameSession gs, GamePack gamePack)
     {
-        var _gamePack = GamePackLoader.Load(packPath);
-        if (_gamePack == null)
-        {
-            throw new ArgumentException("Invalid game pack path or format.");
-        }
-
-        gs.GameTitle = _gamePack.Title ?? "Text Game Engine";
+        gs.GameTitle = gamePack.Title ?? "Text Game Engine";
         gs.Elements[GameConstants.PlayerId] = new GameElementState
         {
 
             Id = GameConstants.PlayerId,
-            Element = _gamePack.Player,
-            Location = _gamePack.Player.StartingLocation,
-            Attributes = _gamePack.Player.Attributes, //Load the initial state of the attributes.
+            Element = gamePack.Player,
+            Location = gamePack.Player.StartingLocation,
+            Attributes = gamePack.Player.Attributes, //Load the initial state of the attributes.
 
         };
 
-        foreach (var s in _gamePack.Scenes)
+        foreach (var s in gamePack.Scenes)
         {
             var id = $"scene:{s.Key}";
             gs.Elements[id] = new GameElementState
@@ -63,7 +67,7 @@ public class GameInitializer
             });
         }
 
-        foreach (var i in _gamePack.Items)
+        foreach (var i in gamePack.Items)
         {
             var id = $"item:{i.Key}";
             gs.Elements[id] = new GameElementState
@@ -77,7 +81,7 @@ public class GameInitializer
             gs.Elements[id].Element.Id = id;
         }
 
-        foreach (var npc in _gamePack.Npcs)
+        foreach (var npc in gamePack.Npcs)
         {
             var id = $"npc:{npc.Key}";
             gs.Elements[id] = new GameElementState
@@ -104,7 +108,7 @@ public class GameInitializer
         }
 
         //Add the data driven actions.
-        foreach (var action in _gamePack.Actions)
+        foreach (var action in gamePack.Actions)
         {
             gs.ActionRegistry.Register(action);
         }
