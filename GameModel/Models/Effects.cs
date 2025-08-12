@@ -39,7 +39,12 @@ public static class EffectExtensions
                     var newLocationId = effect.NewValue.ResolvePlaceholders(session, round.PlayerAction!);
                     if (!string.IsNullOrEmpty(newLocationId))
                     {
-                        if (session.Elements.TryGetValue(newLocationId, out var newLocation))
+                        if (newLocationId == "_inventory")
+                        {
+                            element.Location = newLocationId;
+                            round.Log.Add($"Moved Player from {element.Element.Name} to Inventory ");
+                        }
+                        else if (session.Elements.TryGetValue(newLocationId, out var newLocation))
                         {
                             element.Location = newLocation.Id;
                             round.Log.Add($"Moved Player from {element.Element.Name} to {newLocation.Element.Name} ");
@@ -51,10 +56,12 @@ public static class EffectExtensions
                     }
                     break;
                 case EffectType.AddToInventory:
-                    //session.InventoryOrdinals.Add(element.Id);
+                    round.Log.Add($"Added {element.Element.Name}");
+                    element.Location = "_inventory";
                     break;
                 case EffectType.RemoveFromInventory:
-                    //session.InventoryOrdinals.Remove(element.Id);
+                    round.Log.Add($"Dropped {element.Element.Name}");
+                    element.Location = session.Player.Location;
                     break;
                 case EffectType.SetProperty:
                     Console.WriteLine($"Setting property {effect.Property} to {effect.NewValue} on {element.Id}");

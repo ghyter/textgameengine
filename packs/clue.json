@@ -12,6 +12,13 @@
       "HitPoints": 10,
       "ArmorClass": 10
     },
+    "Flags":{
+      "IsBald": true
+
+    },
+    "Properties":{
+      "Remaining Hair": "White"
+    },
     "States": {
       "default": "You are ready to explore the mansion.",
       "injured": "You are injured and need to find a way to heal."
@@ -455,7 +462,7 @@
         "HitPoints": 10,
         "ArmorClass": 10
       },
-      "StartingLocation": "hall",
+      "StartingLocation": "kitchen",
       "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets.",
       "States": {}
     },

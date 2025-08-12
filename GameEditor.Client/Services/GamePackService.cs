@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Blazor.IndexedDB;
 using GameEditor.Client.Data;
 using GameModel.Models;
+using GameModel.Session;
 
 public interface IGamePackService: INotifyPropertyChanged
 {
@@ -28,7 +29,9 @@ public class GamePackService : IGamePackService
     private const string Store = nameof(GameEditorDb.GamePacks);
 
     public GamePack?   Current    { get; private set; }
-    public string?     CurrentKey { get; private set; }
+    
+    public GameSession? CurrentSession { get; private set; }
+    public string? CurrentKey { get; private set; }
 
     public GamePackService(IIndexedDbFactory factory)
         => _factory = factory;

@@ -106,7 +106,7 @@ public static class GameSessionExtensions
             RequiredTargets = 1,
             CanonicalVerb = "get",
             Target1 = "item:*",
-            VerbAliases = new() { "grab", "g", "pick up" },
+            VerbAliases = new() { "grab", "g", "pick up", "take" },
             Conditions = [
                 new Condition
                 {
@@ -126,7 +126,7 @@ public static class GameSessionExtensions
             Effects = [
                 new(){
                     GameElementId = "$Target1",
-                    Type= EffectType.ChangeLocation,
+                    Type= EffectType.AddToInventory,
                     NewValue = "$Inventory",
                     SuccessMessage = "$Target1.Name: Taken"
                 }
@@ -152,7 +152,7 @@ public static class GameSessionExtensions
             Effects = [
                 new(){
                     GameElementId = "$Target1",
-                    Type= EffectType.ChangeLocation,
+                    Type= EffectType.RemoveFromInventory,
                     NewValue = "$CurrentLocation",
                     SuccessMessage = "$Target1.Name: Dropped"
                 }

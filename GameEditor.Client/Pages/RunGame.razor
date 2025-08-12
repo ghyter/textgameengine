@@ -15,19 +15,20 @@
                    Anchor="Anchor.Left"
                    Elevation="1"
                    DisableOverlay="false">
-            <MudStack Class="p-3" Spacing="2">
+            <MudStack Class="p-3, m-3" Spacing="3" >
                 <MudText Typo="Typo.h6">@_session.Player.Element.Name</MudText>
                 <MudDivider />
-                <MudText Typo="Typo.subtitle2" Class="mt-2">Inventory (placeholder)</MudText>
-                <MudText Typo="Typo.caption">• Item A</MudText>
-                <MudText Typo="Typo.caption">• Item B</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-2">Inventory</MudText>
+                @foreach (var e in _session.Elements.Where(e=> e.Value.Element is Item && e.Value.Location == "_inventory")){
+                        <div><strong>@e.Value.Element.Name</strong></div>
 
+                }
                 <MudDivider Class="my-2" />
 
                 <MudText Typo="Typo.subtitle2">In Room (ordinal list, placeholder)</MudText>
-                <MudText Typo="Typo.caption">1) Lamp</MudText>
-                <MudText Typo="Typo.caption">2) Rug</MudText>
-                <MudText Typo="Typo.caption">3) Trapdoor</MudText>
+                @foreach (var i in _session.SceneOrdinals){
+                    <MudText Typo="Typo.caption">@_session.Elements.Where(e=> e.Value.Id == i).First().Value.Element.Name</MudText>
+                }
             </MudStack>
         </MudDrawer>
 
@@ -38,8 +39,15 @@
                    Elevation="1"
                    DisableOverlay="false">
             <MudStack Class="p-3" Spacing="2">
-                <MudText Typo="Typo.h6">Right Panel</MudText>
+                <MudText Typo="Typo.h6">Game Locations</MudText>
+                @foreach (var e in _session.Elements.Where(e=> e.Value.Element is Item)){
+                        <div><strong>@e.Value.Element.Name</strong> - @e.Value.Location</div>
+                }
                 <MudDivider />
+                @foreach (var e in _session.Elements.OrderBy(e=> e.Value.Element.Id)){
+                        <div><strong>@e.Value.Element.Name (@e.Value.Element.Id)</strong> - @e.Value.State / @e.Value.Location</div>
+                }
+
                 <MudText Typo="Typo.subtitle2" Class="mt-2">Level Map (placeholder)</MudText>
                 <MudPaper Class="pa-3 mt-2" Outlined="true">
                     <!-- TODO: inject your map canvas/graph here -->
