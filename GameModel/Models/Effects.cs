@@ -64,6 +64,7 @@ public static class EffectExtensions
                     element.Location = session.Player.Location;
                     break;
                 case EffectType.SetProperty:
+                    element.Properties[effect.Property] = effect.NewValue ?? string.Empty;
                     Console.WriteLine($"Setting property {effect.Property} to {effect.NewValue} on {element.Id}");
                     break;
                 case EffectType.Custom:
