@@ -105,7 +105,7 @@
         var dialog = await DialogService.ShowAsync<NewPackDialog>("New Game Pack", options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is GamePack newPack)
+        if (!result!.Canceled && result.Data is GamePack newPack)
         {
             // If the key exists, Update; else Create
             if (!await GamePackService.UpdateAsync(newPack.Id, newPack))

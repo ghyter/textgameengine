@@ -1,0 +1,131 @@
+﻿@page "/map"
+@using Blazor.Diagrams
+@using Blazor.Diagrams.Components
+@using Blazor.Diagrams.Components.Widgets
+@using Blazor.Diagrams.Core.Geometry
+@using Blazor.Diagrams.Core.Models
+@using Blazor.Diagrams.Core.PathGenerators
+@using Blazor.Diagrams.Core.Routers
+@using Blazor.Diagrams.Options
+@using GameModel.Models
+@using GameModel.Models.Enums
+@using GameModel.Session
+@inject IGamePackService GamePackService
+
+<h3>Game Editor</h3>
+
+@if (Diagram is not null)
+{
+    <div class="diagram-container">
+      <CascadingValue Value="Diagram" IsFixed="true">
+        <DiagramCanvas>
+        <Widgets>
+			<GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
+		</Widgets>
+
+        </DiagramCanvas>
+      </CascadingValue>
+    </div>
+}
+
+@code {
+    private BlazorDiagram Diagram { get; set; } = null!;
+    private Dictionary<string,NodeModel> _nodemap {get;set;} = [];
+    private GameSession? _session;
+
+    protected override void OnInitialized()
+    {
+        // Create the diagram BEFORE the first render
+        var options = new BlazorDiagramOptions
+        {
+            AllowMultiSelection = true,
+            Zoom = { Enabled = true },
+            Links =
+            {
+                // If you need these, re-add:
+                DefaultRouter = new NormalRouter(),
+                DefaultPathGenerator = new SmoothPathGenerator()
+            },
+        };
+
+        Diagram = new BlazorDiagram(options);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Diagram is null) return;
+
+        if (GamePackService.Current is null)
+            return;
+
+        _session = GameSession.NewGame(GamePackService.Current);
+
+        await AddLinks(_session.CurrentLocation!,new Point(200, 200));
+        // OPTIONAL: center node after container is ready
+
+        if (_nodemap.TryGetValue(_session.CurrentLocation?.Id ?? string.Empty,out var node)){
+            await CenterOnViewport(node);
+        }
+    }
+
+
+    private async Task AddLinks(GameElementState element, Point position){
+        
+        if (!_nodemap.TryGetValue(element?.Id ?? string.Empty,out var nodemodel)){
+            
+            var node = new NodeModel(position)
+            {
+                Title = element.Element.Name
+            };
+            _nodemap[element.Id] = node;
+            Diagram.Nodes.Add(node);
+
+            element.Get<Scene>().Exits.ForEach( async e  => {
+            
+                PortAlignment? portdirection =  e.Direction switch{
+                    ExitDirections.North => PortAlignment.Top,
+                    ExitDirections.NorthEast => PortAlignment.TopRight,
+                    ExitDirections.East => PortAlignment.Right,
+                    ExitDirections.SouthEast => PortAlignment.BottomRight,
+                    ExitDirections.South => PortAlignment.Bottom,
+                    ExitDirections.SouthWest => PortAlignment.BottomLeft,
+                    ExitDirections.West => PortAlignment.Left,
+                    ExitDirections.NorthWest => PortAlignment.TopLeft,
+                    _=> null
+                };
+                if (portdirection != null){
+                    node.AddPort(new PortModel(node,portdirection.Value));
+                }
+                if (_session.Elements.TryGetValue($"scene:{e.TargetId}", out var targetElement)){
+                    Console.WriteLine("Here", targetElement.Id);
+                    
+                    await AddLinks(targetElement,new Point(1,1));
+                }
+            });
+            
+        }
+        // Safe to add nodes now (canvas is mounted)
+
+    }
+
+    private async Task CenterOnViewport(NodeModel node)
+    {
+        // Let JS interop inside the library finalize measurements if needed
+        await Task.Yield();
+
+        if (Diagram?.Container is null) return;
+
+        var cx = Diagram.Container.Width / 2.0;
+        var cy = Diagram.Container.Height / 2.0;
+
+        var zoom = Diagram.Zoom;
+        var pan  = Diagram.Pan; // screen-space translation
+
+        // Convert viewport center (screen) -> diagram coords
+        var worldX = (cx - pan.X) / zoom;
+        var worldY = (cy - pan.Y) / zoom;
+
+        node.Position = new Point(worldX - node.Size?.Width ?? 100 / 2.0, worldY - node.Size?.Height ?? 100 / 2.0);
+        Diagram.Refresh();
+    }
+}

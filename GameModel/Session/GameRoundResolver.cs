@@ -307,7 +307,8 @@ public static class GameRoundResolver
         rollResult.Total = rollResult.Roll + rollResult.Bonus;
         rollResult.Threshold = (int)round.GameAction!.Difficulty;
         if (rollResult.Roll == 20) { return true; }
-        if (rollResult.Roll == 1) { return false; }
+        //A trivial does not require a roll, so you cannot fail it.
+        if (rollResult.Threshold > 0 && rollResult.Roll == 1) { return false; }
         return rollResult.Total >= rollResult.Threshold;
     }
 

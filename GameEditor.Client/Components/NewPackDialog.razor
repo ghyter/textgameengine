@@ -4,9 +4,9 @@
 
 @inject MudBlazor.IDialogService DialogService
 
-<MudDialog>
+<MudDialog>  
     <DialogContent>
-        <MudForm @ref="_form" OnValidSubmit="Submit">
+        <MudForm @ref="_form">
             <MudTextField @bind-Value="_key" Label="Key" Required="true"
                         Pattern="^[a-z0-9-]+$"
                         HelperText="Lowercase letters, digits, hyphens only."

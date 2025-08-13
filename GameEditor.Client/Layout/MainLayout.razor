@@ -6,34 +6,38 @@
 
 <MudThemeProvider Theme="@ThemeService.CurrentTheme" />
 
-<MudAppBar Color="Color.Primary" Elevation="1">
-    <MudText Typo="Typo.h6">GameEditor
-        @if (GamePackService.Current is not null)
-        {
-            <span> — @GamePackService.Current.Title</span>
-        }
+<div class="app-padding">
+<MudLayout>
+    <MudAppBar Color="Color.Primary" Elevation="1">
+        <MudText Typo="Typo.h6">GameEditor
+            @if (GamePackService.Current is not null)
+            {
+                <span> — @GamePackService.Current.Title</span>
+            }
 
-    </MudText>
-    <MudSpacer />
+        </MudText>
+        <MudSpacer />
 
-<!-- Menu Button -->
-    <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.BottomRight">
-        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
-        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
-        <MudMenuItem OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
-    </MudMenu>
+        <!-- Menu Button -->
+        <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.BottomRight">
+            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
+            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
+            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
+        </MudMenu>
 
-    <MudIconButton Icon="@(ThemeService.IsDarkMode 
-                                           ? Icons.Material.Filled.LightMode 
-                                           : Icons.Material.Filled.DarkMode)"
-        OnClick="@(() => ThemeService.IsDarkMode = !ThemeService.IsDarkMode)" />
+        <MudIconButton Icon="@(ThemeService.IsDarkMode 
+                                                                  ? Icons.Material.Filled.LightMode 
+                                                                  : Icons.Material.Filled.DarkMode)"
+            OnClick="@(() => ThemeService.IsDarkMode = !ThemeService.IsDarkMode)" />
 
-</MudAppBar>
+    </MudAppBar>
 
-<MudMainContent>
-    @Body
-</MudMainContent>
+    <MudMainContent Class="p-4">
+        @Body
+    </MudMainContent>
 
+</MudLayout>
+</div>
 @code {
 
     protected override void OnInitialized()
@@ -61,5 +65,5 @@
             // forceLoad avoids weirdness with client-side routing if nothing is mounted yet
             Nav.NavigateTo("/packs", forceLoad: true);
         }
-    }    
+    }
 }

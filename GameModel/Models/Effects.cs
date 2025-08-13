@@ -63,6 +63,52 @@ public static class EffectExtensions
                     round.Log.Add($"Dropped {element.Element.Name}");
                     element.Location = session.Player.Location;
                     break;
+
+                case EffectType.SetFlag:
+                    if (bool.TryParse(effect.NewValue, out bool flag))
+                    {
+                        element.Flags[effect.Property] = flag;
+                        Console.WriteLine($"Setting flag {effect.Property} to {effect.NewValue} on {element.Id}");
+                    }
+                    else
+                    {
+                        round.Log.Add($"{effect.NewValue} is not a true/false flag.");
+                    }
+                    
+                    break;
+                case EffectType.SetAttribute:
+                    if (int.TryParse(effect.NewValue, out int attribute))
+                    {
+                        element.Attributes[effect.Property] = attribute;
+                        Console.WriteLine($"Setting attribute {effect.Property} to {effect.NewValue} on {element.Id}");
+                    }
+                    else
+                    {
+                        round.Log.Add($"{effect.NewValue} is not an integer");
+                    }
+                    break;
+                case EffectType.IncrementAttribute:
+                    if (element.Attributes.TryGetValue(effect.Property, out int value))
+                    {
+                        element.Attributes[effect.Property] = value++;
+
+                    }
+                    else
+                    {
+                        element.Attributes[effect.Property] = 1;
+                    }
+                    break;
+                case EffectType.DecrementAttribute:
+                    if (element.Attributes.TryGetValue(effect.Property, out int decvalue))
+                    {
+                        element.Attributes[effect.Property] = decvalue--;
+
+                    }
+                    else
+                    {
+                        element.Attributes[effect.Property] = -1;
+                    }
+                    break;
                 case EffectType.SetProperty:
                     element.Properties[effect.Property] = effect.NewValue ?? string.Empty;
                     Console.WriteLine($"Setting property {effect.Property} to {effect.NewValue} on {element.Id}");
