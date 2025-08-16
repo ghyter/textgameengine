@@ -1,8 +1,17 @@
-﻿@using GameEditor.Client.Services
+﻿@using GameEditor.Client.Components
+@using GameEditor.Client.Services
+@using System.Text.Json
+@using GameModel.Models
+
 @inject ThemeService ThemeService
 @inject IGamePackService GamePackService
 @inject NavigationManager Nav
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
 @inherits LayoutComponentBase
+
 
 <MudThemeProvider Theme="@ThemeService.CurrentTheme" />
 
@@ -13,16 +22,19 @@
             @if (GamePackService.Current is not null)
             {
                 <span> — @GamePackService.Current.Title</span>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="EditGame"></MudIconButton>
             }
-
         </MudText>
+       
         <MudSpacer />
 
         <!-- Menu Button -->
         <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.BottomRight">
-            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
-            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
-            <MudMenuItem OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
+            <MudMenuItem Icon="@Icons.Material.Filled.FolderZip" OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
+            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Map" OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
+            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.PlayCircleOutline" OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
+            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Download" OnClick="DownloadSelected">Download</MudMenuItem>
+                
         </MudMenu>
 
         <MudIconButton Icon="@(ThemeService.IsDarkMode 
@@ -39,7 +51,7 @@
 </MudLayout>
 </div>
 @code {
-
+    private bool HasSelection => GamePackService.Current is not null;
     protected override void OnInitialized()
     {
         ThemeService.PropertyChanged += (_, __) => StateHasChanged();
@@ -66,4 +78,47 @@
             Nav.NavigateTo("/packs", forceLoad: true);
         }
     }
+
+
+    private async Task DownloadSelected()
+    {
+        var current = GamePackService.Current;
+        if (current is null)
+        {
+            Snackbar.Add("No selected pack to download.", Severity.Warning);
+            return;
+        }
+
+        var json = JsonSerializer.Serialize(current, new JsonSerializerOptions { WriteIndented = true });
+        var b64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
+        var fileName = $"{current.Id}.json";
+
+        await JS.InvokeVoidAsync("blazorDownloadFile", fileName, "application/json", b64);
+        Snackbar.Add($"Downloading {fileName}…", Severity.Normal);
+    }
+
+    private async Task EditGame()
+    {
+        var current = GamePackService.Current;
+        if(current is null)
+        {
+            Snackbar.Add("No selected pack.", Severity.Warning);
+            return;
+        }
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<NewPackDialog>($"Edit {current.Title}", options);
+        var result = await dialog.Result;
+        if (!result!.Canceled && result.Data is GamePack newPack)
+        {
+            // If the key exists, Update; else Create
+            if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
+                await GamePackService.CreateAsync(newPack.Id, newPack);
+
+            Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
+        }
+
+
+    }
+
+
 }

@@ -23,6 +23,9 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+.vs/
+.vscode/
+
 *.gz
 
 # .NET Core

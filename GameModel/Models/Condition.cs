@@ -59,7 +59,7 @@ public class Condition
             ConditionRuleType.PropertyValue => false,
             ConditionRuleType.HasProperty => false,
             ConditionRuleType.IsVisible => element.IsVisible,
-            ConditionRuleType.IsMovable => element.Get<Item>()?.IsMovable ?? true,
+            ConditionRuleType.IsMovable => element.Get<Item>()?.Flags["IsMovable"] ?? true,
             _ => false,
         };
         if (!PassesRules)

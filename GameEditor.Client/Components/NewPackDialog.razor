@@ -26,8 +26,10 @@
 </MudDialog>
 
 @code {
-      [CascadingParameter]
+    [CascadingParameter]
     private IMudDialogInstance? MudDialog { get; set; }
+
+    public GamePack Pack { get; set; } = new();
 
     private MudForm? _form;
     private string _key = string.Empty;

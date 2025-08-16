@@ -63,25 +63,28 @@
         await AddLinks(_session.CurrentLocation!,new Point(200, 200));
         // OPTIONAL: center node after container is ready
 
-        if (_nodemap.TryGetValue(_session.CurrentLocation?.Id ?? string.Empty,out var node)){
-            await CenterOnViewport(node);
-        }
+        await Task.Yield();
+        Diagram.Refresh();
+        Diagram.ZoomToFit();
     }
 
 
     private async Task AddLinks(GameElementState element, Point position){
-        
+
         if (!_nodemap.TryGetValue(element?.Id ?? string.Empty,out var nodemodel)){
-            
-            var node = new NodeModel(position)
+
+            var node = new NodeModel(element!.Id,position)
             {
-                Title = element.Element.Name
+                Title = element.Element.Name,
+              
             };
+            
             _nodemap[element.Id] = node;
             Diagram.Nodes.Add(node);
 
-            element.Get<Scene>().Exits.ForEach( async e  => {
-            
+            foreach (var e in element.Get<Scene>().Exits)
+            {
+
                 PortAlignment? portdirection =  e.Direction switch{
                     ExitDirections.North => PortAlignment.Top,
                     ExitDirections.NorthEast => PortAlignment.TopRight,
@@ -97,16 +100,31 @@
                     node.AddPort(new PortModel(node,portdirection.Value));
                 }
                 if (_session.Elements.TryGetValue($"scene:{e.TargetId}", out var targetElement)){
-                    Console.WriteLine("Here", targetElement.Id);
-                    
-                    await AddLinks(targetElement,new Point(1,1));
+                    int OffsetSize = 125;
+                    var offset = e.Direction switch
+                    {
+                        ExitDirections.North => new Point(position.X, position.Y - OffsetSize),
+                        ExitDirections.NorthEast => new Point(position.X + OffsetSize, position.Y - OffsetSize),
+                        ExitDirections.East => new Point(position.X + OffsetSize, position.Y),
+                        ExitDirections.SouthEast => new Point(position.X + OffsetSize, position.Y + OffsetSize),
+                        ExitDirections.South => new Point(position.X, position.Y + OffsetSize),
+                        ExitDirections.SouthWest => new Point(position.X - OffsetSize, position.Y + OffsetSize),
+                        ExitDirections.West => new Point(position.X - OffsetSize, position.Y),
+                        ExitDirections.NorthWest => new Point(position.X - OffsetSize, position.Y - OffsetSize),
+                        _ => new Point(1,1)
+                    };
+
+                    await AddLinks(targetElement,offset);
                 }
-            });
-            
+            };
+
         }
-        // Safe to add nodes now (canvas is mounted)
 
     }
+
+
+
+
 
     private async Task CenterOnViewport(NodeModel node)
     {

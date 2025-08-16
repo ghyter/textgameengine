@@ -80,7 +80,6 @@
             "open": "The exit to the study is open.",
             "closed": "The exit to the study is closed.",
             "locked": "The door to the Study is locked tight."
-
           }
         },
         {
@@ -421,10 +420,12 @@
     "cabinet": {
       "Id": "cabinet",
       "Name": "Old Oak Cabinet",
-      "IsMovable": false,
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
       "StartingLocation": "billiard-room",
       "StartingState": "locked",
+      "Flags":{
+        "IsMovable": false
+      },
       "States": {
         "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",
         "unlocked": "The cabinet stands unlocked, its contents waiting to be revealed.",

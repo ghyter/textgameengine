@@ -1,10 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2f12e5d2-56cd-4891-99e6-5eef314c07f4</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Model\**" />
+    <Content Remove="Model\**" />
+    <EmbeddedResource Remove="Model\**" />
+    <None Remove="Model\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazor.IndexedDB" Version="3.0.3" />
@@ -19,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Model/" />
+    <Content Update="wwwroot\scripts\helpers.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
