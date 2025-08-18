@@ -1,0 +1,46 @@
+﻿div {
+    width: 230px;
+    outline: 1px solid black;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+    div.selected {
+        box-shadow: 0 4px 8px 0 rgb(182, 255, 0), 0 6px 20px 0 rgba(182, 255, 0, 0.19);
+    }
+
+::deep .diagram-port {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    border-radius: 50%; /* makes them circular */
+}
+
+    /* Top */
+    ::deep .diagram-port.top {
+        top: -20px; /* move further above the box */
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* Bottom */
+    ::deep .diagram-port.bottom {
+        bottom: -20px; /* move further below the box */
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* Left */
+    ::deep .diagram-port.left {
+        left: -20px; /* push further left */
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Right */
+    ::deep .diagram-port.right {
+        right: -20px; /* push further right */
+        top: 50%;
+        transform: translateY(-50%);
+    }

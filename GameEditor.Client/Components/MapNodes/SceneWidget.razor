@@ -1,0 +1,89 @@
+﻿
+
+@using Blazor.Diagrams.Components.Renderers;
+@using Blazor.Diagrams.Components;
+@using GameEditor.Client.Components.Dialogs
+@using GameEditor.Client.Model.Nodes;
+@using Blazor.Diagrams.Core.Models
+@using GameModel.Models
+@inject IDialogService DialogService;
+@inject IGamePackService GamePackService;
+
+
+<div class="node @(Node.Selected ? "selected":null)">
+    <MudCard>
+        <MudCardContent>
+            <MudText>@Node.Element.Name
+            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                          Size="Size.Medium"
+                          Color="Color.Primary"
+                          Class="ml-2"
+                          OnClick="EditDialog" />
+            </MudText>
+            @if (Node.Element is Scene scene)
+            {
+                <MudText Typo="Typo.body2">@scene.MapLocation.ToString()</MudText>
+            }
+            
+        </MudCardContent>
+        @* <MudCardActions>
+            <MudButton Variant="Variant.Text" Color="Color.Primary">+State</MudButton>
+        </MudCardActions> *@
+    </MudCard>
+    
+    @foreach (var port in Node.Ports)
+    {
+        // In case you have any ports to show
+        // IMPORTANT: You are always in charge of rendering ports
+        <PortRenderer @key="port" Port="port" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public GameElementNode Node { get; set; } = null!;
+    protected override void OnInitialized()
+    {
+        // Initialize any properties or services if needed
+        base.OnInitialized();
+    }
+
+    private async Task EditDialog()
+    {
+        // Logic to open the edit dialog for the GameStateNode
+        // This could involve invoking a service or a dialog component
+        var title = Node.Element.Name;
+        Console.WriteLine($"Editing node: {Node.Element.Name}");
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true };
+        DialogParameters dialogParams = new()
+        {
+            { nameof(GameElementDialog<Scene>.Value), Node.Element},
+
+        };
+        var dialog = await DialogService.ShowAsync<GameElementDialog<Scene>>($"Edit {title}", dialogParams, options);
+        var result = await dialog.Result;
+        if (result == null || result.Canceled)
+        {
+            Console.WriteLine("Edit dialog was canceled.");
+            return;
+        };
+
+        //Temporarily, I only want to update what I know is in the form.  Don't drop the exits for example.
+
+        if (Node.Element is Scene scene && result.Data is Scene newscene)
+        {
+            scene.Name = newscene.Name;
+            scene.Description = newscene.Description;
+            scene.MapLocation = newscene.MapLocation;
+            scene.States = newscene.States;
+            scene.Attributes = newscene.Attributes;
+            scene.Properties = newscene.Properties;
+            scene.Flags = newscene.Flags;
+
+        }
+        // Always update the GamePackService to ensure changes are saved
+        await GamePackService.UpdateCurrentAsync();
+        StateHasChanged();
+    }
+
+}

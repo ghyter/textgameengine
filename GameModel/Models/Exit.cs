@@ -1,8 +1,6 @@
-using System;
 using GameModel.Models.Enums;
 
 namespace GameModel.Models;
-
 
 public class Exit : GameElement
 {

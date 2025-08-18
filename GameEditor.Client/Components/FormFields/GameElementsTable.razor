@@ -1,0 +1,125 @@
+﻿@* GameElementsTable.razor *@
+@using MudBlazor
+@using GameModel.Models
+
+<MudPaper Class="p-3">
+  <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+    <MudText Typo="Typo.h6">@Title</MudText>
+
+    <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+      <MudTextField @bind-Value="_search"
+                    Placeholder="Search…"
+                    Adornment="Adornment.Start"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    Immediate="true"
+                    DebounceInterval="200"
+                    Dense="true"
+                    Style="min-width:220px" />
+      @if (ShowCreate)
+      {
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="CreateClicked">@CreateText</MudButton>
+      }
+    </MudStack>
+  </MudStack>
+
+  <MudTable T="IGameElement"
+            Items="_filtered"
+            Dense="true"
+            Hover="true"
+            Bordered="true"
+            Elevation="0">
+    <HeaderContent>
+      <MudTh style="width: 20%">Id</MudTh>
+      <MudTh style="width: 20%">Visible</MudTh>
+      <MudTh style="width: 20%">Name</MudTh>
+      <MudTh>Description</MudTh>
+      <MudTh style="width: 56px"></MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+      <MudTd>@context.Id</MudTd>
+      <MudTd>@context.IsVisible</MudTd>
+      <MudTd>@context.Name</MudTd>
+      <MudTd>
+        <MudText Typo="Typo.body2" Class="line-clamp-2">@context.Description</MudText>
+      </MudTd>
+
+      <MudTd Class="text-right">
+        <MudMenu Dense="true" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.TopRight" Icon="@Icons.Material.Filled.MoreVert">
+           
+          <MudMenuItem Label="Edit" OnClick="@(() => Edit(context))" Icon="@Icons.Material.Filled.Edit"/>
+          <MudMenuItem OnClick="@(() => Delete(context))"
+                       Icon="@Icons.Material.Filled.Delete"
+                       Label="Delete"
+                       Disabled="@(!CanDelete(context))"
+                       Class="text-error"/>
+        </MudMenu>
+      </MudTd>
+    </RowTemplate>
+
+    <NoRecordsContent>
+      <MudText Color="Color.Secondary">No elements found.</MudText>
+    </NoRecordsContent>
+  </MudTable>
+</MudPaper>
+
+@code {
+  // ----- Parameters -----
+  [Parameter] public string Title { get; set; } = "Elements";
+  [Parameter] public IEnumerable<IGameElement> Items { get; set; } = Array.Empty<IGameElement>();
+  [Parameter] public EventCallback OnCreate { get; set; }
+  [Parameter] public EventCallback<IGameElement> OnEdit { get; set; }
+  [Parameter] public EventCallback<IGameElement> OnDelete { get; set; }
+
+  // UI options
+  [Parameter] public bool ShowCreate { get; set; } = true;
+  [Parameter] public string CreateText { get; set; } = "New";
+
+  // Optional per-row delete rule (default = allowed)
+  [Parameter] public Func<IGameElement, bool>? CanDeleteRule { get; set; }
+
+  // ----- Internals -----
+  private string _search = string.Empty;
+  private List<IGameElement> _filtered = new();
+
+  protected override void OnParametersSet()
+  {
+    Recompute();
+  }
+
+  private void Recompute()
+  {
+    var q = (_search ?? string.Empty).Trim();
+    var src = Items ?? Array.Empty<IGameElement>();
+
+    if (string.IsNullOrEmpty(q))
+    {
+      _filtered = src.ToList();
+      return;
+    }
+
+    _filtered = src.Where(e =>
+      (!string.IsNullOrEmpty(e.Id) && e.Id.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+      (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+      (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
+    ).ToList();
+  }
+
+  private bool CanDelete(IGameElement e) => CanDeleteRule?.Invoke(e) ?? true;
+
+  private Task CreateClicked() => OnCreate.HasDelegate ? OnCreate.InvokeAsync() : Task.CompletedTask;
+  private Task Edit(IGameElement e) => OnEdit.HasDelegate ? OnEdit.InvokeAsync(e) : Task.CompletedTask;
+  private Task Delete(IGameElement e) => OnDelete.HasDelegate ? OnDelete.InvokeAsync(e) : Task.CompletedTask;
+
+  // recompute when the search box changes
+  private string Search
+  {
+    get => _search;
+    set
+    {
+      _search = value;
+      Recompute();
+    }
+  }
+}

@@ -7,60 +7,74 @@
 @using Blazor.Diagrams.Core.PathGenerators
 @using Blazor.Diagrams.Core.Routers
 @using Blazor.Diagrams.Options
+@using GameEditor.Client.Components.MapNodes
+@using GameEditor.Client.Model.Nodes
 @using GameModel.Models
 @using GameModel.Models.Enums
 @using GameModel.Session
 @inject IGamePackService GamePackService
+@inject ISnackbar snackbar
 
 <h3>Game Editor</h3>
 
 @if (Diagram is not null)
 {
     <div class="diagram-container">
-      <CascadingValue Value="Diagram" IsFixed="true">
-        <DiagramCanvas>
-        <Widgets>
-			<GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
-		</Widgets>
-
-        </DiagramCanvas>
-      </CascadingValue>
+        <CascadingValue Value="Diagram" IsFixed="true">
+            <DiagramCanvas>
+                <Widgets>
+                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
+                </Widgets>
+            </DiagramCanvas>
+        </CascadingValue>
     </div>
 }
 
+
+
+
 @code {
     private BlazorDiagram Diagram { get; set; } = null!;
-    private Dictionary<string,NodeModel> _nodemap {get;set;} = [];
-    private GameSession? _session;
+    private Dictionary<string, SceneNode> _nodemap { get; set; } = [];
+
+    private int xOffset = 300;
+    private int yOffset = 200;
 
     protected override void OnInitialized()
     {
         // Create the diagram BEFORE the first render
         var options = new BlazorDiagramOptions
-        {
-            AllowMultiSelection = true,
-            Zoom = { Enabled = true },
-            Links =
+            {
+                AllowMultiSelection = true,
+                Zoom = { Enabled = true },
+                Links =
             {
                 // If you need these, re-add:
                 DefaultRouter = new NormalRouter(),
                 DefaultPathGenerator = new SmoothPathGenerator()
             },
-        };
+            };
 
         Diagram = new BlazorDiagram(options);
+        Diagram.RegisterComponent<SceneNode, SceneWidget>();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender || Diagram is null) return;
 
-        if (GamePackService.Current is null)
+        if (GamePackService.Current is null || GamePackService.Current.Scenes.Count == 0)
+        {
+            snackbar.Add("Current Game does not have any scenes", Severity.Error);
             return;
+        }
 
-        _session = GameSession.NewGame(GamePackService.Current);
+        var startingLocation = GamePackService.Current.Player.StartingLocation;
 
-        await AddLinks(_session.CurrentLocation!,new Point(200, 200));
+        var playerLocation = GamePackService.Current.Scenes.Where(p=> p.Key == startingLocation).FirstOrDefault();
+        
+
+        await AddLinks(playerLocation.Value,new Point(200, 200));
         // OPTIONAL: center node after container is ready
 
         await Task.Yield();
@@ -69,20 +83,19 @@
     }
 
 
-    private async Task AddLinks(GameElementState element, Point position){
+    private async Task AddLinks(Scene element, Point position){
 
         if (!_nodemap.TryGetValue(element?.Id ?? string.Empty,out var nodemodel)){
 
-            var node = new NodeModel(element!.Id,position)
+            var node = new SceneNode(element!.Id,position, element)
             {
-                Title = element.Element.Name,
-              
+                Title = element.Name,              
             };
             
             _nodemap[element.Id] = node;
             Diagram.Nodes.Add(node);
 
-            foreach (var e in element.Get<Scene>().Exits)
+            foreach (var e in element.Exits)
             {
 
                 PortAlignment? portdirection =  e.Direction switch{
@@ -99,18 +112,17 @@
                 if (portdirection != null){
                     node.AddPort(new PortModel(node,portdirection.Value));
                 }
-                if (_session.Elements.TryGetValue($"scene:{e.TargetId}", out var targetElement)){
-                    int OffsetSize = 125;
+                if ( GamePackService.Current!.Scenes.TryGetValue(e.TargetId, out var targetElement)){
                     var offset = e.Direction switch
                     {
-                        ExitDirections.North => new Point(position.X, position.Y - OffsetSize),
-                        ExitDirections.NorthEast => new Point(position.X + OffsetSize, position.Y - OffsetSize),
-                        ExitDirections.East => new Point(position.X + OffsetSize, position.Y),
-                        ExitDirections.SouthEast => new Point(position.X + OffsetSize, position.Y + OffsetSize),
-                        ExitDirections.South => new Point(position.X, position.Y + OffsetSize),
-                        ExitDirections.SouthWest => new Point(position.X - OffsetSize, position.Y + OffsetSize),
-                        ExitDirections.West => new Point(position.X - OffsetSize, position.Y),
-                        ExitDirections.NorthWest => new Point(position.X - OffsetSize, position.Y - OffsetSize),
+                        ExitDirections.North => new Point(position.X, position.Y - yOffset),
+                        ExitDirections.NorthEast => new Point(position.X + xOffset, position.Y - yOffset),
+                        ExitDirections.East => new Point(position.X + xOffset, position.Y),
+                        ExitDirections.SouthEast => new Point(position.X + xOffset, position.Y + yOffset),
+                        ExitDirections.South => new Point(position.X, position.Y + yOffset),
+                        ExitDirections.SouthWest => new Point(position.X - xOffset, position.Y + yOffset),
+                        ExitDirections.West => new Point(position.X - xOffset, position.Y),
+                        ExitDirections.NorthWest => new Point(position.X - xOffset, position.Y - yOffset),
                         _ => new Point(1,1)
                     };
 

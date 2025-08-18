@@ -1,5 +1,6 @@
 using System;
 using GameModel.Actions;
+using GameModel.Helpers;
 using GameModel.Models;
 using GameModel.Models.Constants;
 using GameModel.Pack;
@@ -31,15 +32,27 @@ public class GameInitializer
     private static void LoadGamePack(GameSession gs, GamePack gamePack)
     {
         gs.GameTitle = gamePack.Title ?? "Text Game Engine";
+
+        Player? player;
+        if (gamePack.Players.Count == 1)
+        {
+            player = gamePack.Players.FirstOrDefault().Value.DeepClone();
+        } else
+        {
+            player = new();
+        }
+           
         gs.Elements[GameConstants.PlayerId] = new GameElementState
         {
-
             Id = GameConstants.PlayerId,
-            Element = gamePack.Player,
-            Location = gamePack.Player.StartingLocation,
-            Attributes = gamePack.Player.Attributes, //Load the initial state of the attributes.
+            Element = player!,
+            Location = player.StartingLocation,
+            Attributes = player.Attributes.DeepClone(), //Load the initial state of the attributes.
+            Properties = player.Properties.DeepClone(),
+            Flags = player.Flags.DeepClone(),
 
         };
+
 
         foreach (var s in gamePack.Scenes)
         {
@@ -47,7 +60,7 @@ public class GameInitializer
             gs.Elements[id] = new GameElementState
             {
                 Id = id,
-                Element = s.Value,
+                Element = s.Value.DeepClone(),
                 Location = null,
                 IsVisible = s.Value.IsVisible,
                 State = s.Value.StartingState ?? "default"
@@ -67,18 +80,22 @@ public class GameInitializer
             });
         }
 
-        foreach (var i in gamePack.Items)
+        foreach (var itm in gamePack.Items)
         {
-            var id = $"item:{i.Key}";
+            var id = $"item:{itm.Key}";
             gs.Elements[id] = new GameElementState
             {
                 Id = id,
-                Element = i.Value,
-                IsVisible = i.Value.IsVisible,
-                Location = i.Value.StartingLocation,
-                State = i.Value.StartingState ?? "default"
+                Element = itm.Value.DeepClone(),
+                IsVisible = itm.Value.IsVisible,
+                Location = itm.Value.StartingLocation,
+                State = itm.Value.StartingState ?? "default",
+                Attributes = itm.Value.Attributes.DeepClone(),
+                Properties = itm.Value.Properties.DeepClone(),
+                Flags = itm.Value.Flags.DeepClone(),
+
             };
-            gs.Elements[id].Element.Id = id;
+            //gs.Elements[id].Element.Id = id;
         }
 
         foreach (var npc in gamePack.Npcs)
@@ -87,15 +104,18 @@ public class GameInitializer
             gs.Elements[id] = new GameElementState
             {
                 Id = id,
-                Element = npc.Value,
+                Element = npc.Value.DeepClone(),
                 IsVisible = npc.Value.IsVisible,
                 Location = npc.Value.StartingLocation,
-                State = npc.Value.StartingState ?? "default"
+                State = npc.Value.StartingState ?? "default",
+                Attributes = npc.Value.Attributes.DeepClone(),
+                Properties = npc.Value.Properties.DeepClone(),
+                Flags = npc.Value.Flags.DeepClone(),
             };
-            gs.Elements[id].Element.Id = id;
+            //gs.Elements[id].Element.Id = id;
         }
 
-        //Add the scene prefix for any element that doest start with _
+        //Add the scene prefix for any Location element that doest start with _
         foreach (var element in gs.Elements.Values)
         {
             if (element.Location != null

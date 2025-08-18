@@ -1,5 +1,6 @@
-﻿@using GameEditor.Client.Components
+﻿@using GameEditor.Client.Components.Dialogs
 @using GameEditor.Client.Services
+@using System.Text.Json.Serialization
 @using System.Text.Json
 @using GameModel.Models
 
@@ -34,6 +35,8 @@
             <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Map" OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
             <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.PlayCircleOutline" OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
             <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Download" OnClick="DownloadSelected">Download</MudMenuItem>
+            <MudDivider />
+                <MudMenuItem Icon="@Icons.Material.Filled.TableView" OnClick="@(() => Nav.NavigateTo("/editor"))">Game Elements</MudMenuItem>
                 
         </MudMenu>
 
@@ -89,7 +92,7 @@
             return;
         }
 
-        var json = JsonSerializer.Serialize(current, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(current, new JsonSerializerOptions { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault });
         var b64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
         var fileName = $"{current.Id}.json";
 
@@ -106,19 +109,25 @@
             return;
         }
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<NewPackDialog>($"Edit {current.Title}", options);
+        DialogParameters dialogParams = new ()
+        {
+            { nameof(PackDialog.Value), current},
+            { nameof(PackDialog.AllowEditKey), false},
+        };
+        var dialog = await DialogService.ShowAsync<PackDialog>($"Edit {current.Title}",dialogParams, options);
         var result = await dialog.Result;
         if (!result!.Canceled && result.Data is GamePack newPack)
         {
             // If the key exists, Update; else Create
             if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
+            {
                 await GamePackService.CreateAsync(newPack.Id, newPack);
-
-            Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
+                Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
+            } else
+            {
+                Snackbar.Add($"Pack '{newPack.Title}' updated.", Severity.Success);
+            }
         }
 
-
     }
-
-
 }

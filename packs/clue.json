@@ -1,6 +1,6 @@
 {
   "Title": "Clue Mansion",
-  "Player": {
+    "Player": {
     "Id": "player:player",
     "Name": "Det. Boddy",
     "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",

@@ -1,0 +1,85 @@
+﻿@using MudBlazor
+@using GameModel.Models
+@using GameModel.Helpers
+@inherits ComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_key"
+                          Label="Key"
+                          Required="true"
+                          Pattern="^[a-z0-9-]+$"
+                          HelperText="Lowercase letters, digits, hyphens only."
+                          Immediate="true"
+                          Disabled="@IsEdit" />
+
+            <MudTextField @bind-Value="_editPack.Title"
+                          Label="Title"
+                          Required="true" />
+
+            <MudTextField @bind-Value="_editPack.Description"
+                          Label="Description"
+                          Lines="3" />
+
+            <MudStack Row Justify="Justify.FlexEnd" Spacing="1" Class="mt-4">
+                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">
+                    @(IsEdit ? "Save" : "Create")
+                </MudButton>
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    // ===== Parameters =====
+    [Parameter] public GamePack? Value { get; set; }  // null => New; not null => Edit existing
+    [Parameter] public bool AllowEditKey { get; set; } = false; // if you ever want to permit Id changes
+
+    // ===== Internals =====
+    [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
+    private MudForm? _form;
+
+    // The working copy we bind the form to (never the original)
+    private GamePack _editPack = new();
+
+    // separate key field because we validate formatting and may disable during edit
+    private string _key = string.Empty;
+
+    private bool IsEdit => Value is not null;
+
+    protected override void OnParametersSet()
+    {
+        // Deep clone incoming Value (or create a brand new pack)
+        _editPack = (Value is not null) ? Value.DeepClone() : new GamePack();
+
+        // Keep the Id/Key in a separate field for validation and optional disabling
+        _key = string.IsNullOrWhiteSpace(_editPack.Id) ? string.Empty : _editPack.Id;
+
+    }
+
+    private async Task Submit()
+    {
+        if (_form is null) return;
+        await _form.Validate();
+        if (!_form.IsValid) return;
+
+        var key = (_key ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(key)) return;
+
+        // If editing, optionally enforce key immutability unless AllowEditKey is true
+        if (IsEdit && !AllowEditKey && !string.Equals(key, Value!.Id, StringComparison.Ordinal))
+            return; // or show a message that key cannot be changed
+
+        // Apply the key to the working copy (for New or allowed key change during Edit)
+        _editPack.Id = key;
+
+        // Return ONLY the working copy; the caller decides how to apply it
+        MudDialog?.Close(DialogResult.Ok(_editPack));
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+
+}
+

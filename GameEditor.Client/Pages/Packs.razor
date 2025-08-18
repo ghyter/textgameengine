@@ -1,5 +1,6 @@
 ﻿@page "/packs"
 @using GameEditor.Client.Components
+@using GameEditor.Client.Components.Dialogs
 @using GameEditor.Client.Data
 @using MudBlazor
 @using System.Text.Json
@@ -15,7 +16,7 @@
 
         <MudStack Row Spacing="1">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                OnClick="OpenNewPackDialog">New Pack</MudButton>
+                OnClick="OpenPAckDialog">New Pack</MudButton>
 
             <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
                 OnClick="LoadPacks">Refresh</MudButton>
@@ -99,10 +100,10 @@
         StateHasChanged();
     }
 
-    private async Task OpenNewPackDialog()
+    private async Task OpenPAckDialog()
     {
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<NewPackDialog>("New Game Pack", options);
+        var dialog = await DialogService.ShowAsync<PackDialog>("New Game Pack", options);
         var result = await dialog.Result;
 
         if (!result!.Canceled && result.Data is GamePack newPack)

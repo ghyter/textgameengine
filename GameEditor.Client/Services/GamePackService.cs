@@ -6,7 +6,7 @@ using GameModel.Session;
 
 public interface IGamePackService: INotifyPropertyChanged
 {
-    GamePack?      Current      { get; }
+    GamePack?      Current      { get;  }
     string?        CurrentKey   { get; }
 
     Task InitializeAsync();
@@ -15,6 +15,7 @@ public interface IGamePackService: INotifyPropertyChanged
     Task<string>           CreateAsync(string id, GamePack pack);
     Task<GamePackRecord?>        ReadAsync(string id);
     Task<List<GamePackRecord>>   ReadAllAsync();
+    Task<bool> UpdateCurrentAsync();
     Task<bool>             UpdateAsync(string id, GamePack pack);
     Task<bool>             DeleteAsync(string id);
 
@@ -53,6 +54,7 @@ public class GamePackService : IGamePackService
         using var db = await _factory.Create<GameEditorDb>();
         db.GamePacks.Add(record);
         await db.SaveChanges();
+        Current = pack;
         return id;
     }
 
@@ -68,6 +70,12 @@ public class GamePackService : IGamePackService
         return db.GamePacks.ToList();
     }
 
+
+    public async Task<bool> UpdateCurrentAsync()
+    {
+        return await UpdateAsync(CurrentKey!, Current!);
+    }
+
     public async Task<bool> UpdateAsync(string id, GamePack pack)
     {
         using var db = await _factory.Create<GameEditorDb>();
@@ -78,6 +86,7 @@ public class GamePackService : IGamePackService
         try
         {
             await db.SaveChanges();
+            Current = pack;
 
         }
         catch (Exception e)
