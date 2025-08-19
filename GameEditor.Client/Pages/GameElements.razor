@@ -53,7 +53,7 @@
 @code {
 
 
-    private async Task EditElementAsync<T>(T? element) where T : class, IGameElement
+    private async Task EditElementAsync<T>(T? element, bool isEdit) where T : class, IGameElement
     {
 
         var title = element != null ? $"Edit '{element.Name}'" : $"Add {nameof(T)}";
@@ -66,13 +66,51 @@
         DialogParameters dialogParams = new()
         {
             { nameof(GameElementDialog<T>.Value), element},
+            { nameof(GameElementDialog<T>.IsEdit), isEdit }
         };
 
         var dialog = await DialogService.ShowAsync<GameElementDialog<T>>(title, dialogParams, options);
         var result = await dialog.Result;
 
         if (result == null || result.Canceled || result.Data is not T updated) return;
-        CopyEditableFields(element, updated);
+        CopyEditableFields(element!, updated);
+
+
+        //Save the values to the appropriate location in the system
+        switch(element!)
+        {
+            case Scene scene:
+                if (isEdit)
+                {
+                    GamePackService.Current!.Scenes[scene.Id] = scene;
+                }
+                else 
+                {
+                    GamePackService.Current!.Scenes.Add(scene.Id,scene);
+                }
+                break;
+            case Item item:
+                if (isEdit)
+                {
+                    GamePackService.Current!.Items[item.Id] = item;
+                }
+                else
+                {
+                    GamePackService.Current!.Items.Add(item.Id, item);
+                }
+                break;
+            case Npc npc:
+                if (isEdit)
+                {
+                    GamePackService.Current!.Npcs[npc.Id] = npc;
+                }
+                else
+                {
+                    GamePackService.Current!.Npcs.Add(npc.Id, npc);
+                }
+                break;
+        }
+
 
         await GamePackService.UpdateCurrentAsync();
         StateHasChanged();
@@ -100,7 +138,7 @@
 
     private async Task NewScene()
     {
-        await EditElementAsync<Scene>(new Scene());
+        await EditElementAsync<Scene>(new Scene(),false);
 
     }
 
@@ -108,7 +146,7 @@
     private async Task EditScene(GameModel.Models.IGameElement args)
     {
 
-        await EditElementAsync<Scene>(args as Scene ?? throw new ArgumentException("Invalid element type"));
+        await EditElementAsync<Scene>(args as Scene ?? throw new ArgumentException("Invalid element type"),true);
  
     }
 
@@ -119,13 +157,13 @@
     }
 
 
-    private void NewItem()
+    private async Task NewItem()
     {
-        throw new NotImplementedException();
+        await EditElementAsync<Item>(new Item(), false);
     }
-    private void EditItem(GameModel.Models.IGameElement args)
+    private async Task EditItem(GameModel.Models.IGameElement args)
     {
-        throw new NotImplementedException();
+        await EditElementAsync<Item>(args as Item ?? throw new ArgumentException("Invalid element type"), true);
     }
     private void DeleteItem(GameModel.Models.IGameElement args)
     {
@@ -133,14 +171,16 @@
     }
     
     
-    private void NewNpc()
+    private async Task NewNpc()
     {
-        throw new NotImplementedException();
+        await EditElementAsync<Npc>(new Npc(), false);
     }
-    private void EditNpc(GameModel.Models.IGameElement args)
+
+    private async Task EditNpc(GameModel.Models.IGameElement args)
     {
-        throw new NotImplementedException();
+        await EditElementAsync<Npc>(args as Npc ?? throw new ArgumentException("Invalid element type"), true);
     }
+
     private void DeleteNpc(GameModel.Models.IGameElement args)
     {
         throw new NotImplementedException();
