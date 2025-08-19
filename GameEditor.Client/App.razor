@@ -1,17 +1,12 @@
-﻿@using MudBlazor
-@using MudBlazor.Services
-@using GameEditor.Client.Services
-@inject ThemeService ThemeService
+@using Radzen
+@using Radzen.Blazor
 @inject IGamePackService PackSvc
-
 @using RoutingNav = Microsoft.AspNetCore.Components.Routing.NavigationContext
 
-<MudThemeProvider Theme="@ThemeService.CurrentTheme"
-                  @bind-IsDarkMode="@ThemeService.IsDarkMode" />
-
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudPopoverProvider />
+<RadzenDialog />
+<RadzenNotification />
+<RadzenTooltip />
+<RadzenContextMenu />
 
 <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="Bootstrap">
     <Found Context="routeData">
@@ -20,23 +15,19 @@
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(MainLayout)">
-            <MudText Typo="Typo.h6">Sorry, there's nothing at this address.</MudText>
+            <h6>Sorry, there's nothing at this address.</h6>
         </LayoutView>
     </NotFound>
 </Router>
 
 @code {
-  private bool _booted;
+    private bool _booted;
 
-  private async Task Bootstrap(RoutingNav _)
-  {
-    if (_booted) return;
+    private async Task Bootstrap(RoutingNav _)
+    {
+        if (_booted) return;
 
-    await PackSvc.InitializeAsync();
-
-    // If you want to force the user into a selection screen,
-    // you could redirect here—but with auto‐create you probably
-    // just go straight to "/".
-    _booted = true;
-  }
+        await PackSvc.InitializeAsync();
+        _booted = true;
+    }
 }
