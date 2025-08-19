@@ -1,5 +1,0 @@
-﻿/* in your site css or .razor.css file */
-.mud-table td,
-.mud-table th {
-    vertical-align: top; /* or bottom, if you prefer */
-}

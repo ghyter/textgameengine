@@ -1,80 +1,17 @@
-﻿@page "/packs"
-@using GameEditor.Client.Components
-@using GameEditor.Client.Components.Dialogs
+@page "/packs"
 @using GameEditor.Client.Data
-@using MudBlazor
-@using System.Text.Json
-@using GameModel.Models
-@using System.Diagnostics
 @inject IGamePackService GamePackService
-@inject ISnackbar Snackbar
-@inject IDialogService DialogService
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Game Packs</MudText>
+<h3>Game Packs</h3>
 
-        <MudStack Row Spacing="1">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                OnClick="OpenPAckDialog">New Pack</MudButton>
+<ul>
+    @foreach (var record in packs)
+    {
+        <li>@record.Pack.Id - @record.Pack.Title</li>
+    }
+</ul>
 
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
-                OnClick="LoadPacks">Refresh</MudButton>
-        </MudStack>
-    </MudStack>
-
-    <MudDivider Class="my-2" />
-
-    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-        <InputFile OnChange="OnFileSelected" accept=".json" />
-        <MudText Typo="Typo.caption" Class="ml-2">
-            Upload a .json GamePack (key becomes the filename without extension)
-        </MudText>
-    </MudStack>
-
-    <MudTable Items="packs" Dense="true" Hover="true" Class="mt-4" Elevation="0">
-        <HeaderContent>
-            <MudTh Style="width: 48px;"></MudTh>
-            <MudTh>Id</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh Style="width: 280px;">Actions</MudTh>
-        </HeaderContent>
-
-        <RowTemplate>
-            <MudTd>
-                @if (IsSelected(context.Id))
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Title="Selected" />
-                }
-            </MudTd>
-            <MudTd DataLabel="Id">
-                <MudText>@context.Pack.Id</MudText>
-            </MudTd>
-            <MudTd DataLabel="Title">
-                <MudText>@context.Pack.Title</MudText>
-            </MudTd>
-            <MudTd DataLabel="Description">
-                <MudText Truncate="true" MaxLines="2">@context.Pack.Description</MudText>
-            </MudTd>
-            <MudTd DataLabel="Actions">
-                <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
-                    Disabled="@(IsSelected(context.Id))" OnClick="() => SelectPack(context.Id)">
-                    Select
-                </MudButton>
-
-                <MudButton Variant="Variant.Text" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete"
-                    OnClick="() => DeletePack(context.Id)">
-                    Delete
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
-
-        <NoRecordsContent>
-            <MudText Typo="Typo.body2" Class="pa-4">No packs found. Create a new one or upload a JSON file.</MudText>
-        </NoRecordsContent>
-    </MudTable>
-</MudPaper>
+<button @onclick="LoadPacks">Refresh</button>
 
 @code {
     private List<GamePackRecord> packs = new();
@@ -84,83 +21,8 @@
         await LoadPacks();
     }
 
-    private bool IsSelected(string id)
-    => GamePackService.Current?.Id == id;
-
-    private async Task SelectPack(string id)
-    {
-        await GamePackService.SwitchAsync(id);
-        Snackbar.Add($"Selected pack '{id}'.", Severity.Success);
-        StateHasChanged();
-    }
-
     private async Task LoadPacks()
     {
         packs = await GamePackService.ReadAllAsync();
-        StateHasChanged();
-    }
-
-    private async Task OpenPAckDialog()
-    {
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<PackDialog>("New Game Pack", options);
-        var result = await dialog.Result;
-
-        if (!result!.Canceled && result.Data is GamePack newPack)
-        {
-            // If the key exists, Update; else Create
-            if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
-                await GamePackService.CreateAsync(newPack.Id, newPack);
-
-            Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
-            await LoadPacks();
-        }
-    }
-
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        var filename = Path.GetFileNameWithoutExtension(file.Name);
-
-        var existing = await GamePackService.ReadAsync(filename);
-        if (existing != null)
-        {
-            Snackbar.Add($"A pack with id '{filename}' already exists.", Severity.Warning);
-            return;
-        }
-
-        using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
-        using var reader = new StreamReader(stream);
-        var json = await reader.ReadToEndAsync();
-        try
-        {
-            var pack = JsonSerializer.Deserialize<GamePack>(json);
-            if (pack is null)
-            {
-                Snackbar.Add("Failed to parse GamePack JSON.", Severity.Error);
-                return;
-            }
-
-            pack.Id = filename;
-            if (string.IsNullOrWhiteSpace(pack.Title))
-                pack.Title = filename;
-
-            if (!await GamePackService.UpdateAsync(pack.Id, pack))
-                await GamePackService.CreateAsync(pack.Id, pack);
-
-            Snackbar.Add($"Pack '{filename}' uploaded successfully.", Severity.Success);
-            await LoadPacks();
-        }
-        catch (JsonException ex)
-        {
-            Snackbar.Add($"JSON error: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private async Task DeletePack(string id)
-    {
-        await GamePackService.DeleteAsync(id);
-        Snackbar.Add($"Pack '{id}' deleted.", Severity.Info);
-        await LoadPacks();
     }
 }
