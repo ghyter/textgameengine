@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
     <ProjectReference Include="..\GameModel\GameModel.csproj" />
   </ItemGroup>
 

@@ -65,15 +65,15 @@ public class GameInitializer
                 IsVisible = s.Value.IsVisible,
                 State = s.Value.StartingState ?? "default"
             };
-            gs.Elements[id].Element.Id = id;
+            //gs.Elements[id].Element.Id = id;
             s.Value.Exits.ForEach(exit =>
             {
-                exit.Id = $"exit:{s.Value.Id}:{exit.TargetId}";
-                gs.Elements[exit.Id] = new()
+                string Id = $"exit:{s.Value.Id}:{exit.TargetId}";
+                gs.Elements[Id] = new()
                 {
-                    Id = exit.Id,
+                    Id = Id,
                     IsVisible = exit.IsVisible,
-                    Element = exit,
+                    Element = exit.DeepClone(),
                     Location = id,
                     State = exit.StartingState
                 };

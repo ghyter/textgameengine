@@ -1,18 +1,9 @@
-﻿@using MudBlazor
-@using MudBlazor.Services
-@using GameEditor.Client.Services
-@inject ThemeService ThemeService
+﻿@using GameEditor.Client.Services
 @inject IGamePackService PackSvc
 
 @using RoutingNav = Microsoft.AspNetCore.Components.Routing.NavigationContext
 
-<MudThemeProvider Theme="@ThemeService.CurrentTheme"
-                  @bind-IsDarkMode="@ThemeService.IsDarkMode" />
-
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudPopoverProvider />
-
+<RadzenComponents />
 <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="Bootstrap">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
@@ -20,12 +11,15 @@
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(MainLayout)">
-            <MudText Typo="Typo.h6">Sorry, there's nothing at this address.</MudText>
+
+            <RadzenCard Variant="Variant.Flat" class="rz-background-color-danger-lighter">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Sorry, there's nothing at this address.</RadzenText>
+            </RadzenCard>
         </LayoutView>
     </NotFound>
 </Router>
 
-@code {
+@code { 
   private bool _booted;
 
   private async Task Bootstrap(RoutingNav _)

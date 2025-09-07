@@ -1,200 +1,194 @@
 ﻿@page "/run"
-@using MudBlazor
 @using GameModel.Session
 @using GameModel.Models
+@using Radzen
+@using Radzen.Blazor
+@using Microsoft.AspNetCore.Components.Web
+
 @inject IGamePackService GamePackService
-@inject ISnackbar Snackbar
+@inject NotificationService NotificationService
 
-<MudLayout>
+<RadzenLayout Style="min-height:100vh;">
+  <!-- Left Drawer: Inventory / Ordinals -->
+  <RadzenSidebar @bind-Expanded="_leftOpen" Style="width:300px;">
+    <div class="p-3">
+      @if (_session != null)
+      {
+        <RadzenText Text="@_session.Player.Element.Name" Style="font-size:1.1rem;font-weight:600;" />
+        
+        <RadzenText Text="Inventory" Style="font-weight:600;opacity:.85" />
 
-    <!-- Left Drawer: Inventory / Ordinals (placeholder) -->
-    <MudDrawerContainer>
+        @foreach (var e in _session.Elements.Where(e => e.Value.Element is Item && e.Value.Location == "_inventory"))
+        {
+          <div><strong>@e.Value.Element.Name</strong></div>
+        }
+        <RadzenText Text="In Room (ordinal list, placeholder)" Style="font-weight:600;opacity:.85" />
+        @foreach (var i in _session.SceneOrdinals)
+        {
+          <div style="font-size:.8rem;opacity:.8">
+            @_session.Elements.First(el => el.Value.Id == i).Value.Element.Name
+          </div>
+        }
+      }
+    </div>
+  </RadzenSidebar>
 
-        <MudDrawer Open="@_leftOpen" Variant="DrawerVariant.Responsive" Anchor="Anchor.Left" Elevation="1"
-            DisableOverlay="false">
-            <MudStack Class="p-3, m-3" Spacing="3">
-                @if (_session != null)
-                {
-                    <MudText Typo="Typo.h6">@_session.Player.Element.Name</MudText>
-                    <MudDivider />
-                    <MudText Typo="Typo.subtitle2" Class="mt-2">Inventory</MudText>
-                    @foreach (var e in _session.Elements.Where(e => e.Value.Element is Item && e.Value.Location ==
-                                    "_inventory"))
-                    {
-                        <div><strong>@e.Value.Element.Name</strong></div>
+  <!-- Right Drawer: Level map / debug -->
+  <RadzenSidebar @bind-Expanded="_rightOpen" Position="SidebarPosition.Right" Style="width:360px;">
+    <div class="p-3">
+      <RadzenText Text="Game Locations" Style="font-size:1.1rem;font-weight:600;" />
+      @if (_session != null)
+      {
+        @foreach (var e in _session.Elements.Where(e => e.Value.Element is Item))
+        {
+          <div><strong>@e.Value.Element.Name</strong> - @e.Value.Location</div>
+        }
 
-                    }
-                    <MudDivider Class="my-2" />
 
-                    <MudText Typo="Typo.subtitle2">In Room (ordinal list, placeholder)</MudText>
-                    @foreach (var i in _session.SceneOrdinals)
-                    {
-                        <MudText Typo="Typo.caption">@_session.Elements.Where(e => e.Value.Id == i).First().Value.Element.Name
-                        </MudText>
-                    }
-                }
-            </MudStack>
-        </MudDrawer>
+        @foreach (var e in _session.Elements.OrderBy(e => e.Value.Element.Id))
+        {
+          <div>
+            <strong>@e.Value.Element.Name (@e.Value.Element.Id)</strong> - @e.Value.State / @e.Value.Location
+          </div>
+        }
+      }
 
-        <!-- Right Drawer: Level map (placeholder) -->
-        <MudDrawer Open="@_rightOpen" Variant="DrawerVariant.Responsive" Anchor="Anchor.Right" Elevation="1"
-            DisableOverlay="false">
-            <MudStack Class="p-3" Spacing="2">
-                <MudText Typo="Typo.h6">Game Locations</MudText>
-                @if (_session != null)
-                {
-                    @foreach (var e in _session.Elements.Where(e => e.Value.Element is Item))
-                    {
-                        <div><strong>@e.Value.Element.Name</strong> - @e.Value.Location</div>
-                    }
-                    <MudDivider />
-                    @foreach (var e in _session.Elements.OrderBy(e => e.Value.Element.Id))
-                    {
-                        <div><strong>@e.Value.Element.Name (@e.Value.Element.Id)</strong> - @e.Value.State / @e.Value.Location
-                        </div>
-                    }
-                }
+      <RadzenText Text="Level Map (placeholder)" Style="font-weight:600;opacity:.85" class="mt-2" />
+      <RadzenCard class="mt-2" Style="padding:12px;">
+        <RadzenText Text="[map will render here]" Style="font-size:.85rem;opacity:.7" />
+      </RadzenCard>
+    </div>
+  </RadzenSidebar>
 
-                <MudText Typo="Typo.subtitle2" Class="mt-2">Level Map (placeholder)</MudText>
-                <MudPaper Class="pa-3 mt-2" Outlined="true">
-                    <!-- TODO: inject your map canvas/graph here -->
-                    <MudText Typo="Typo.caption">[map will render here]</MudText>
-                </MudPaper>
-            </MudStack>
-        </MudDrawer>
+  <RadzenBody>
+    <div class="p-3">
+      <!-- Top controls -->
+      <div class="rz-display-flex rz-align-items-center rz-justify-content-between mb-3">
+        <div class="rz-display-flex" style="gap:.5rem;">
+          <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="@(_leftOpen ? "chevron_left" : "chevron_right")"
+                        Text="Left Panel" Click="@ToggleLeft" />
+          <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="@(_rightOpen ? "chevron_right" : "chevron_left")"
+                        Text="Right Panel" Click="@ToggleRight" />
+        </div>
 
-        <MudMainContent>
+        <RadzenText Text="@(_session is null ? "No game loaded" : $"Game: {_session.Header ?? GamePackService.Current?.Title}")"
+                    Style="font-weight:500;opacity:.85" />
+      </div>
 
-            <!-- Top controls -->
-            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
-                <MudStack Row="true" Spacing="1">
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                        StartIcon="@(_leftOpen ? Icons.Material.Filled.ChevronLeft : Icons.Material.Filled.ChevronRight)"
-                        OnClick="@ToggleLeft">
-                        Left Panel
-                    </MudButton>
+      <!-- Game header + description -->
+      <RadzenCard class="mb-3" Style="padding:16px;">
+        <RadzenText Text="@_currentHeader" Style="font-size:1.25rem;font-weight:600" />
+        <div style="white-space:pre-wrap">@_currentDescription</div>
+      </RadzenCard>
 
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                        StartIcon="@(_rightOpen ? Icons.Material.Filled.ChevronRight : Icons.Material.Filled.ChevronLeft)"
-                        OnClick="@ToggleRight">
-                        Right Panel
-                    </MudButton>
-                </MudStack>
+      <!-- Input -->
+      <RadzenCard Style="padding:12px;">
+        <div class="rz-display-flex rz-align-items-center" style="gap:.5rem;">
+          <RadzenTextBox @bind-Value="_input"
+                         Placeholder="Type a command…"
+                         Style="flex:1"
+                         ChangeEvent="ChangeEvent.Input"
+                         @onkeydown="CheckKey" />
+          <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="Go" Click="ExecuteAsync" />
+        </div>
+      </RadzenCard>
 
-                <MudText Typo="Typo.subtitle2">
-                    @(_session is null
-                                        ? "No game loaded"
-                                        : $"Game: {_session.Header ?? GamePackService.Current?.Title}")
-                </MudText>
-            </MudStack>
-
-            <!-- Game header + description -->
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.h5">@_currentHeader</MudText>
-                <MudDivider Class="my-2" />
-                <MudText Style="white-space:pre-wrap">@_currentDescription</MudText>
-            </MudPaper>
-
-            <!-- Input -->
-            <MudPaper Class="pa-3 mt-3">
-                <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
-                    <MudTextField @bind-Value="_input" Label="Type a command…" Variant="Variant.Outlined"
-                        FullWidth="true" Immediate="true" OnKeyDown="CheckKey" />
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ExecuteAsync">
-                        Go
-                    </MudButton>
-                </MudStack>
-            </MudPaper>
-
-            <!-- Optional: recent log -->
-            @if (_log.Count > 0)
+      <!-- Optional: recent log -->
+      @if (_log.Count > 0)
+      {
+        <RadzenAccordion class="mt-3">
+          <RadzenAccordionItem Text="Show Debug Log">
+            @foreach (var l in _log)
             {
-                <MudExpansionPanels Class="mt-3">
-                    <MudExpansionPanel Text="Show Debug Log">
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
+              <div>@l</div>
             }
-
-        </MudMainContent>
-
-    </MudDrawerContainer>
-</MudLayout>
+          </RadzenAccordionItem>
+        </RadzenAccordion>
+      }
+    </div>
+  </RadzenBody>
+</RadzenLayout>
 
 @code {
-    // Drawer state (you can control these from game context later)
-    private bool _leftOpen = true;
-    private bool _rightOpen = false;
+  // Drawer state
+  private bool _leftOpen = true;
+  private bool _rightOpen = false;
 
-    // Game session & UI
-    private GameSession? _session;
-    private string _currentHeader = "Welcome";
-    private string _currentDescription = "Start a new game or select a pack.";
-    private string _input = string.Empty;
-    private readonly List<string> _log = new();
+  // Game session & UI
+  private GameSession? _session;
+  private string _currentHeader = "Welcome";
+  private string _currentDescription = "Start a new game or select a pack.";
+  private string _input = string.Empty;
+  private readonly List<string> _log = new();
 
-    protected override Task OnInitializedAsync()
+  protected override Task OnInitializedAsync()
+  {
+    if (GamePackService.Current is null)
     {
-        // Ensure a pack/session exists. Adapt this to your service API.
-        // If you already create a session elsewhere, just fetch it.
-        if (GamePackService.Current is null)
-        {
-            _currentHeader = "No Pack Selected";
-            _currentDescription = "Go to Packs and select a GamePack to start.";
-            return Task.CompletedTask;
-        }
-
-        // Create or retrieve a session tied to the current pack.
-        // TODO: replace with your actual way to create a session from the selected GamePack.
-        _session = GameSession.NewGame(GamePackService.Current);
-
-        var round = _session.Execute("look");
-        _currentHeader = round.Header;
-        _currentDescription = round.Body ?? string.Empty;
-        StateHasChanged();
-        return Task.CompletedTask;
+      _currentHeader = "No Pack Selected";
+      _currentDescription = "Go to Packs and select a GamePack to start.";
+      return Task.CompletedTask;
     }
 
-    private void ToggleLeft() => _leftOpen = !_leftOpen;
-    private void ToggleRight() => _rightOpen = !_rightOpen;
+    _session = GameSession.NewGame(GamePackService.Current);
 
-    private async Task CheckKey(KeyboardEventArgs e)
+    var round = _session.Execute("look");
+    _currentHeader = round.Header;
+    _currentDescription = round.Body ?? string.Empty;
+
+    StateHasChanged();
+    return Task.CompletedTask;
+  }
+
+  private void ToggleLeft()  => _leftOpen  = !_leftOpen;
+  private void ToggleRight() => _rightOpen = !_rightOpen;
+
+  private async Task CheckKey(KeyboardEventArgs e)
+  {
+    if (e.Key == "Enter")
     {
-        if (e.Key == "Enter")
-        {
-            await ExecuteAsync();
-        }
-        if (e.Key == "ArrowUp")
-        {
-            _input = _session?.GameLog.Last().PlayerInput ?? string.Empty;
-        }
+      await ExecuteAsync();
+    }
+    else if (e.Key == "ArrowUp")
+    {
+      _input = _session?.GameLog.LastOrDefault()?.PlayerInput ?? string.Empty;
+      StateHasChanged();
+    }
+  }
+
+  private async Task ExecuteAsync()
+  {
+    if (_session is null)
+    {
+      NotificationService.Notify(new NotificationMessage
+      {
+        Severity = NotificationSeverity.Warning,
+        Summary = "No active game session. Select a pack first."
+      });
+      return;
     }
 
-    private async Task ExecuteAsync()
+    var input = _input?.Trim() ?? string.Empty;
+    if (string.IsNullOrWhiteSpace(input))
+      return;
+
+    try
     {
-        if (_session is null)
-        {
-            Snackbar.Add("No active game session. Select a pack first.", Severity.Warning);
-            return;
-        }
-
-        string input = _input?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(input))
-            return;
-
-        try
-        {
-            var round = _session.Execute(input); 
-            // Update UI
-            _currentHeader = round.Header;
-            _currentDescription = round.Body!;
-            _input = string.Empty;
-        }
-        catch (Exception ex)
-        {
-            _log.Add($"Error: {ex.Message}");
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
-
-        await InvokeAsync(StateHasChanged);
+      var round = _session.Execute(input);
+      _currentHeader = round.Header;
+      _currentDescription = round.Body ?? string.Empty;
+      _input = string.Empty;
     }
+    catch (Exception ex)
+    {
+      _log.Add($"Error: {ex.Message}");
+      NotificationService.Notify(new NotificationMessage
+      {
+        Severity = NotificationSeverity.Error,
+        Summary = $"Error: {ex.Message}"
+      });
+    }
+
+    await InvokeAsync(StateHasChanged);
+  }
 }

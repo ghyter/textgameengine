@@ -1,0 +1,606 @@
+{
+  "Title": "Clue Mansion",
+  "Player": {
+    "Id": "player:player",
+    "Name": "Det. Boddy",
+    "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
+    "StartingLocation": "hall",
+    "StartingState": "default",
+    "Attributes": {
+      "Luck": 10,
+      "Strength": 10,
+      "HitPoints": 10,
+      "ArmorClass": 10
+    },
+    "Flags": {
+      "IsBald": true
+    },
+    "Properties": {
+      "Remaining Hair": "White"
+    },
+    "States": {
+      "default": "You are ready to explore the mansion.",
+      "injured": "You are injured and need to find a way to heal."
+    }
+  },
+  "Scenes": {
+    "study": {
+      "Id": "study",
+      "Name": "Study",
+      "Description": "A dimly lit study lined with aged bookshelves and a large, claw-footed desk. Dust lingers in the air and a single green-shaded lamp flickers softly. A faint draft suggests a hidden passage might lie nearby.",
+      "IsVisible": false,
+      "Exits": [
+        {
+          "Name": "South",
+          "Direction": "South",
+          "TargetId": "library",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the library is open.",
+            "closed": "The exit to the library is closed."
+          }
+        },
+        {
+          "Name": "East",
+          "Direction": "East",
+          "TargetId": "hall",
+          "StartingState": "locked",
+          "States": {
+            "open": "The exit to the hall is open.",
+            "closed": "The exit to the hall is closed.",
+            "locked": "The door to the hall is locked tight."
+          }
+        },
+        {
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
+          "Name": "Secret Passage",
+          "TargetId": "kitchen",
+          "IsVisible": false,
+          "StartingState": "closed",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "hall": {
+      "Id": "hall",
+      "Name": "Hall",
+      "Description": "A long entrance hall with polished marble floors, twin staircases sweeping upward, and antique portraits staring down from every wall. You feel as if the house itself is watching.",
+      "Exits": [
+        {
+          "Direction": "West",
+          "Name": "West",
+          "TargetId": "study",
+          "StartingState": "locked",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed.",
+            "locked": "The door to the Study is locked tight."
+          }
+        },
+        {
+          "Direction": "East",
+          "Name": "East",
+          "TargetId": "lounge",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        }
+      ],
+      "StartingState": "initial",
+      "States": {
+        "initial": "All is normal here.",
+        "post-bomb": "All of the furniture is destroyed and bits of wood and shards of glass litter the floor."
+      }
+    },
+    "lounge": {
+      "Id": "lounge",
+      "Name": "Lounge",
+      "IsVisible": false,
+      "Description": "A richly decorated sitting room with velvet curtains, high-backed chairs, and the lingering scent of cigar smoke. The room feels like it was made for secrets and whispers.",
+      "Exits": [
+        {
+          "Direction": "West",
+          "Name": "West",
+          "TargetId": "hall",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the hall is open.",
+            "closed": "The exit to the hall is closed."
+          }
+        },
+        {
+          "Direction": "South",
+          "Name": "South",
+          "TargetId": "dining-room",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        },
+        {
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
+          "Name": "Secret Passage",
+          "TargetId": "conservatory",
+          "StartingState": "closed",
+          "IsVisible": false,
+          "States": {
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "dining-room": {
+      "Id": "dining-room",
+      "Name": "Dining Room",
+      "IsVisible": false,
+      "Description": "A long mahogany table stretches beneath a flickering chandelier. The silverware is still set, as if dinner had been interrupted — or never started at all.",
+      "Exits": [
+        {
+          "Direction": "North",
+          "Name": "North",
+          "TargetId": "lounge",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        },
+        {
+          "Direction": "South",
+          "Name": "South",
+          "TargetId": "kitchen",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "kitchen": {
+      "Id": "kitchen",
+      "Name": "Kitchen",
+      "IsVisible": false,
+      "Description": "Pots dangle from wrought-iron racks above stone counters. The smell of old spices and something more metallic lingers in the air. Knives rest suspiciously out of place.",
+      "Exits": [
+        {
+          "Direction": "North",
+          "Name": "North",
+          "TargetId": "dining-room",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the dining room is open.",
+            "closed": "The exit to the dining room is closed."
+          }
+        },
+        {
+          "Direction": "West",
+          "Name": "West",
+          "TargetId": "ballroom",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        },
+        {
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
+          "Name": "Secret Passage",
+          "TargetId": "study",
+          "IsVisible": false,
+          "StartingState": "closed",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "ballroom": {
+      "Id": "ballroom",
+      "Name": "Ballroom",
+      "IsVisible": false,
+      "Description": "An echoing chamber with a polished parquet floor and towering windows. Chandeliers overhead sway slightly, though there is no wind. Footsteps seem to follow your own.",
+      "Exits": [
+        {
+          "Direction": "East",
+          "Name": "East",
+          "TargetId": "kitchen",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the kitchen is open.",
+            "closed": "The exit to the kitchen is closed."
+          }
+        },
+        {
+          "Direction": "West",
+          "Name": "West",
+          "TargetId": "conservatory",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "conservatory": {
+      "Id": "conservatory",
+      "Name": "Conservatory",
+      "IsVisible": false,
+      "Description": "Tall glass walls rise into a domed ceiling, letting moonlight bathe rows of exotic plants. Leaves rustle even when you’re still, and the air is thick with humidity.",
+      "Exits": [
+        {
+          "Direction": "East",
+          "Name": "East",
+          "TargetId": "ballroom",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the ballroom is open.",
+            "closed": "The exit to the ballroom is closed."
+          }
+        },
+        {
+          "Direction": "North",
+          "Name": "North",
+          "TargetId": "billiard-room",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the billiard room is open.",
+            "closed": "The exit to the billiard room is closed."
+          }
+        },
+        {
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
+          "Name": "Secret Passage",
+          "TargetId": "lounge",
+          "StartingState": "hidden",
+          "IsVisible": false,
+          "States": {
+            "hidden": "There is a knocking sound from behind the wall.",
+            "open": "The exit to the lounge is open.",
+            "closed": "The exit to the lounge is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "billiard-room": {
+      "Id": "billiard-room",
+      "Name": "Billiard Room",
+      "IsVisible": false,
+      "Description": "Faded green felt lines the billiard table at the center. Chalk dust covers the cues and a forgotten drink rests on a side table, still half full. Someone left in a hurry.",
+      "Exits": [
+        {
+          "Direction": "North",
+          "Name": "North",
+          "TargetId": "library",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the library is open.",
+            "closed": "The exit to the library is closed."
+          }
+        },
+        {
+          "Direction": "South",
+          "Name": "South",
+          "TargetId": "conservatory",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the conservatory is open.",
+            "closed": "The exit to the conservatory is closed."
+          }
+        }
+      ],
+      "States": {}
+    },
+    "library": {
+      "Id": "library",
+      "Name": "Library",
+      "IsVisible": false,
+      "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
+      "Exits": [
+        {
+          "Direction": "North",
+          "Name": "North",
+          "TargetId": "study",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the study is open.",
+            "closed": "The exit to the study is closed."
+          }
+        },
+        {
+          "Direction": "South",
+          "Name": "South",
+          "TargetId": "billiard-room",
+          "StartingState": "open",
+          "States": {
+            "open": "The exit to the billiard room is open.",
+            "closed": "The exit to the billiard room is closed."
+          }
+        }
+      ],
+      "States": {}
+    }
+  },
+  "Items": {
+    "candlestick": {
+      "Id": "candlestick",
+      "Name": "Candlestick",
+      "Description": "A heavy brass candlestick, ornately sculpted and cold to the touch. Traces of soot and wax cling to its rim, but it feels more like a weapon than a decoration.",
+      "StartingLocation": "lounge",
+      "States": {}
+    },
+    "dagger": {
+      "Id": "dagger",
+      "Name": "Dagger",
+      "Description": "A slim-bladed dagger with a jeweled hilt and a wicked edge. Though designed for elegance, its stained blade tells of more sinister use.",
+      "StartingLocation": "dining-room",
+      "StartingState": "clean",
+      "States": {
+        "clean": "The dagger's blade gleams, free of any stains.",
+        "bloody": "The dagger's blade is stained with fresh blood."
+      }
+    },
+    "lead-pipe": {
+      "Id": "lead-pipe",
+      "Name": "Lead Pipe",
+      "Description": "A bent section of lead piping, heavy and marred with rust. It's oddly out of place in such a refined mansion.",
+      "StartingLocation": "hall",
+      "StartingState": "clean",
+      "States": {
+        "clean": "The lead pipe is free of any marks except for rust.",
+        "bloody": "The lead pipe is smeared with blood."
+      }
+    },
+    "revolver": {
+      "Id": "revolver",
+      "Name": "Revolver",
+      "Description": "A six-shot revolver, gleaming darkly. The chamber spins smoothly, but one bullet seems freshly fired.",
+      "StartingLocation": "study",
+      "StartingState": "loaded",
+      "States": {
+        "loaded": "The revolver is loaded and ready to fire.",
+        "unloaded": "The revolver is empty, its chamber clicking hollowly.",
+        "fired": "The revolver has just been fired, smoke curling from the barrel."
+      }
+    },
+    "rope": {
+      "Id": "rope",
+      "Name": "Rope",
+      "Description": "A coarse, looped rope — expertly tied. It carries the scent of the outdoors, yet the fibers are frayed from recent tension.",
+      "StartingLocation": "billiard-room",
+      "StartingState": "coiled",
+      "States": {
+        "coiled": "The rope is neatly coiled and ready for use.",
+        "tied": "The rope is tied securely around something.",
+        "frayed": "The rope is frayed and weakened from use."
+      }
+    },
+    "wrench": {
+      "Id": "wrench",
+      "Name": "Wrench",
+      "Description": "A large steel wrench coated in oil and grime. Its blunt weight gives it a deadly heft in untrained hands.",
+      "StartingLocation": "kitchen",
+      "StartingState": "clean",
+      "States": {
+        "clean": "The wrench is clean and shiny.",
+        "bloody": "The wrench is smeared with blood."
+      }
+    },
+    "flashlight": {
+      "Id": "flashlight",
+      "Name": "Black and Decker Flashlight",
+      "Description": "Powerful and reliable, this flashlight cuts through the darkness with a beam that feels almost alive. The batteries are fresh, and it hums softly when switched on.",
+      "StartingLocation": "_inventory",
+      "StartingState": "default",
+      "States": {
+        "default": "The flashlight is off, waiting to be used.",
+        "on": "The flashlight is on, illuminating the room with a steady beam.",
+        "off": "The flashlight is off, leaving you in darkness."
+      }
+    },
+    "cabinet": {
+      "Id": "cabinet",
+      "Name": "Old Oak Cabinet",
+      "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
+      "StartingLocation": "billiard-room",
+      "StartingState": "locked",
+      "Flags": {
+        "IsMovable": false
+      },
+      "States": {
+        "locked": "The cabinet is locked tightly, its ornate keyhole glinting with age.",
+        "unlocked": "The cabinet stands unlocked, its contents waiting to be revealed.",
+        "open": "The cabinet door hangs open, shadows curling around its empty interior."
+      }
+    }
+  },
+  "Npcs": {
+    "scarlet": {
+      "Id": "scarlet",
+      "Name": "Miss Scarlet",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "lounge",
+      "Description": "Miss Scarlet exudes charm and mystery. Draped in crimson silk, she glides through rooms like a whisper of perfume and suspicion. Her smile rarely reaches her eyes.",
+      "States": {}
+    },
+    "mustard": {
+      "Id": "mustard",
+      "Name": "Colonel Mustard",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "hall",
+      "Description": "Colonel Mustard stands tall and broad-shouldered, his military uniform still crisp despite his retirement. He speaks in clipped commands and never turns his back to a door.",
+      "States": {}
+    },
+    "white": {
+      "Id": "white",
+      "Name": "Mrs. White",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "kitchen",
+      "Description": "Mrs. White, the long-time housekeeper, moves with quiet efficiency. Her hands are always gloved, and her expression betrays years of buried secrets.",
+      "States": {}
+    },
+    "green": {
+      "Id": "green",
+      "Name": "Mr. Green",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "conservatory",
+      "Description": "Mr. Green fidgets nervously, adjusting his tie far too often. He speaks in practiced pleasantries, but his darting eyes suggest he's hiding more than gossip.",
+      "States": {}
+    },
+    "peacock": {
+      "Id": "peacock",
+      "Name": "Mrs. Peacock",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "hall",
+      "Description": "Mrs. Peacock is regal and razor-tongued, adorned in sapphire feathers and too much jewelry. She always knows who last entered the room — and why they shouldn't have.",
+      "States": {}
+    },
+    "plum": {
+      "Id": "plum",
+      "Name": "Professor Plum",
+      "Attributes": {
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "StartingLocation": "hall",
+      "Description": "Professor Plum adjusts his glasses often and mutters to himself about motive and means. His intellect is vast, but his memory conveniently selective.",
+      "States": {}
+    }
+  },
+  "Actions": [
+    {
+      "Id": "open_locked_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Open Locked Door",
+      "Description": "Attempts to open a locked door using strength.",
+      "Difficulty": "Difficult",
+      "AttributeCheck": "Strength",
+      "CanonicalVerb": "force",
+      "VerbAliases": [
+        "bash",
+        "break door"
+      ],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "HasState",
+          "Comparison": "equals",
+          "Value": "locked",
+          "FailMessage": "$Target1.Name does not have a lock."
+        },
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "locked",
+          "FailMessage": "$Target1.Name is $Target1.State."
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$Target1",
+          "Type": "ChangeState",
+          "NewValue": "open"
+        }
+      ],
+      "SuccessMessage": "You strain and the lock gives way. The door swings open.",
+      "FailureMessage": "You struggle, but the door doesn’t budge."
+    },
+    {
+      "Id": "open_closed_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Open Closed Door",
+      "Description": "Attempts to open a closed door.",
+      "Difficulty": "Trivial",
+      "CanonicalVerb": "open",
+      "VerbAliases": [],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "closed",
+          "FailMessage": "Cannot open $Target1.Name. It is $Target1.State"
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$Target1",
+          "Type": "ChangeState",
+          "NewValue": "open"
+        }
+      ],
+      "SuccessMessage": "You open the door.",
+      "FailureMessage": "You cannot open $Target1.Name."
+    },
+    {
+      "Id": "close_opened_door",
+      "RequiredTargets": 1,
+      "Target1": "exit:*",
+      "Target2": "",
+      "Name": "Close Open Door",
+      "Description": "Attempts to close an open door.",
+      "Difficulty": "Trivial",
+      "CanonicalVerb": "close",
+      "VerbAliases": [
+        "shut"
+      ],
+      "Conditions": [
+        {
+          "GameElementId": "$Target1",
+          "Rule": "StateValue",
+          "Comparison": "equals",
+          "Value": "open",
+          "FailMessage": "$Target1.Name is $Target1.State"
+        }
+      ],
+      "Effects": [
+        {
+          "GameElementId": "$Target1",
+          "Type": "ChangeState",
+          "NewValue": "closed"
+        }
+      ],
+      "SuccessMessage": "You close the door.",
+      "FailureMessage": "You cannot close $Target1.Name."
+    }
+  ]
+}

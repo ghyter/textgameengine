@@ -1,27 +1,28 @@
 {
   "Title": "Clue Mansion",
-    "Player": {
-    "Id": "player:player",
-    "Name": "Det. Boddy",
-    "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
-    "StartingLocation": "hall",
-    "StartingState": "default",
-    "Attributes": {
-      "Luck": 10,
-      "Strength": 10,
-      "HitPoints": 10,
-      "ArmorClass": 10
-    },
-    "Flags":{
-      "IsBald": true
-
-    },
-    "Properties":{
-      "Remaining Hair": "White"
-    },
-    "States": {
-      "default": "You are ready to explore the mansion.",
-      "injured": "You are injured and need to find a way to heal."
+  "Players": {
+    "player": {
+      "Id": "player",
+      "Name": "Det. Boddy",
+      "Description": "You are a detective in a grand mansion, tasked with solving a mystery. Your surroundings are filled with secrets and hidden dangers.",
+      "StartingLocation": "hall",
+      "StartingState": "default",
+      "Attributes": {
+        "Luck": 10,
+        "Strength": 10,
+        "HitPoints": 10,
+        "ArmorClass": 10
+      },
+      "Flags": {
+        "IsBald": true
+      },
+      "Properties": {
+        "Remaining Hair": "White"
+      },
+      "States": {
+        "default": "You are ready to explore the mansion.",
+        "injured": "You are injured and need to find a way to heal."
+      }
     }
   },
   "Scenes": {
@@ -116,7 +117,7 @@
           }
         },
         {
-          "Direction" :"South",
+          "Direction": "South",
           "Name": "South",
           "TargetId": "dining-room",
           "StartingState": "open",
@@ -127,7 +128,7 @@
         },
         {
           "Direction": "Custom",
-          "CustomDirection":"Secret Passage",
+          "CustomDirection": "Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "conservatory",
           "StartingState": "closed",
@@ -197,7 +198,7 @@
         },
         {
           "Direction": "Custom",
-          "CustomDirection":"Secret Passage",
+          "CustomDirection": "Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "study",
           "IsVisible": false,
@@ -227,7 +228,7 @@
           }
         },
         {
-          "Direction":"West",
+          "Direction": "West",
           "Name": "West",
           "TargetId": "conservatory",
           "StartingState": "open",
@@ -256,7 +257,7 @@
           }
         },
         {
-          "Direction":"North",
+          "Direction": "North",
           "Name": "North",
           "TargetId": "billiard-room",
           "StartingState": "open",
@@ -266,8 +267,8 @@
           }
         },
         {
-          "Direction":"Custom",
-          "CustomDirection":"Secret Passage",
+          "Direction": "Custom",
+          "CustomDirection": "Secret Passage",
           "Name": "Secret Passage",
           "TargetId": "lounge",
           "StartingState": "hidden",
@@ -298,7 +299,7 @@
           }
         },
         {
-          "Direction":"South",
+          "Direction": "South",
           "Name": "South",
           "TargetId": "conservatory",
           "StartingState": "open",
@@ -317,7 +318,7 @@
       "Description": "Towering shelves filled with mismatched volumes stretch into shadow. A ladder leans nearby and a leather armchair sits by the fireplace. One book lies open on the floor.",
       "Exits": [
         {
-          "Direction":"North",
+          "Direction": "North",
           "Name": "North",
           "TargetId": "study",
           "StartingState": "open",
@@ -423,7 +424,7 @@
       "Description": "An antique oak cabinet with intricate scrollwork and a brass locking latch. It creaks ominously when disturbed.",
       "StartingLocation": "billiard-room",
       "StartingState": "locked",
-      "Flags":{
+      "Flags": {
         "IsMovable": false
       },
       "States": {
@@ -437,7 +438,7 @@
     "scarlet": {
       "Id": "scarlet",
       "Name": "Miss Scarlet",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -448,7 +449,7 @@
     "mustard": {
       "Id": "mustard",
       "Name": "Colonel Mustard",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -459,7 +460,7 @@
     "white": {
       "Id": "white",
       "Name": "Mrs. White",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -470,7 +471,7 @@
     "green": {
       "Id": "green",
       "Name": "Mr. Green",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -481,7 +482,7 @@
     "peacock": {
       "Id": "peacock",
       "Name": "Mrs. Peacock",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -492,7 +493,7 @@
     "plum": {
       "Id": "plum",
       "Name": "Professor Plum",
-      "Attributes":{
+      "Attributes": {
         "HitPoints": 10,
         "ArmorClass": 10
       },
@@ -542,7 +543,7 @@
       "SuccessMessage": "You strain and the lock gives way. The door swings open.",
       "FailureMessage": "You struggle, but the door doesn’t budge."
     },
-     {
+    {
       "Id": "open_closed_door",
       "RequiredTargets": 1,
       "Target1": "exit:*",
@@ -571,7 +572,7 @@
       "SuccessMessage": "You open the door.",
       "FailureMessage": "You cannot open $Target1.Name."
     },
-     {
+    {
       "Id": "close_opened_door",
       "RequiredTargets": 1,
       "Target1": "exit:*",
@@ -580,7 +581,9 @@
       "Description": "Attempts to close an open door.",
       "Difficulty": "Trivial",
       "CanonicalVerb": "close",
-      "VerbAliases": ["shut"],
+      "VerbAliases": [
+        "shut"
+      ],
       "Conditions": [
         {
           "GameElementId": "$Target1",

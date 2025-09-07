@@ -4,67 +4,87 @@
 @using System.Text.Json
 @using GameModel.Models
 
-@inject ThemeService ThemeService
 @inject IGamePackService GamePackService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
 @inject NavigationManager Nav
-@inject ISnackbar Snackbar
-@inject IDialogService DialogService
 @inject IJSRuntime JS
 
 @inherits LayoutComponentBase
+<HeadContent>
+    <RadzenTheme Theme="material" />
+</HeadContent>
 
-
-<MudThemeProvider Theme="@ThemeService.CurrentTheme" />
-
-<div class="app-padding">
-<MudLayout>
-    <MudAppBar Color="Color.Primary" Elevation="1">
-        <MudText Typo="Typo.h6">GameEditor
-            @if (GamePackService.Current is not null)
-            {
-                <span> — @GamePackService.Current.Title</span>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="EditGame"></MudIconButton>
-            }
-        </MudText>
-       
-        <MudSpacer />
-
-        <!-- Menu Button -->
-        <MudMenu Icon="@Icons.Material.Filled.Menu" AnchorOrigin="Origin.BottomRight">
-            <MudMenuItem Icon="@Icons.Material.Filled.FolderZip" OnClick="@(() => Nav.NavigateTo("/packs"))">Packs</MudMenuItem>
-            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Map" OnClick="@(() => Nav.NavigateTo("/map"))">Map</MudMenuItem>
-            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.PlayCircleOutline" OnClick="@(() => Nav.NavigateTo("/run"))">Run Game</MudMenuItem>
-            <MudMenuItem Disabled="@(!HasSelection)" Icon="@Icons.Material.Filled.Download" OnClick="DownloadSelected">Download</MudMenuItem>
-            <MudDivider />
-                <MudMenuItem Icon="@Icons.Material.Filled.TableView" OnClick="@(() => Nav.NavigateTo("/editor"))">Game Elements</MudMenuItem>
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenRow>
+            <RadzenColumn Size="1">
+                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+            </RadzenColumn>
+            <RadzenColumn >
                 
-        </MudMenu>
+                <RadzenText TextStyle="TextStyle.H5" class="rz-border-radius-5 rz-primary rz-p-4">
+                    GameEditor
+                    @if (GamePackService.Current is not null)
+                    {
+                        <span>&nbsp;— @GamePackService.Current.Title</span>
+                    }
+                    @if (GamePackService.Current is not null)
+                    {
+                        <RadzenButton Icon="edit"
+                                      Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Light"
+                                      Class="rz-ml-2"
+                                      Click="EditGame" />
+                    }
+                </RadzenText>
+               
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenHeader>
+    <RadzenSidebar  Style="width: max-content">
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)" ShowArrow="false">
+            <RadzenPanelMenuItem Text="Packs" Icon="folder_zip" Click="@(_ => Nav.NavigateTo("/packs"))" />
+            <RadzenPanelMenuItem Text="Map" Icon="map" Disabled="@(!HasSelection)" Click="@(_ => Nav.NavigateTo("/map"))" />
+            <RadzenPanelMenuItem Text="Run Game" Icon="play_circle" Disabled="@(!HasSelection)" Click="@(_ => Nav.NavigateTo("/run"))" />
+            <RadzenPanelMenuItem Text="Download" Icon="download" Disabled="@(!HasSelection)" Click="@(_ => DownloadSelected())" />
+            <RadzenPanelMenuItem Text="Game Elements" Icon="table_view" Click="@(_ => Nav.NavigateTo("/editor"))" />
+         </RadzenPanelMenu>
 
-        <MudIconButton Icon="@(ThemeService.IsDarkMode 
-                                                                  ? Icons.Material.Filled.LightMode 
-                                                                  : Icons.Material.Filled.DarkMode)"
-            OnClick="@(() => ThemeService.IsDarkMode = !ThemeService.IsDarkMode)" />
+    </RadzenSidebar>
 
-    </MudAppBar>
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+</RadzenLayout>
 
-    <MudMainContent Class="p-4">
-        @Body
-    </MudMainContent>
 
-</MudLayout>
-</div>
 @code {
+    private bool sidebarExpanded = false;
     private bool HasSelection => GamePackService.Current is not null;
     protected override void OnInitialized()
     {
-        ThemeService.PropertyChanged += (_, __) => StateHasChanged();
         GamePackService.PropertyChanged += (_, __) => StateHasChanged();
     }
 
     public void Dispose()
     {
-        ThemeService.PropertyChanged -= (_, __) => StateHasChanged();
         GamePackService.PropertyChanged -= (_, __) => StateHasChanged();
+    }
+
+
+    async Task OnMenuItemClick(MenuItemEventArgs args)
+    {
+        switch (args.Value?.ToString())
+        {
+            case "packs": Nav.NavigateTo("/packs"); break;
+            case "map": if (HasSelection) Nav.NavigateTo("/map"); break;
+            case "run": if (HasSelection) Nav.NavigateTo("/run"); break;
+            case "download": if (HasSelection) await DownloadSelected(); break;
+            case "editor": Nav.NavigateTo("/editor"); break;
+        }
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -88,7 +108,7 @@
         var current = GamePackService.Current;
         if (current is null)
         {
-            Snackbar.Add("No selected pack to download.", Severity.Warning);
+            //Snackbar.Add("No selected pack to download.", Severity.Warning);
             return;
         }
 
@@ -97,7 +117,8 @@
         var fileName = $"{current.Id}.json";
 
         await JS.InvokeVoidAsync("blazorDownloadFile", fileName, "application/json", b64);
-        Snackbar.Add($"Downloading {fileName}…", Severity.Normal);
+
+        //Snackbar.Add($"Downloading {fileName}…", Severity.Normal);
     }
 
     private async Task EditGame()
@@ -105,29 +126,36 @@
         var current = GamePackService.Current;
         if(current is null)
         {
-            Snackbar.Add("No selected pack.", Severity.Warning);
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "No selected pack." });
             return;
         }
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        DialogParameters dialogParams = new ()
-        {
-            { nameof(PackDialog.Value), current},
-            { nameof(PackDialog.AllowEditKey), false},
-        };
-        var dialog = await DialogService.ShowAsync<PackDialog>($"Edit {current.Title}",dialogParams, options);
-        var result = await dialog.Result;
-        if (!result!.Canceled && result.Data is GamePack newPack)
-        {
-            // If the key exists, Update; else Create
-            if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
+        GamePack? dialog = await DialogService.OpenAsync<PackDialog>($"Edit {current.Title}",
+            new Dictionary<string,object>
             {
-                await GamePackService.CreateAsync(newPack.Id, newPack);
-                Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
-            } else
+                { nameof(PackDialog.Value), current },
+                { nameof(PackDialog.AllowEditKey), false },
+            },
+            new DialogOptions()
             {
-                Snackbar.Add($"Pack '{newPack.Title}' updated.", Severity.Success);
+                Resizable = true,
+                Width = "700px",
             }
+        );
+
+        if (dialog != null)
+        {
+            //If the key exists, Update; else Create
+            if (!await GamePackService.UpdateAsync(dialog.Id, dialog))
+             {
+                await GamePackService.CreateAsync(dialog.Id, dialog);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = $"Pack '{dialog.Id}' created." });
+                
+             } else
+             {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = $"Pack '{dialog.Id}' updated." });
+             }
         }
 
     }
+
 }

@@ -1,180 +1,230 @@
-﻿@* DictEditor.razor *@
+﻿@* DictionaryTable.razor *@
 @typeparam TValue
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq.Expressions
+@inject DialogService Dialogs
 
-@using MudBlazor
-@inherits ComponentBase
+<CascadingValue Value="_editContext">
 
-<MudStack Spacing="2">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+<RadzenRow AlignItems="AlignItems.Stretch" Style="margin-bottom:.5rem">
+    <RadzenColumn Size="11">
         @if (!string.IsNullOrEmpty(Title))
         {
-            <MudText Typo="Typo.h6">@Title</MudText>
+            <RadzenText Text="@Title" Style="font-size:1.1rem;font-weight:600" />
+            @if (!string.IsNullOrWhiteSpace(Help))
+            {
+                <div style="opacity:.75">@Help</div>
+            }
         }
-        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddRow">Add</MudButton>
-    </MudStack>
+    </RadzenColumn>
+    <RadzenColumn Size="1" Style="text-align:right">
+        <RadzenButton Icon="add"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Size="ButtonSize.Small"
+                      Click="@AddRow" />
+    </RadzenColumn>
+</RadzenRow>
 
-    @if (!string.IsNullOrWhiteSpace(Help))
-    {
-        <MudText Typo="Typo.body2" Class="text-secondary">@Help</MudText>
-    }
+<RadzenDataGrid TItem="Entry"
+                Data="@_rows"
+                Density="Density.Compact"
+                RowHover="true"
+                EmptyMessage="No entries."
+                ShowEmptyMessage="true"
+                Style="border:1px solid var(--rz-base-200);box-shadow:none">
+    <Columns>
 
-    
-    <MudTable T="string" Items="_rows.Keys.ToList()" Dense="true" Elevation="0">
-        <HeaderContent>
-            <MudTh style="width:30%">Key</MudTh>
-            <MudTh>Value</MudTh>
-            <MudTh style="width:56px"></MudTh>
-        </HeaderContent>
+        <RadzenDataGridColumn TItem="Entry" Title="Key" Width="32%">
+            <Template Context="e">
+                <RadzenTextBox @bind-Value="e.KeyEdit"
+                               ChangeEvent="ChangeEvent.Input"
+                               Placeholder="key"
+                               Style="width:100%"
+                               @onblur="@(_ => RenameKey(e, e.KeyEdit))" />
+                @if (!System.Text.RegularExpressions.Regex.IsMatch(e.KeyEdit ?? string.Empty, KeyPattern))
+                {
+                    <div style="font-size:.75rem;opacity:.7">@KeyHelperText</div>
+                }
+            </Template>
+        </RadzenDataGridColumn>
 
-        <RowTemplate>
-            <MudTd>
-                <MudTextField @bind-Value="_editKeys[context]"
-                              Immediate="true"
-                              Placeholder="key"
-                              Pattern="@KeyPattern"
-                              HelperText="@KeyHelperText"
-                              OnBlur="@(() => RenameKey(context, _editKeys[context]))" />
-            </MudTd>
+        <RadzenDataGridColumn TItem="Entry" Title="Value">
+            <Template Context="e">
+                @* string *@
+                @if (typeof(TValue) == typeof(string))
+                {
+                    <RadzenTextBox Value="@( (string?)(object?)e.Value )"
+                                   ValueChanged="@( (Action<string?>)(v => { e.Value = (TValue?)(object?) (v ?? ""); Push(); }) )"
+                                   ChangeEvent="ChangeEvent.Input"
+                                   Placeholder="text…"
+                                   Style="width:100%" />
+                }
+                @* int *@
+                else if (typeof(TValue) == typeof(int))
+                {
+                    <RadzenNumeric Value="@((int)(object?)e.Value!)"
+                                   ValueChanged="@((Action<int>)(v => { e.Value = (TValue)(object)v; Push(); }))"
+                                   Style="width:160px" />
+                }
+                @* bool *@
+                else if (typeof(TValue) == typeof(bool))
+                {
+                    <RadzenSwitch Value="@((bool)(object?)e.Value!)"
+                                  ValueChanged="@( (Action<bool>)(v => { e.Value = (TValue)(object)v; Push(); }) )" />
+                }
+                else
+                {
+                    <RadzenText Text=$"Unsupported type {typeof(TValue).Name}" />
+                }
+            </Template>
+        </RadzenDataGridColumn>
 
-            <MudTd>
-                @RenderValueCell(context)
-            </MudTd>
+        <RadzenDataGridColumn TItem="Entry" Width="56px">
+            <Template Context="e">
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => RemoveRow(e))" />
+            </Template>
+        </RadzenDataGridColumn>
 
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                               Color="Color.Error"
-                               OnClick="@(() => RemoveRow(context))" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudStack>
+    </Columns>
+</RadzenDataGrid>
+</CascadingValue>
 
 @code {
-    // ── Public API ────────────────────────────────────────────────────────────────
-    [Parameter] public string Title { get; set; } = "Dictionary";
-    [Parameter] public string? Help { get; set; }
+    [CascadingParameter] private EditContext? _editContext { get; set; }
 
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Help { get; set; }
     [Parameter] public string KeyPattern { get; set; } = "^[a-z0-9-]+$";
     [Parameter] public string KeyHelperText { get; set; } = "Lowercase letters, digits, hyphens only.";
 
     [Parameter] public Dictionary<string, TValue> Values { get; set; } = new();
     [Parameter] public EventCallback<Dictionary<string, TValue>> ValuesChanged { get; set; }
+    [Parameter] public Expression<Func<object>>? For { get; set; }  // or a typed expression per table
 
-    // Optional: override the default value used when clicking Add
+    [Parameter] public EventCallback OnChanged { get; set; }
+
     [Parameter] public TValue? NewValueDefault { get; set; }
 
-    // ── Internals ────────────────────────────────────────────────────────────────
-    private Dictionary<string, TValue> _rows = new();
-    private Dictionary<string, string> _editKeys = new();
+    // A simple row model for the grid
+    public class Entry
+    {
+        public string Key { get; set; } = "";
+        public string KeyEdit { get; set; } = "";   // live editor buffer
+        public TValue? Value { get; set; }
+    }
+
+    private List<Entry> _rows = new();
 
     protected override void OnParametersSet()
     {
-        // shallow copy so edits don't mutate parent until we push
-        _rows = Values?.ToDictionary(kv => kv.Key, kv => kv.Value)!;
-        _editKeys = _rows.Keys.ToDictionary(k => k, k => k);
+        // Rehydrate rows from the incoming dictionary
+        _rows = Values?.Select(kv => new Entry
+        {
+            Key = kv.Key,
+            KeyEdit = kv.Key,
+            Value = kv.Value
+        }).ToList() ?? new();
     }
 
-    private void AddRow()
+    private async Task NotifyChangedAsync()
+    {
+        // tell the parent form “the field changed”
+        if (_editContext is not null && For is not null)
+        {
+            var fi = FieldIdentifier.Create(For);
+            _editContext.NotifyFieldChanged(fi);
+        }
+        await OnChanged.InvokeAsync();
+    }
+
+
+
+    private async void AddRow()
     {
         var key = GenerateKey("new-key");
-        _rows[key] = NewValueDefault is not null ? NewValueDefault
-                     : typeof(TValue) == typeof(string) ? (TValue)(object)string.Empty
-                     : typeof(TValue) == typeof(int) ? (TValue)(object)0
-                     : typeof(TValue) == typeof(bool) ? (TValue)(object)false
-                     : default!;
-        _editKeys[key] = key;
-        Push();
-    }
-
-    private void RemoveRow(string key)
-    {
-        if (_rows.Remove(key))
+        _rows.Add(new Entry
         {
-            _editKeys.Remove(key);
-            Push();
+            Key = key,
+            KeyEdit = key,
+            Value = NewValueDefault is not null ? NewValueDefault
+                  : typeof(TValue) == typeof(string) ? (TValue)(object)string.Empty
+                  : typeof(TValue) == typeof(int) ? (TValue)(object)0
+                  : typeof(TValue) == typeof(bool) ? (TValue)(object)false
+                  : default!
+        });
+        await PushAsync();
+    }
+
+    private async void RemoveRow(Entry e)
+    {
+        if (e is null) return;
+        _rows.Remove(e);
+        await PushAsync();
+    }
+
+    private async void RenameKey(Entry e, string? newKey)
+    {
+        if (e is null) return;
+
+        newKey = (newKey ?? "").Trim();
+        if (string.IsNullOrEmpty(newKey) || newKey == e.Key)
+        {
+            e.KeyEdit = e.Key; // snap back
+            await NotifyChangedAsync();
+            StateHasChanged();
+            return;
         }
-    }
+        if (!System.Text.RegularExpressions.Regex.IsMatch(newKey, KeyPattern))
+        {
+            e.KeyEdit = e.Key;
+            await NotifyChangedAsync();
+            StateHasChanged();
+            return;
+        }
+        if (_rows.Any(r => r != e && r.Key.Equals(newKey, StringComparison.Ordinal)))
+        {
+            e.KeyEdit = e.Key;
+            await NotifyChangedAsync();
+            StateHasChanged();
+            return;
+        }
 
-    private void RenameKey(string oldKey, string? newKey)
-    {
-        newKey ??= "";
-        newKey = newKey.Trim();
-        if (string.IsNullOrEmpty(newKey) || newKey == oldKey) { _editKeys[oldKey] = oldKey; return; }
-        if (!System.Text.RegularExpressions.Regex.IsMatch(newKey, KeyPattern)) { _editKeys[oldKey] = oldKey; return; }
-        if (_rows.ContainsKey(newKey)) { _editKeys[oldKey] = oldKey; return; }
-
-        var val = _rows[oldKey];
-        _rows.Remove(oldKey);
-        _rows[newKey] = val;
-
-        var edited = _editKeys[oldKey];
-        _editKeys.Remove(oldKey);
-        _editKeys[newKey] = edited == oldKey ? newKey : edited;
-
-        Push();
-    }
-
-    private async void Push()
-    {
-        // emit a fresh copy for @bind-Values
-        await ValuesChanged.InvokeAsync(_rows.ToDictionary(k => k.Key, v => v.Value));
-        StateHasChanged();
+        // commit rename
+        e.Key = newKey;
+        await PushAsync();
     }
 
     private string GenerateKey(string baseKey)
     {
-        var existing = new HashSet<string>(_rows.Keys);
+        var existing = new HashSet<string>(_rows.Select(r => r.Key));
         var key = baseKey; var i = 1;
         while (existing.Contains(key)) key = $"{baseKey}-{i++}";
         return key;
     }
 
-    // ── Value cell renderer (auto-picks control by TValue) ───────────────────────
-    private RenderFragment RenderValueCell(string key) => builder =>
+    private void Push()
     {
-        var seq = 0;
+        // Synchronous sibling for ValueChanged on input
+        _ = PushAsync();
+    }
 
-        if (typeof(TValue) == typeof(string))
-        {
-            builder.OpenComponent(seq++, typeof(MudTextField<string>));
-            builder.AddAttribute(seq++, "Value", (string)(object?)_rows[key]!);
-            builder.AddAttribute(seq++, "ValueChanged",
-            EventCallback.Factory.Create<string>(this, v => { _rows[key] = (TValue)(object)v; Push(); }));
-            builder.AddAttribute(seq++, "Immediate", true);
-            builder.AddAttribute(seq++, "Placeholder", "text…");
-            builder.CloseComponent();
-            return;
-        }
+    private async Task PushAsync()
+    {
+        // Build a fresh dictionary to send up
+        var snapshot = _rows.ToDictionary(r => r.Key, r => r.Value!);
 
-        if (typeof(TValue) == typeof(int))
-        {
-            builder.OpenComponent(seq++, typeof(MudNumericField<int>));
-            builder.AddAttribute(seq++, "Value", (int)(object?)_rows[key]!);
-            builder.AddAttribute(seq++, "ValueChanged",
-            EventCallback.Factory.Create<int>(this, v => { _rows[key] = (TValue)(object)v; Push(); }));
-            builder.AddAttribute(seq++, "Immediate", true);
-            builder.CloseComponent();
-            return;
-        }
+        // Keep child in sync to avoid “revert” flicker
+        Values = snapshot;
 
-        if (typeof(TValue) == typeof(bool))
-        {
-            // MudSwitch uses Checked/CheckedChanged
-            builder.OpenComponent(seq++, typeof(MudSwitch<bool>));
-            builder.AddAttribute(seq++, "Checked", (bool)(object?)_rows[key]!);
-            builder.AddAttribute(seq++, "CheckedChanged",
-            EventCallback.Factory.Create<bool>(this, v => { _rows[key] = (TValue)(object)v; Push(); }));
-            builder.AddAttribute(seq++, "Color", Color.Primary);
-            builder.CloseComponent();
-            return;
-        }
-
-        // Fallback (unsupported type)
-        builder.OpenComponent(seq++, typeof(MudText));
-        builder.AddAttribute(seq++, "ChildContent", (RenderFragment)(b =>
-      {
-          b.AddContent(0, $"Unsupported type {typeof(TValue).Name}");
-      }));
-        builder.CloseComponent();
-    };
+        if (ValuesChanged.HasDelegate)
+            await ValuesChanged.InvokeAsync(snapshot);
+        if (OnChanged.HasDelegate)
+            await OnChanged.InvokeAsync();
+        await NotifyChangedAsync();
+        StateHasChanged();
+    }
 }

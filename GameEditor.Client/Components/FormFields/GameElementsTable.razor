@@ -1,125 +1,299 @@
-﻿@* GameElementsTable.razor *@
-@using MudBlazor
+﻿@* GameElementsTable.razor (Radzen) *@
+@typeparam TElement where TElement : class, IGameElement
+
+@using GameEditor.Client.Components.Dialogs
 @using GameModel.Models
+@using Radzen
+@using Radzen.Blazor
 
-<MudPaper Class="p-3">
-  <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
-    <MudText Typo="Typo.h6">@Title</MudText>
+@inject DialogService DialogService
+@inject IGamePackService GamePackService
 
-    <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-      <MudTextField @bind-Value="_search"
-                    Placeholder="Search…"
-                    Adornment="Adornment.Start"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    Immediate="true"
-                    DebounceInterval="200"
-                    Dense="true"
-                    Style="min-width:220px" />
-      @if (ShowCreate)
-      {
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="CreateClicked">@CreateText</MudButton>
-      }
-    </MudStack>
-  </MudStack>
+<RadzenCard Class="p-3">
+    <ChildContent>
+        <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+            <RadzenText Text="@Title" Style="font-weight:600;font-size:1.1rem" />
 
-  <MudTable T="IGameElement"
-            Items="_filtered"
-            Dense="true"
-            Hover="true"
-            Bordered="true"
-            Elevation="0">
-    <HeaderContent>
-      <MudTh style="width: 20%">Id</MudTh>
-      <MudTh style="width: 20%">Visible</MudTh>
-      <MudTh style="width: 20%">Name</MudTh>
-      <MudTh>Description</MudTh>
-      <MudTh style="width: 56px"></MudTh>
-    </HeaderContent>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="1.1rem">
+                <RadzenTextBox @bind-Value="Search"
+                               Placeholder="Search…"
+                               Icon="search"
+                               ChangeEvent="ChangeEvent.Input"
+                               Style="min-width:220px" />
+                @if (ShowCreate)
+                {
+                    <RadzenButton Icon="add"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Text="@CreateText"
+                                  Click="@OpenNewWindowAsync" />
+                }
+            </RadzenStack>
+        </RadzenRow>
 
-    <RowTemplate>
-      <MudTd>@context.Id</MudTd>
-      <MudTd>@context.IsVisible</MudTd>
-      <MudTd>@context.Name</MudTd>
-      <MudTd>
-        <MudText Typo="Typo.body2" Class="line-clamp-2">@context.Description</MudText>
-      </MudTd>
+        <RadzenDataList 
+            Data="@_filtered"
+        >
+            <Template Context="e">
+                <!-- Spacer to separate from above -->
+                <RadzenPanel AllowCollapse="false" Collapsed="false" >
+                    <HeaderTemplate>
+                        
+                        <RadzenStack Orientation="Orientation.Horizontal">
+                            <RadzenText TextStyle="TextStyle.DisplayH6">@e.Name</RadzenText>
+                            <RadzenIcon Icon="@(e.IsVisible ? "visibility" : "visibility_off")" />
+                        </RadzenStack>
+                        
+                        
 
-      <MudTd Class="text-right">
-        <MudMenu Dense="true" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.TopRight" Icon="@Icons.Material.Filled.MoreVert">
-           
-          <MudMenuItem Label="Edit" OnClick="@(() => Edit(context))" Icon="@Icons.Material.Filled.Edit"/>
-          <MudMenuItem OnClick="@(() => Delete(context))"
-                       Icon="@Icons.Material.Filled.Delete"
-                       Label="Delete"
-                       Disabled="@(!CanDelete(context))"
-                       Class="text-error"/>
-        </MudMenu>
-      </MudTd>
-    </RowTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0">
+                            
+                            <RadzenButton Icon="content_copy" title="Clone"
+                                          Size="ButtonSize.Small"
+                                          ButtonStyle="ButtonStyle.Success"
+                                          Shade="Shade.Lighter"
+                                          Click="@(() => OpenCloneWindowAsync(e))" />
+                            <RadzenButton Icon="edit" title="Edit"
+                                          Size="ButtonSize.Small"
+                                          ButtonStyle="ButtonStyle.Light"
+                                          Click="@(() => OpenEditWindowAsync(e))" />
+                            <RadzenButton Icon="delete" title="Delete"
+                                          Size="ButtonSize.Small"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Shade="Shade.Lighter"
+                                          Disabled="@(!CanDelete(e))"
+                                          Click="@(() => ConfirmAndDeleteAsync(e))" />
 
-    <NoRecordsContent>
-      <MudText Color="Color.Secondary">No elements found.</MudText>
-    </NoRecordsContent>
-  </MudTable>
-</MudPaper>
+                        </RadzenStack>
+
+                    </HeaderTemplate>
+                    <ChildContent>
+                        <RadzenStack>
+                            <RadzenText>@e.Description</RadzenText>
+
+                            <RadzenText TextStyle="TextStyle.Overline">Stats</RadzenText>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="2">
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                    States
+                                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{e.States.Count}")" class="rz-ms-2" />
+                                </RadzenButton>
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                    Attributes
+                                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{e.Attributes.Count}")" class="rz-ms-2" />
+                                </RadzenButton>
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                    Properties
+                                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{e.Properties.Count}")" class="rz-ms-2" />
+                                </RadzenButton>
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                    Flags
+                                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{e.Flags.Count}")" class="rz-ms-2" />
+                                </RadzenButton>
+
+                            </RadzenStack>
+
+                            @if (e is Scene scene)
+                            {
+                                <RadzenText TextStyle="TextStyle.Overline">Map Location</RadzenText>
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="2">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                        Row
+                                        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{scene.MapLocation.Row}")" class="rz-ms-2" />
+                                    </RadzenButton>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                        Column
+                                        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{scene.MapLocation.Column}")" class="rz-ms-2" />
+                                    </RadzenButton>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                        Level
+                                        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{scene.MapLocation.Level}")" class="rz-ms-2" />
+                                    </RadzenButton>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                        Height
+                                        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{scene.MapLocation.Height}")" class="rz-ms-2" />
+                                    </RadzenButton>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true">
+                                        Width
+                                        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{scene.MapLocation.Width}")" class="rz-ms-2" />
+                                    </RadzenButton>
+
+                                </RadzenStack>
+                            }
+                            else
+                            {
+
+                                <RadzenButton ButtonStyle="ButtonStyle.Light" Disabled="true" Size="ButtonSize.Small">
+                                    Starting Location
+                                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Dark" Text="@($"{e.StartingLocation}")" class="rz-ms-2" />
+                                </RadzenButton>
+                                
+                            }
+
+
+                           
+                        </RadzenStack>
+                        
+
+                    </ChildContent>
+                </RadzenPanel>
+
+            </Template>
+        </RadzenDataList>
+        
+
+    </ChildContent>
+</RadzenCard>
 
 @code {
-  // ----- Parameters -----
-  [Parameter] public string Title { get; set; } = "Elements";
-  [Parameter] public IEnumerable<IGameElement> Items { get; set; } = Array.Empty<IGameElement>();
-  [Parameter] public EventCallback OnCreate { get; set; }
-  [Parameter] public EventCallback<IGameElement> OnEdit { get; set; }
-  [Parameter] public EventCallback<IGameElement> OnDelete { get; set; }
+    // ----- Parameters -----
+    [Parameter] public string Title { get; set; } = "Elements";
+    [Parameter] public IEnumerable<TElement> Items { get; set; } = Array.Empty<TElement>();
 
-  // UI options
-  [Parameter] public bool ShowCreate { get; set; } = true;
-  [Parameter] public string CreateText { get; set; } = "New";
+    // UI options
+    [Parameter] public bool ShowCreate { get; set; } = true;
+    [Parameter] public string CreateText { get; set; } = "New";
 
-  // Optional per-row delete rule (default = allowed)
-  [Parameter] public Func<IGameElement, bool>? CanDeleteRule { get; set; }
+    // Optional per-row delete rule (default = allowed)
+    [Parameter] public Func<TElement, bool>? CanDeleteRule { get; set; }
 
-  // ----- Internals -----
-  private string _search = string.Empty;
-  private List<IGameElement> _filtered = new();
+    // ----- Internals -----
+    private string _search = string.Empty;
+    private List<TElement> _filtered = new();
 
-  protected override void OnParametersSet()
-  {
-    Recompute();
-  }
+    protected override void OnParametersSet() => Recompute();
 
-  private void Recompute()
-  {
-    var q = (_search ?? string.Empty).Trim();
-    var src = Items ?? Array.Empty<IGameElement>();
-
-    if (string.IsNullOrEmpty(q))
+    private void Recompute()
     {
-      _filtered = src.ToList();
-      return;
+        var q = (_search ?? string.Empty).Trim();
+        var src = Items ?? Array.Empty<TElement>();
+
+        _filtered = string.IsNullOrEmpty(q)
+            ? src.ToList()
+            : src.Where(e =>
+                (!string.IsNullOrEmpty(e.Id) && e.Id.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
+              ).ToList();
+        StateHasChanged();
     }
 
-    _filtered = src.Where(e =>
-      (!string.IsNullOrEmpty(e.Id) && e.Id.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-      (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-      (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
-    ).ToList();
-  }
-
-  private bool CanDelete(IGameElement e) => CanDeleteRule?.Invoke(e) ?? true;
-
-  private Task CreateClicked() => OnCreate.HasDelegate ? OnCreate.InvokeAsync() : Task.CompletedTask;
-  private Task Edit(IGameElement e) => OnEdit.HasDelegate ? OnEdit.InvokeAsync(e) : Task.CompletedTask;
-  private Task Delete(IGameElement e) => OnDelete.HasDelegate ? OnDelete.InvokeAsync(e) : Task.CompletedTask;
-
-  // recompute when the search box changes
-  private string Search
-  {
-    get => _search;
-    set
+    private string Search
     {
-      _search = value;
-      Recompute();
+        get => _search;
+        set { _search = value; Recompute(); }
     }
-  }
+
+    private bool CanDelete(TElement e) => CanDeleteRule?.Invoke(e) ?? DefaultCanDelete(e);
+    private bool DefaultCanDelete(TElement e)
+    {
+        // Prevent deleting the singleton Player if you ever use this table for Player
+        if (typeof(TElement) == typeof(Player))
+        {
+            var id = e.Id?.ToLowerInvariant();
+            return id is not "main" and not "player";
+        }
+        return true;
+    }
+
+    // ---------- Open Dialogs ----------
+    private async Task OpenEditWindowAsync(TElement element)
+    {
+        await DialogService.OpenSideAsync<GameElementDialog>(
+            $"Edit {TypeTitle} · {element.Name}",
+            new Dictionary<string, object?>
+            {
+                ["QId"] = $"{TypeKey}:{element.Id}",
+                ["QMode"] = "edit"
+            },
+            new SideDialogOptions { Position = DialogPosition.Right, Width = "1000px", CloseDialogOnOverlayClick = false });
+
+        // The dialog mutates GamePackService.Current directly; refresh our view.
+        Recompute();
+        StateHasChanged();
+    }
+
+    private async Task OpenNewWindowAsync()
+    {
+        var suggested = SuggestId();
+        await DialogService.OpenAsync<GameElementDialog>(
+            $"New {TypeTitle}",
+            new Dictionary<string, object?>
+            {
+                ["QId"] = $"{TypeKey}:{suggested}",
+                ["QMode"] = "new"
+            },
+            new DialogOptions { Width = "1000px", Resizable = true, CloseDialogOnOverlayClick = false });
+
+        Recompute();
+        StateHasChanged();
+    }
+
+    private async Task OpenCloneWindowAsync(TElement element)
+    {
+        // Use current Id as the “source”; dialog will seed fields but set mode=clone
+        await DialogService.OpenAsync<GameElementDialog>(
+            $"Clone {TypeTitle} · {element.Name}",
+            new Dictionary<string, object?>
+            {
+                // For clone, we pass the new id seed too — use current id plus "-copy" as a hint
+                ["QId"] = $"{TypeKey}:{element.Id}",
+                ["QMode"] = "clone"
+            },
+            new DialogOptions { Width = "1000px", Resizable = true, CloseDialogOnOverlayClick = false });
+
+        Recompute();
+        StateHasChanged();
+    }
+
+    // ---------- Delete ----------
+    private async Task ConfirmAndDeleteAsync(TElement e)
+    {
+        if (!CanDelete(e)) return;
+
+        var ok = await DialogService.Confirm(
+            $"Delete {TypeTitle} “{e.Name}” (id: {e.Id})?",
+            "Confirm Delete",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel", CloseDialogOnOverlayClick = true });
+
+        if (ok != true) return;
+
+        // Remove from GamePackService.Current by type
+        var pack = GamePackService.Current;
+
+        if (typeof(TElement) == typeof(Scene))
+            pack!.Scenes.Remove(e.Id);
+        else if (typeof(TElement) == typeof(Item))
+            pack!.Items.Remove(e.Id);
+        else if (typeof(TElement) == typeof(Npc))
+            pack!.Npcs.Remove(e.Id);
+        else if (typeof(TElement) == typeof(Player))
+        {
+            var id = e.Id?.ToLowerInvariant();
+            if (id is "main" or "player") return; // protect singleton
+            pack!.Players.Remove(e.Id!);
+        }
+
+        Recompute();
+        StateHasChanged();
+    }
+
+    // ---------- Helpers ----------
+    private string TypeKey => typeof(TElement) == typeof(Scene) ? "scene"
+                       : typeof(TElement) == typeof(Item)      ? "item"
+                       : typeof(TElement) == typeof(Npc)       ? "npc"
+                       : typeof(TElement) == typeof(Player)    ? "player"
+                       : throw new InvalidOperationException($"Unsupported element type {typeof(TElement).Name}");
+
+    private string TypeTitle => typeof(TElement) == typeof(Scene) ? "Scene"
+                         : typeof(TElement) == typeof(Item)       ? "Item"
+                         : typeof(TElement) == typeof(Npc)        ? "NPC"
+                         : typeof(TElement) == typeof(Player)     ? "Player"
+                         : "Element";
+
+    private static string SuggestId()
+    {
+        // quick readable slug e.g., "new-7f3a"
+        var shortToken = Guid.NewGuid().ToString("N")[..4];
+        return $"new-{shortToken}";
+    }
 }

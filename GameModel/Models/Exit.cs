@@ -20,4 +20,5 @@ public class Exit : GameElement
 
     public ExitDirections Direction { get; set; } = ExitDirections.Custom;
     public string CustomDirection { get; set; } = string.Empty;
+
 }

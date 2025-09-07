@@ -4,187 +4,52 @@
 @using GameEditor.Client.Components.FormFields
 @using GameModel.Models
 @using GameModel.Helpers
+@using Radzen
+@using Radzen.Blazor
+
 @inject IGamePackService GamePackService
-@inject IDialogService DialogService
-@inject IGamePackService GamePackService
+@* If/when you wire up a Radzen modal for editing:
+@inject DialogService DialogService *@
 
-<h3>GameElements</h3>
+<h3>Game Elements</h3>
 
-<MudTabs>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Players">
+            <GameElementsTable 
+                               Title="Players"
+                               Items="GamePackService.Current!.Players.Values"
+                               ShowCreate="true"
+                               CreateText="New Player"
+                     />
+        </RadzenTabsItem>
 
-    <MudTabPanel Text="Scenes">
-        <GameElementsTable Title="Scenes"
-            Items="GamePackService.Current!.Scenes.Values"
-            ShowCreate="true"
-            CreateText="New Scene"
-            OnCreate="NewScene"
-            OnEdit="EditScene"
-            OnDelete="DeleteScene" />
+        <RadzenTabsItem Text="Scenes">
+            <GameElementsTable Title="Scenes"
+                               Items="GamePackService.Current!.Scenes.Values"
+                               ShowCreate="true"
+                               CreateText="New Scene" />
+        </RadzenTabsItem>
 
 
+        <RadzenTabsItem Text="Items">
+            <GameElementsTable 
+                               Title="Items"
+                               Items="GamePackService.Current!.Items.Values"
+                               ShowCreate="true"
+                               CreateText="New Item"
+                               />
+        </RadzenTabsItem>
 
-    </MudTabPanel>
-
-    <MudTabPanel Text="Items">
-        <GameElementsTable Title="Items"
-            Items="GamePackService.Current!.Items.Values"
-            ShowCreate="true"
-            CreateText="New Item"
-            OnCreate="NewItem"
-            OnEdit="EditItem"
-            OnDelete="DeleteItem" />
-
-    </MudTabPanel>
-
-    <MudTabPanel Text="NPCs">
-        <GameElementsTable Title="NPCs"
-            Items="GamePackService.Current!.Npcs.Values"
-            ShowCreate="true"
-            CreateText="New NPC"
-            OnCreate="NewNpc"
-            OnEdit="EditNpc"
-            OnDelete="DeleteNpc" />
-
-    </MudTabPanel>
-
-</MudTabs>
-
+        <RadzenTabsItem Text="NPCs">
+            <GameElementsTable 
+                               Title="NPCs"
+                               Items="GamePackService.Current!.Npcs.Values"
+                               ShowCreate="true"
+                               CreateText="New NPC"/>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 
 @code {
-
-
-    private async Task EditElementAsync<T>(T? element, bool isEdit) where T : class, IGameElement
-    {
-
-        var title = element != null ? $"Edit '{element.Name}'" : $"Add {nameof(T)}";
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true };
-
-        if (element == null)
-        {
-        }
-
-        DialogParameters dialogParams = new()
-        {
-            { nameof(GameElementDialog<T>.Value), element},
-            { nameof(GameElementDialog<T>.IsEdit), isEdit }
-        };
-
-        var dialog = await DialogService.ShowAsync<GameElementDialog<T>>(title, dialogParams, options);
-        var result = await dialog.Result;
-
-        if (result == null || result.Canceled || result.Data is not T updated) return;
-        CopyEditableFields(element!, updated);
-
-
-        //Save the values to the appropriate location in the system
-        switch(element!)
-        {
-            case Scene scene:
-                if (isEdit)
-                {
-                    GamePackService.Current!.Scenes[scene.Id] = scene;
-                }
-                else 
-                {
-                    GamePackService.Current!.Scenes.Add(scene.Id,scene);
-                }
-                break;
-            case Item item:
-                if (isEdit)
-                {
-                    GamePackService.Current!.Items[item.Id] = item;
-                }
-                else
-                {
-                    GamePackService.Current!.Items.Add(item.Id, item);
-                }
-                break;
-            case Npc npc:
-                if (isEdit)
-                {
-                    GamePackService.Current!.Npcs[npc.Id] = npc;
-                }
-                else
-                {
-                    GamePackService.Current!.Npcs.Add(npc.Id, npc);
-                }
-                break;
-        }
-
-
-        await GamePackService.UpdateCurrentAsync();
-        StateHasChanged();
-
-    }
-
-    private static void CopyEditableFields<T>(T target, T source)
-    where T : IGameElement
-    {
-        target.Name = source.Name;
-        target.Description = source.Description;
-        target.IsVisible = source.IsVisible;
-        target.States = source.States.DeepClone();
-        target.Attributes = source.Attributes.DeepClone();
-        target.Properties = source.Properties.DeepClone();
-        target.Flags = source.Flags.DeepClone();
-
-        if (target is Scene ts && source is Scene ss)
-        {
-            ts.MapLocation = ss.MapLocation.DeepClone();
-            // Don’t overwrite exits
-        }
-    }
-
-
-    private async Task NewScene()
-    {
-        await EditElementAsync<Scene>(new Scene(),false);
-
-    }
-
-
-    private async Task EditScene(GameModel.Models.IGameElement args)
-    {
-
-        await EditElementAsync<Scene>(args as Scene ?? throw new ArgumentException("Invalid element type"),true);
- 
-    }
-
-
-    private void DeleteScene(GameModel.Models.IGameElement args)
-    {
-        throw new NotImplementedException();
-    }
-
-
-    private async Task NewItem()
-    {
-        await EditElementAsync<Item>(new Item(), false);
-    }
-    private async Task EditItem(GameModel.Models.IGameElement args)
-    {
-        await EditElementAsync<Item>(args as Item ?? throw new ArgumentException("Invalid element type"), true);
-    }
-    private void DeleteItem(GameModel.Models.IGameElement args)
-    {
-        throw new NotImplementedException();
-    }
-    
-    
-    private async Task NewNpc()
-    {
-        await EditElementAsync<Npc>(new Npc(), false);
-    }
-
-    private async Task EditNpc(GameModel.Models.IGameElement args)
-    {
-        await EditElementAsync<Npc>(args as Npc ?? throw new ArgumentException("Invalid element type"), true);
-    }
-
-    private void DeleteNpc(GameModel.Models.IGameElement args)
-    {
-        throw new NotImplementedException();
-    }
-
 }
-

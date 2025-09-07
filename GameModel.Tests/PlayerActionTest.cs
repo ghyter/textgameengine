@@ -9,7 +9,7 @@ namespace GameEngine.Tests;
 [TestClass]
 public class PlayerActionTests
 {
-    private ActionRegistry _registry = null!;
+    //private ActionRegistry _registry = null!;
 
     [TestInitialize]
     public void Setup()

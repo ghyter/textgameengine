@@ -6,12 +6,30 @@
 @using GameEditor.Client.Model.Nodes;
 @using Blazor.Diagrams.Core.Models
 @using GameModel.Models
-@inject IDialogService DialogService;
+@* @inject IDialogService DialogService; *@
 @inject IGamePackService GamePackService;
 
 
 <div class="node @(Node.Selected ? "selected":null)">
-    <MudCard>
+    <RadzenCard>
+        <RadzenStack>
+            <div class="d-flex align-items-center">
+                <RadzenText Text="@Node.Element.Name" />
+                <RadzenButton Icon="edit"
+                              Size="ButtonSize.Medium"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Class="ml-2"
+                              Click="@EditDialog" />
+            </div>
+
+            @if (Node.Element is Scene scene)
+            {
+                <RadzenText Text="@scene.MapLocation.ToString()" Style="display:block" />
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    @* <MudCard>
         <MudCardContent>
             <MudText>@Node.Element.Name
             <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -28,8 +46,8 @@
         </MudCardContent>
         @* <MudCardActions>
             <MudButton Variant="Variant.Text" Color="Color.Primary">+State</MudButton>
-        </MudCardActions> *@
-    </MudCard>
+        </MudCardActions>
+    </MudCard> *@
     
     @foreach (var port in Node.Ports)
     {
@@ -54,35 +72,38 @@
         // This could involve invoking a service or a dialog component
         var title = Node.Element.Name;
         Console.WriteLine($"Editing node: {Node.Element.Name}");
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true };
-        DialogParameters dialogParams = new()
-        {
-            { nameof(GameElementDialog<Scene>.Value), Node.Element},
 
-        };
-        var dialog = await DialogService.ShowAsync<GameElementDialog<Scene>>($"Edit {title}", dialogParams, options);
-        var result = await dialog.Result;
-        if (result == null || result.Canceled)
-        {
-            Console.WriteLine("Edit dialog was canceled.");
-            return;
-        };
+        
+
+        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true };
+        // DialogParameters dialogParams = new()
+        // {
+        //     { nameof(GameElementDialog<Scene>.Value), Node.Element},
+
+        // };
+        // var dialog = await DialogService.ShowAsync<GameElementDialog<Scene>>($"Edit {title}", dialogParams, options);
+        // var result = await dialog.Result;
+        // if (result == null || result.Canceled)
+        // {
+        //     Console.WriteLine("Edit dialog was canceled.");
+        //     return;
+        // };
 
         //Temporarily, I only want to update what I know is in the form.  Don't drop the exits for example.
 
-        if (Node.Element is Scene scene && result.Data is Scene newscene)
-        {
-            scene.Name = newscene.Name;
-            scene.Description = newscene.Description;
-            scene.MapLocation = newscene.MapLocation;
-            scene.States = newscene.States;
-            scene.Attributes = newscene.Attributes;
-            scene.Properties = newscene.Properties;
-            scene.Flags = newscene.Flags;
+        // if (Node.Element is Scene scene && result.Data is Scene newscene)
+        // {
+        //     scene.Name = newscene.Name;
+        //     scene.Description = newscene.Description;
+        //     scene.MapLocation = newscene.MapLocation;
+        //     scene.States = newscene.States;
+        //     scene.Attributes = newscene.Attributes;
+        //     scene.Properties = newscene.Properties;
+        //     scene.Flags = newscene.Flags;
 
-        }
+        // }
         // Always update the GamePackService to ensure changes are saved
-        await GamePackService.UpdateCurrentAsync();
+        //await GamePackService.UpdateCurrentAsync();
         StateHasChanged();
     }
 

@@ -1,85 +1,118 @@
-﻿@using MudBlazor
+﻿@* PackDialog.razor (Radzen) *@
 @using GameModel.Models
 @using GameModel.Helpers
+@using Radzen
+@using Radzen.Blazor
+
 @inherits ComponentBase
 
-<MudDialog>
-    <DialogContent>
-        <MudForm @ref="_form">
-            <MudTextField @bind-Value="_key"
-                          Label="Key"
-                          Required="true"
-                          Pattern="^[a-z0-9-]+$"
-                          HelperText="Lowercase letters, digits, hyphens only."
-                          Immediate="true"
-                          Disabled="@IsEdit" />
+@inject NotificationService NotificationService
+@inject DialogService DialogService
 
-            <MudTextField @bind-Value="_editPack.Title"
-                          Label="Title"
-                          Required="true" />
+<div class="p-4" style="min-width:420px; display:flex; flex-direction:column; gap:12px;">
+  <RadzenTemplateForm TItem="GamePack" Data="@_editPack" Submit="@OnSubmit" InvalidSubmit="@OnInvalid">
+    <ChildContent>
+      <div style="display:flex; flex-direction:column; gap:12px;">
 
-            <MudTextField @bind-Value="_editPack.Description"
-                          Label="Description"
-                          Lines="3" />
+        <!-- Key -->
+        <div>
+          <label class="rz-label">Key</label>
+          <RadzenTextBox @ref="_keyBox"
+                         @bind-Value="_key"
+                         Name="Key"
+                         Disabled="@(IsEdit && !AllowEditKey)"
+                         Style="width:100%" />
+          <RadzenRequiredValidator Component="Key" Text="Key is required." />
+          <RadzenRegexValidator    Component="Key"
+                                   Pattern="^[a-z0-9-_ \(\)]+$"
+                                   Text="Lowercase letters, digits, hyphens only." />
+          @if (_keyError is not null)
+          {
+            <div style="color:var(--rz-danger); font-size:.85rem; margin-top:4px;">
+              @_keyError
+            </div>
+          }
+        </div>
 
-            <MudStack Row Justify="Justify.FlexEnd" Spacing="1" Class="mt-4">
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">
-                    @(IsEdit ? "Save" : "Create")
-                </MudButton>
-            </MudStack>
-        </MudForm>
-    </DialogContent>
-</MudDialog>
+        <!-- Title -->
+        <div>
+          <label class="rz-label">Title</label>
+          <RadzenTextBox @ref="_titleBox"
+                         @bind-Value="_editPack.Title"
+                         Name="Title"
+                         Style="width:100%" />
+                    <RadzenRequiredValidator Component="Title" Text="Title is required." />
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="rz-label">Description</label>
+          <RadzenTextArea @bind-Value="_editPack.Description" Style="width:100%" Rows="3" />
+        </div>
+
+        <div class="rz-justify-content-end rz-display-flex" style="gap:.5rem;">
+          <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Click="@Cancel" />
+          <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Text="@(IsEdit ? "Save" : "Create")" />
+        </div>
+      </div>
+    </ChildContent>
+  </RadzenTemplateForm>
+</div>
 
 @code {
     // ===== Parameters =====
-    [Parameter] public GamePack? Value { get; set; }  // null => New; not null => Edit existing
-    [Parameter] public bool AllowEditKey { get; set; } = false; // if you ever want to permit Id changes
+    [Parameter] public GamePack? Value { get; set; }           // null => New; not null => Edit existing
+    [Parameter] public bool AllowEditKey { get; set; } = false;
 
     // ===== Internals =====
-    [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
-    private MudForm? _form;
-
-    // The working copy we bind the form to (never the original)
     private GamePack _editPack = new();
-
-    // separate key field because we validate formatting and may disable during edit
     private string _key = string.Empty;
+
+    private RadzenTextBox? _keyBox;
+    private RadzenTextBox? _titleBox;
+
+    private string? _keyError;
 
     private bool IsEdit => Value is not null;
 
     protected override void OnParametersSet()
     {
-        // Deep clone incoming Value (or create a brand new pack)
         _editPack = (Value is not null) ? Value.DeepClone() : new GamePack();
-
-        // Keep the Id/Key in a separate field for validation and optional disabling
         _key = string.IsNullOrWhiteSpace(_editPack.Id) ? string.Empty : _editPack.Id;
-
+        _keyError = null;
     }
 
-    private async Task Submit()
+    private Task OnSubmit(GamePack _)
     {
-        if (_form is null) return;
-        await _form.Validate();
-        if (!_form.IsValid) return;
+        _keyError = null;
 
         var key = (_key ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(key)) return;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            // TemplateForm already catches this via required validator, but guard anyway.
+            return Task.CompletedTask;
+        }
 
-        // If editing, optionally enforce key immutability unless AllowEditKey is true
+        // If editing and key changes are not allowed, enforce immutability.
         if (IsEdit && !AllowEditKey && !string.Equals(key, Value!.Id, StringComparison.Ordinal))
-            return; // or show a message that key cannot be changed
+        {
+            _keyError = "Key cannot be changed for an existing pack.";
+            // Optional toast:
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = _keyError });
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
 
-        // Apply the key to the working copy (for New or allowed key change during Edit)
+        // Finalize Id and close with result
         _editPack.Id = key;
-
-        // Return ONLY the working copy; the caller decides how to apply it
-        MudDialog?.Close(DialogResult.Ok(_editPack));
+        DialogService.Close(_editPack);
+        return Task.CompletedTask;
     }
 
-    private void Cancel() => MudDialog?.Cancel();
+  private void OnInvalid(FormInvalidSubmitEventArgs _)
+  {
+    // No-op; validators show inline messages.
+  }
 
+  private void Cancel() => DialogService.Close(null);
 }
-

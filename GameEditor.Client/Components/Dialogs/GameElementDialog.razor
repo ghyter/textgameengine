@@ -1,181 +1,202 @@
-﻿@typeparam TElement where TElement : class, IGameElement
-@using GameEditor.Client.Components.FormFields
-@using MudBlazor
+﻿@page "/element"
 @using GameModel.Models
-@using GameModel.Helpers
-@inherits ComponentBase
+@using GameEditor.Client.Components.FormFields
+@using Radzen
+@using Radzen.Blazor
 
-<MudDialog>
-    <DialogContent>
-        @if (_edit !=null)       
-        {
-        <MudForm @ref="_form">
-            <MudTextField @bind-Value="_key"
-                          Label="Id"
-                          Required="true"
-                          Pattern="^[a-z0-9-]+$"
-                          HelperText="Lowercase letters, digits, hyphens only."
-                          Immediate="true"
-                          Variant="Variant.Outlined"
-                          Disabled="@IsEdit" />
+    <!-- Header -->
+    <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Style="margin-bottom:12px;border-bottom:1px solid var(--rz-base-200);padding-bottom:8px;">
+        <RadzenColumn Size="6" Small="12">
+            <RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenColumn>
+                    <RadzenText Text="@_title" Style="font-weight:600;" />
+                </RadzenColumn>
+                <RadzenColumn>
+                    <RadzenBadge Text="@_modeDisplay" />
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenColumn>
 
-            <MudTextField @bind-Value="_edit.Name"
-                          Label="Name"
-                          Variant="Variant.Outlined"
-                          Required="true" />
+        <RadzenColumn Size="6" Small="12" Style="text-align:right;">
+            <RadzenButton Text="Save" Icon="save" ButtonStyle="ButtonStyle.Primary" Disabled="@(!_isDirty)" Click="@SaveAsync" />
+            <RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Danger" Disabled="@_isNew" Click="@DeleteAsync" Style="margin-left:8px;" />
+            <RadzenButton Text="Cancel" Icon="close" ButtonStyle="ButtonStyle.Light" Click="@Cancel" Style="margin-left:8px;" />
+        </RadzenColumn>
+    </RadzenRow>
 
-            <MudTextField @bind-Value="_edit.Description"
-                          Variant="Variant.Outlined"
-                          Label="Description"
-                          Lines="3" />
+    @if (_error is not null)
+    {
+        <RadzenAlert Severity="AlertSeverity.Error">@_error</RadzenAlert>
+    }
+    else if (_edit is null)
+    {
+        <!-- simple loading -->
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="50" />
+            </RadzenColumn>
+        </RadzenRow>
+    }
+    else
+    {
+        <RadzenTemplateForm 
+            Data="@_edit" 
+            TItem="IGameElement" 
+            Submit="@SaveAsync"
+            EditContext="_ec"
+           >
+            <RadzenRow Style="row-gap:12px;vertical-align:center;" >
+                <!-- Id -->
 
-            <MudSwitch Label="IsVisible" 
-                          @bind-Value="_edit.IsVisible"
-                          Variant="Variant.Outlined"
-                          HelperText="Is this element visible in the game?"
-                         Dense="true" Class="mt-2" />
-
-            <MudSelect T="string" Label="Starting State"
-                       @bind-Value="_edit.StartingState"
-                       Variant="Variant.Filled"
-                       HelperText="This is the state of the Element at the start of the game."
-                       Dense="true" Class="mt-2">
-                @foreach (var stateKey in _edit.States.Keys)
-                {
-                    <MudSelectItem T="string" Value="@stateKey">@stateKey</MudSelectItem>
-                }
-            </MudSelect>
-
-
-            <MudTabs Elevation="2" ApplyEffectsToContainer="true">
-                <MudTabPanel Text="States">
-                    @* States (string) *@
-                    <DictionaryTable TValue="string"
-                        Title=""
-                        Help="Named states for this element."
-                        @bind-Values="_edit.States" />
-
-                </MudTabPanel>
-
-                <MudTabPanel Text="Attributes">
-                    @* States (string) *@
-                    <DictionaryTable TValue="int"
-                        Help="Attributes are numeric values that can be accessed at runtime (Hitpoints, Armor Class, etc)."
-                        @bind-Values="_edit.Attributes" />
-                </MudTabPanel>
-
-                <MudTabPanel Text="Properties">
-                    @* States (string) *@
-                    <DictionaryTable TValue="string"
-                                     Help="String values that can be accessed at runtime."
-                                     @bind-Values="_edit.Properties" />
-                </MudTabPanel>
-                
-                <MudTabPanel Text="Flags">
-                    @* States (string) *@
-                    <DictionaryTable TValue="bool"
-                                     Help="True/false values that can be accessed by the Actions."
-                                     @bind-Values="_edit.Flags" />
-                </MudTabPanel>
+                <RadzenColumn Size="8" Medium="6" Large="3">
+                    <RadzenFormField Text="Id" Variant="Variant.Filled" Component="Id">
+                        <RadzenTextBox @bind-Value="_edit.Id" Name="Id" Style="width:100%" />
+                        <RadzenRequiredValidator Component="Id" Text="Id is required" />
+                        <RadzenRegexValidator Component="Id" Pattern="@IdPattern" Text="Invalid Id Format" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                            
+                <!-- Visible -->
+                <RadzenColumn Size="4" Medium="6" Large="3">
+                    <RadzenLabel Text="Is Visible" />
+                    <RadzenSwitch @bind-Value="_edit.IsVisible" Name="IsVisible" TValue="bool" />
+                </RadzenColumn>
 
 
+                <!-- Name -->
+                <RadzenColumn Size="12" Medium="6" Large="4">
+                    <RadzenFormField Text="Name" Variant="Variant.Filled" Component="Name">
+                        <RadzenTextBox @bind-Value="_edit.Name" Name="Name" Style="width:100%" />
+                        <RadzenRequiredValidator Component="Name" Text="Name is required" />
+                    </RadzenFormField>
+                </RadzenColumn>
 
+                <!-- Description -->
+                <RadzenColumn Size="12" Large="5">
+                    <RadzenFormField Text="Description" Variant="Variant.Filled" Component="Description">
+                        <RadzenTextArea @bind-Value="_edit.Description" Name="Description" Rows="3" Style="width:50rem" />
+                    </RadzenFormField>
+                </RadzenColumn>
+
+                <!-- Location -->
                 @if (_edit is Scene scene)
             {
-                <MudTabPanel Text="Map Positions">
-                    <MudTooltip Text="Where should this scene appear on the map?  The rows and columns originate with the starting scene.  The starting sceen is row 0, column 0 and level 0">
-                    <MudGrid Spacing="5">
-                        <MudItem xs="2">
-                            <MudNumericField @bind-Value="scene.MapLocation.Row" Label="Row" Required="true" Step="1" Variant="Variant.Outlined"></MudNumericField>
-                        </MudItem>
-                        <MudItem xs="2">
-                            <MudNumericField @bind-Value="scene.MapLocation.Column" Label="Column" Required="true" Step="1" Variant="Variant.Outlined"></MudNumericField>
-                        </MudItem>
-                        <MudItem xs="2">
-                            <MudNumericField @bind-Value="scene.MapLocation.Level" Label="Level" Required="true" Step="1" Variant="Variant.Outlined"></MudNumericField>
-                        </MudItem>
-                    </MudGrid>
-                    </MudTooltip>
 
-                    <MudSpacer />
-                    <MudTooltip Text="Height/Width of the scene on the Map.  This only affects the visual elements of the diagram.  This represents how many cells the room occupies, default is 1x1">
-                        <MudGrid Spacing="5">
-                            <MudItem xs="4">
-                                <MudNumericField @bind-Value="scene.MapLocation.Height" Label="Height" Required="true" Step="1" Variant="Variant.Outlined"></MudNumericField>
-                            </MudItem>
-                            <MudItem xs="4">
-                                <MudNumericField @bind-Value="scene.MapLocation.Width" Label="Width" Required="true" Step="1" Variant="Variant.Outlined"></MudNumericField>
-                            </MudItem>
-                        </MudGrid>
-                    </MudTooltip>
-                </MudTabPanel>
+                <RadzenColumn Size="2" Large="5">
+                    <RadzenFormField Text="Column" Variant="Variant.Filled" Component="MapColumn">
+                        <RadzenNumeric @bind-Value="scene.MapLocation.Column" Name="MapColumn" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="2" Large="5">
+                    <RadzenFormField Text="Row" Variant="Variant.Filled" Component="MapRow">
+                        <RadzenNumeric @bind-Value="scene.MapLocation.Row" Name="MapRow" />
+                    </RadzenFormField>
+                </RadzenColumn>
+
+                <RadzenColumn Size="2" Large="5">
+                    <RadzenFormField Text="Level" Variant="Variant.Filled" Component="MapLevel">
+                        <RadzenNumeric @bind-Value="scene.MapLocation.Level" Name="MapLevel" />
+                    </RadzenFormField>
+                </RadzenColumn>
+
+
+                <RadzenColumn Size="2" Large="5">
+                    <RadzenFormField Text="Width" Variant="Variant.Filled" Component="MapWidth">
+                        <RadzenNumeric @bind-Value="scene.MapLocation.Width" Name="MapWidth"/>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="2" Large="5">
+                    <RadzenFormField Text="Height" Variant="Variant.Filled" Component="MapHeight">
+                        <RadzenNumeric @bind-Value="scene.MapLocation.Height" Name="MapHeight" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                
+
+
+                
+            } else
+            {
+                <RadzenColumn Size="12" Large="5">
+                    <RadzenFormField Text="Starting Location" Variant="Variant.Filled" Component="St">
+                        <RadzenDropDown @bind-Value=@_edit.StartingLocation
+                                        Name="Starting Location"
+                                        Data="@(SceneDropdown)"
+                                        TextProperty="@nameof(SceneDropdownRecord.Value)"
+                                        ValueProperty="@nameof(SceneDropdownRecord.Id)"
+                                        Placeholder="(none)"
+                                        Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+
             }
-            </MudTabs>
 
 
+    
+            </RadzenRow>
+
+                
+            
 
 
-            <MudStack Row Justify="Justify.FlexEnd" Spacing="1" Class="mt-4">
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit">
-                    @(IsEdit ? "Save" : "Create")
-                </MudButton>
-            </MudStack>
-        </MudForm>
-        }
-    </DialogContent>
-</MudDialog>
+                  <br/>
+                    
 
-@code {
-    // ===== Parameters =====
-    [Parameter] public TElement? Value { get; set; }  // null => New; not null => Edit existing
-    [Parameter] public bool IsEdit { get; set; } = true;  // null => New; not null => Edit existing
+            <RadzenTabs>
+                <Tabs>
 
-    // ===== Internals =====
-    [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
-    private MudForm? _form;
+                <RadzenTabsItem Text="States">
+                <!-- States -->
+                    <DictionaryTable TValue="string"
+                                        OnChanged="() => _isDirty = true"
+                                        Help="Named states for this element."
+                                        For="@(()=>_edit!.States)" 
+                                        @bind-Values="StatesProxy" />
 
-    // The working copy we bind the form to (never the original)
-    private TElement? _edit;
+                    <RadzenRow Style="margin-top:12px">
+                        <RadzenColumn Size="12" Medium="6" Large="4">
+                            <RadzenFormField Text="Starting State" Variant="Variant.Filled" Component="StartingState">
+                                <RadzenDropDown @bind-Value="_edit.StartingState"
+                                                Name="StartingState"
+                                                Data="@(StatesProxy.Keys.ToList())"
+                                                AllowClear="true"
+                                                Placeholder="(none)"
+                                                Style="width:100%" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenTabsItem>
 
-    // separate key field because we validate formatting and may disable during edit
-    private string _key = string.Empty;
 
-    protected override void OnParametersSet()
-    {
+                <RadzenTabsItem Text="Attributes">
+                        <DictionaryTable TValue="int"
+                                            OnChanged="() => _isDirty = true"
+                                            For="@(()=>_edit!.Attributes)"
+                                            Help="Key/value attributes."
+                                            @bind-Values="AttributesProxy" />
+                </RadzenTabsItem>
 
-        // Deep clone incoming Value (polymorphic) or start a fresh instance of TElement
-        if (Value is not null)
-        {
-            // DeepClone() should preserve runtime type; if you don't have one, you can use your JSON-based helper.
-            _edit = Value.DeepClone(); // ensure this extension handles polymorphic types
-            _key = string.IsNullOrWhiteSpace(_edit.Id) ? string.Empty : _edit.Id;
+                <RadzenTabsItem Text="Properties">
 
-        }
-        else
-        {
-            _edit = null;
-        }
+                        <DictionaryTable TValue="string"
+                                            OnChanged="() => _isDirty = true"
+                                            For="@(()=>_edit!.Properties)"
+                                            Help="Free-form properties."
+                                            @bind-Values="PropertiesProxy" />
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Flags">
+
+                    <DictionaryTable TValue="bool"
+                                        OnChanged="() => _isDirty = true"
+                                        For="@(()=>_edit!.Flags)"
+                                        Help="Named flags."
+                                        @bind-Values="FlagsProxy" />
+
+            </RadzenTabsItem>
+
+
+            </Tabs>
+        </RadzenTabs>
+        </RadzenTemplateForm>
     }
-
-    private async Task Submit()
-    {
-        if (_form is null) return;
-        if (_edit is null) return;
-        await _form.Validate();
-        if (!_form.IsValid) return;
-
-        var key = (_key ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(key)) return;
-
-        // Apply the key to the working copy (for New or allowed key change during Edit)
-        _edit.Id = key;
-
-        // Return ONLY the working copy; the caller decides how to apply it
-        MudDialog?.Close(DialogResult.Ok(_edit));
-    }
-
-    private void Cancel() => MudDialog?.Cancel();
-
-}
 

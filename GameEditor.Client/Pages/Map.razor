@@ -12,8 +12,9 @@
 @using GameModel.Models
 @using GameModel.Models.Enums
 @using GameModel.Session
+@using Point = Blazor.Diagrams.Core.Geometry.Point
 @inject IGamePackService GamePackService
-@inject ISnackbar snackbar
+@* @inject ISnackbar snackbar *@
 
 <h3>Game Editor</h3>
 
@@ -65,7 +66,7 @@
 
         if (GamePackService.Current is null || GamePackService.Current.Scenes.Count == 0)
         {
-            snackbar.Add("Current Game does not have any scenes", Severity.Error);
+            //snackbar.Add("Current Game does not have any scenes", Severity.Error);
             return;
         }
 

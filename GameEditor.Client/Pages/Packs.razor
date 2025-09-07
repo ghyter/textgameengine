@@ -1,143 +1,197 @@
 ﻿@page "/packs"
-@using GameEditor.Client.Components
 @using GameEditor.Client.Components.Dialogs
 @using GameEditor.Client.Data
-@using MudBlazor
 @using System.Text.Json
 @using GameModel.Models
-@using System.Diagnostics
+@using Radzen
+@using Radzen.Blazor
+
 @inject IGamePackService GamePackService
-@inject ISnackbar Snackbar
-@inject IDialogService DialogService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Game Packs</MudText>
+<RadzenStack Orientation="Orientation.Vertical" Gap="1rem">
 
-        <MudStack Row Spacing="1">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                OnClick="OpenPAckDialog">New Pack</MudButton>
+  <!-- Header -->
+  <RadzenStack Orientation="Orientation.Horizontal"
+               AlignItems="AlignItems.Center"
+               JustifyContent="JustifyContent.SpaceBetween">
+    <RadzenText Text="Game Packs" Style="font-size:1.25rem;font-weight:600" />
 
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
-                OnClick="LoadPacks">Refresh</MudButton>
-        </MudStack>
-    </MudStack>
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+      <RadzenButton Icon="add"
+                    ButtonStyle="ButtonStyle.Primary"
+                    Text="New Pack"
+                    Click="@OpenPackDialog" />
+      <RadzenButton Icon="refresh"
+                    ButtonStyle="ButtonStyle.Light"
+                    Text="Refresh"
+                    Click="@LoadPacks" />
+    </RadzenStack>
+  </RadzenStack>
 
-    <MudDivider Class="my-2" />
+  <!-- Upload -->
+    <!-- Upload -->
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenFileInput TValue="string"
+                         @bind-Value="_uploadDataUrlOrText"
+                         @bind-FileName="_uploadFileName"
+                         Accept=".json"
+                         ChooseText="Upload JSON"
+                         Change="@OnFileTextChanged" />
+        <RadzenText Text="Upload a .json GamePack (key becomes the filename without extension)"
+                    Class="packs-upload-hint" />
+    </RadzenStack>
 
-    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-        <InputFile OnChange="OnFileSelected" accept=".json" />
-        <MudText Typo="Typo.caption" Class="ml-2">
-            Upload a .json GamePack (key becomes the filename without extension)
-        </MudText>
-    </MudStack>
+  <!-- Cards -->
+  @if (packs.Count == 0)
+  {
+    <RadzenText Text="No packs found. Create a new one or upload a JSON file." Style="opacity:.7" />
+  }
+  else
+  {
+    <RadzenCardGroup>
+      @foreach (var record in packs)
+      {
+        var isSelected = IsSelected(record.Id);
 
-    <MudTable Items="packs" Dense="true" Hover="true" Class="mt-4" Elevation="0">
-        <HeaderContent>
-            <MudTh Style="width: 48px;"></MudTh>
-            <MudTh>Id</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh Style="width: 280px;">Actions</MudTh>
-        </HeaderContent>
+        <RadzenCard>
+          <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
 
-        <RowTemplate>
-            <MudTd>
-                @if (IsSelected(context.Id))
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Title="Selected" />
-                }
-            </MudTd>
-            <MudTd DataLabel="Id">
-                <MudText>@context.Pack.Id</MudText>
-            </MudTd>
-            <MudTd DataLabel="Title">
-                <MudText>@context.Pack.Title</MudText>
-            </MudTd>
-            <MudTd DataLabel="Description">
-                <MudText Truncate="true" MaxLines="2">@context.Pack.Description</MudText>
-            </MudTd>
-            <MudTd DataLabel="Actions">
-                <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
-                    Disabled="@(IsSelected(context.Id))" OnClick="() => SelectPack(context.Id)">
-                    Select
-                </MudButton>
+            <!-- Title / Selected badge -->
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.SpaceBetween">
+              <RadzenText Text="@record.Pack.Title" Style="font-weight:600;font-size:1.05rem" />
+              @if (isSelected)
+              {
+                <RadzenIcon Icon="check_circle" Style="color:var(--rz-success)" Title="Selected" />
+              }
+            </RadzenStack>
 
-                <MudButton Variant="Variant.Text" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete"
-                    OnClick="() => DeletePack(context.Id)">
-                    Delete
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
 
-        <NoRecordsContent>
-            <MudText Typo="Typo.body2" Class="pa-4">No packs found. Create a new one or upload a JSON file.</MudText>
-        </NoRecordsContent>
-    </MudTable>
-</MudPaper>
+            <!-- Description -->
+            <RadzenText Style="font-size:.9rem;opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+              @record.Pack.Description
+            </RadzenText>
+
+            <!-- Actions -->
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Class="mt-2">
+              <RadzenButton Text="Select"
+                            Icon="play_arrow"
+                            ButtonStyle="ButtonStyle.Primary"
+                            Disabled="@isSelected"
+                            Click="@(args => SelectPack(record.Id))" />
+              <RadzenButton Text="Delete"
+                            Icon="delete"
+                            ButtonStyle="ButtonStyle.Danger"
+                            Click="@(args => DeletePack(record.Id))" />
+            </RadzenStack>
+
+          </RadzenStack>
+        </RadzenCard>
+      }
+    </RadzenCardGroup>
+  }
+</RadzenStack>
 
 @code {
-    private List<GamePackRecord> packs = new();
+  private List<GamePackRecord> packs = new();
 
-    protected override async Task OnInitializedAsync()
+    private string? _uploadDataUrlOrText;
+    private string? _uploadFileName;
+
+  protected override async Task OnInitializedAsync() => await LoadPacks();
+
+  private bool IsSelected(string id) => GamePackService.Current?.Id == id;
+
+  private async Task SelectPack(string id)
+  {
+    await GamePackService.SwitchAsync(id);
+    NotificationService.Notify(new NotificationMessage
     {
-        await LoadPacks();
+      Severity = NotificationSeverity.Success,
+      Summary = $"Selected pack '{id}'."
+    });
+    await LoadPacks();
+  }
+
+  private async Task LoadPacks()
+  {
+    packs = await GamePackService.ReadAllAsync();
+  }
+
+  private async Task OpenPackDialog()
+  {
+    var options = new DialogOptions { CloseDialogOnOverlayClick = true, Width = "500px" };
+    var result = await DialogService.OpenAsync<PackDialog>("New Game Pack", null, options);
+
+    if (result is GamePack newPack)
+    {
+      if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
+        await GamePackService.CreateAsync(newPack.Id, newPack);
+
+      NotificationService.Notify(new NotificationMessage
+      {
+        Severity = NotificationSeverity.Success,
+        Summary = $"Pack '{newPack.Id}' created."
+      });
+
+      await LoadPacks();
     }
+  }
 
-    private bool IsSelected(string id)
-    => GamePackService.Current?.Id == id;
-
-    private async Task SelectPack(string id)
+    private static byte[] DecodeRadzenFile(string dataUrlOrText)
     {
-        await GamePackService.SwitchAsync(id);
-        Snackbar.Add($"Selected pack '{id}'.", Severity.Success);
-        StateHasChanged();
-    }
-
-    private async Task LoadPacks()
-    {
-        packs = await GamePackService.ReadAllAsync();
-        StateHasChanged();
-    }
-
-    private async Task OpenPAckDialog()
-    {
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<PackDialog>("New Game Pack", options);
-        var result = await dialog.Result;
-
-        if (!result!.Canceled && result.Data is GamePack newPack)
+        // If it's a data URL, strip prefix and base64-decode
+        if (dataUrlOrText.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
         {
-            // If the key exists, Update; else Create
-            if (!await GamePackService.UpdateAsync(newPack.Id, newPack))
-                await GamePackService.CreateAsync(newPack.Id, newPack);
-
-            Snackbar.Add($"Pack '{newPack.Id}' created.", Severity.Success);
-            await LoadPacks();
+            var comma = dataUrlOrText.IndexOf(',');
+            if (comma >= 0)
+            {
+                var b64 = dataUrlOrText[(comma + 1)..];
+                return Convert.FromBase64String(b64);
+            }
         }
+
+        // Otherwise assume it's raw text content already (e.g., Radzen returning the file as text)
+        return System.Text.Encoding.UTF8.GetBytes(dataUrlOrText);
     }
 
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    private async Task OnFileTextChanged(string dataUrlOrText)
     {
-        var file = e.File;
-        var filename = Path.GetFileNameWithoutExtension(file.Name);
+        if (string.IsNullOrWhiteSpace(dataUrlOrText))
+            return;
+
+        var filename = Path.GetFileNameWithoutExtension(_uploadFileName ?? "pack");
 
         var existing = await GamePackService.ReadAsync(filename);
         if (existing != null)
         {
-            Snackbar.Add($"A pack with id '{filename}' already exists.", Severity.Warning);
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = $"A pack with id '{filename}' already exists."
+            });
             return;
         }
 
-        using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
-        using var reader = new StreamReader(stream);
-        var json = await reader.ReadToEndAsync();
         try
         {
+            var bytes = DecodeRadzenFile(dataUrlOrText);
+            var json = System.Text.Encoding.UTF8.GetString(bytes);
+
+            // Optional safety: trim leading BOM/whitespace
+            json = json.TrimStart('\uFEFF', ' ', '\t', '\r', '\n');
+
             var pack = JsonSerializer.Deserialize<GamePack>(json);
             if (pack is null)
             {
-                Snackbar.Add("Failed to parse GamePack JSON.", Severity.Error);
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Failed to parse GamePack JSON."
+                });
                 return;
             }
 
@@ -148,19 +202,117 @@
             if (!await GamePackService.UpdateAsync(pack.Id, pack))
                 await GamePackService.CreateAsync(pack.Id, pack);
 
-            Snackbar.Add($"Pack '{filename}' uploaded successfully.", Severity.Success);
-            await LoadPacks();
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = $"Pack '{filename}' uploaded successfully."
+            });
+
+            // clear input and auto-select uploaded pack
+            await AfterUploadSuccess(filename);
+        }
+        catch (FormatException)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "The uploaded file isn't valid base64 or JSON text."
+            });
         }
         catch (JsonException ex)
         {
-            Snackbar.Add($"JSON error: {ex.Message}", Severity.Error);
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = $"JSON error: {ex.Message}"
+            });
         }
     }
 
-    private async Task DeletePack(string id)
+
+    private async Task AfterUploadSuccess(string packId)
     {
-        await GamePackService.DeleteAsync(id);
-        Snackbar.Add($"Pack '{id}' deleted.", Severity.Info);
         await LoadPacks();
+        _uploadDataUrlOrText = null;
+        _uploadFileName = null;
+        StateHasChanged();
+        await SelectPack(packId);
     }
+
+
+  // private async Task OnFileSelected(InputFileChangeEventArgs e)
+  // {
+  //   var file = e.File;
+  //   var filename = Path.GetFileNameWithoutExtension(file.Name);
+
+  //   var existing = await GamePackService.ReadAsync(filename);
+  //   if (existing != null)
+  //   {
+  //     NotificationService.Notify(new NotificationMessage
+  //     {
+  //       Severity = NotificationSeverity.Warning,
+  //       Summary = $"A pack with id '{filename}' already exists."
+  //     });
+  //     return;
+  //   }
+
+  //   using var stream = file.OpenReadStream(10_000_000);
+  //   using var reader = new StreamReader(stream);
+  //   var json = await reader.ReadToEndAsync();
+
+  //   try
+  //   {
+  //     var pack = JsonSerializer.Deserialize<GamePack>(json);
+  //     if (pack is null)
+  //     {
+  //       NotificationService.Notify(new NotificationMessage
+  //       {
+  //         Severity = NotificationSeverity.Error,
+  //         Summary = "Failed to parse GamePack JSON."
+  //       });
+  //       return;
+  //     }
+
+  //     pack.Id = filename;
+  //     if (string.IsNullOrWhiteSpace(pack.Title))
+  //       pack.Title = filename;
+
+  //     if (!await GamePackService.UpdateAsync(pack.Id, pack))
+  //       await GamePackService.CreateAsync(pack.Id, pack);
+
+  //     NotificationService.Notify(new NotificationMessage
+  //     {
+  //       Severity = NotificationSeverity.Success,
+  //       Summary = $"Pack '{filename}' uploaded successfully."
+  //     });
+
+  //     await LoadPacks();
+  //   }
+  //   catch (JsonException ex)
+  //   {
+  //     NotificationService.Notify(new NotificationMessage
+  //     {
+  //       Severity = NotificationSeverity.Error,
+  //       Summary = $"JSON error: {ex.Message}"
+  //     });
+  //   }
+  // }
+
+  private async Task DeletePack(string id)
+  {
+    var confirm = await DialogService.Confirm(
+      $"Are you sure you want to delete pack '{id}'?",
+      "Confirm Delete");
+
+    if (confirm != true) return;
+
+    await GamePackService.DeleteAsync(id);
+    NotificationService.Notify(new NotificationMessage
+    {
+      Severity = NotificationSeverity.Info,
+      Summary = $"Pack '{id}' deleted."
+    });
+
+    await LoadPacks();
+  }
 }

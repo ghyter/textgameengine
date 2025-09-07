@@ -4,6 +4,8 @@ using GameEditor.Client.Data;
 using GameModel.Models;
 using GameModel.Session;
 
+namespace GameEditor.Client.Services;
+
 public interface IGamePackService: INotifyPropertyChanged
 {
     GamePack?      Current      { get;  }
@@ -31,7 +33,7 @@ public class GamePackService : IGamePackService
 
     public GamePack?   Current    { get; private set; }
     
-    public GameSession? CurrentSession { get; private set; }
+    //public GameSession? CurrentSession { get; private set; }
     public string? CurrentKey { get; private set; }
 
     public GamePackService(IIndexedDbFactory factory)
