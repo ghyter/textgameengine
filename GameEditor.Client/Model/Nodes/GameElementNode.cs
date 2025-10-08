@@ -6,6 +6,7 @@ namespace GameEditor.Client.Model.Nodes;
 
 public class GameElementNode : NodeModel
 {
+
     public GameElementNode(Point position, IGameElement element) : base(position) {
         Element = element;
     }
@@ -16,10 +17,13 @@ public class GameElementNode : NodeModel
     }
 
     public IGameElement Element { get; set; }
+
 }
 
 public class SceneNode : GameElementNode 
 {
+    
+
     public SceneNode(Point position, IGameElement element) : base(position, element) { }
     public SceneNode(string id, Point position, IGameElement element) : base(id, position, element) { }
 }

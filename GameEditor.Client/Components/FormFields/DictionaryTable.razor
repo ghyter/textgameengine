@@ -3,9 +3,6 @@
 @using Radzen
 @using Radzen.Blazor
 @using System.Linq.Expressions
-@inject DialogService Dialogs
-
-<CascadingValue Value="_editContext">
 
 <RadzenRow AlignItems="AlignItems.Stretch" Style="margin-bottom:.5rem">
     <RadzenColumn Size="11">
@@ -19,22 +16,14 @@
         }
     </RadzenColumn>
     <RadzenColumn Size="1" Style="text-align:right">
-        <RadzenButton Icon="add"
-                      ButtonStyle="ButtonStyle.Secondary"
-                      Size="ButtonSize.Small"
-                      Click="@AddRow" />
+        <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Click="@AddRow" />
     </RadzenColumn>
 </RadzenRow>
 
-<RadzenDataGrid TItem="Entry"
-                Data="@_rows"
-                Density="Density.Compact"
-                RowHover="true"
-                EmptyMessage="No entries."
-                ShowEmptyMessage="true"
+<RadzenDataGrid TItem="Entry" Data="@_rows" Density="Density.Compact" RowHover="true"
+                EmptyMessage="No entries." ShowEmptyMessage="true"
                 Style="border:1px solid var(--rz-base-200);box-shadow:none">
     <Columns>
-
         <RadzenDataGridColumn TItem="Entry" Title="Key" Width="32%">
             <Template Context="e">
                 <RadzenTextBox @bind-Value="e.KeyEdit"
@@ -51,27 +40,24 @@
 
         <RadzenDataGridColumn TItem="Entry" Title="Value">
             <Template Context="e">
-                @* string *@
                 @if (typeof(TValue) == typeof(string))
                 {
-                    <RadzenTextBox Value="@( (string?)(object?)e.Value )"
-                                   ValueChanged="@( (Action<string?>)(v => { e.Value = (TValue?)(object?) (v ?? ""); Push(); }) )"
+                    <RadzenTextBox Value="@((string?)(object?)e.Value)"
+                                   ValueChanged="@((Action<string?>)(v => { e.Value = (TValue?)(object?)(v ?? ""); Push(); }))"
                                    ChangeEvent="ChangeEvent.Input"
                                    Placeholder="text…"
                                    Style="width:100%" />
                 }
-                @* int *@
                 else if (typeof(TValue) == typeof(int))
                 {
                     <RadzenNumeric Value="@((int)(object?)e.Value!)"
                                    ValueChanged="@((Action<int>)(v => { e.Value = (TValue)(object)v; Push(); }))"
                                    Style="width:160px" />
                 }
-                @* bool *@
                 else if (typeof(TValue) == typeof(bool))
                 {
                     <RadzenSwitch Value="@((bool)(object?)e.Value!)"
-                                  ValueChanged="@( (Action<bool>)(v => { e.Value = (TValue)(object)v; Push(); }) )" />
+                                  ValueChanged="@((Action<bool>)(v => { e.Value = (TValue)(object)v; Push(); }))" />
                 }
                 else
                 {
@@ -82,16 +68,12 @@
 
         <RadzenDataGridColumn TItem="Entry" Width="56px">
             <Template Context="e">
-                <RadzenButton Icon="delete"
-                              ButtonStyle="ButtonStyle.Danger"
-                              Size="ButtonSize.Small"
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
                               Click="@(() => RemoveRow(e))" />
             </Template>
         </RadzenDataGridColumn>
-
     </Columns>
 </RadzenDataGrid>
-</CascadingValue>
 
 @code {
     [CascadingParameter] private EditContext? _editContext { get; set; }
@@ -103,17 +85,16 @@
 
     [Parameter] public Dictionary<string, TValue> Values { get; set; } = new();
     [Parameter] public EventCallback<Dictionary<string, TValue>> ValuesChanged { get; set; }
-    [Parameter] public Expression<Func<object>>? For { get; set; }  // or a typed expression per table
 
-    [Parameter] public EventCallback OnChanged { get; set; }
+    [EditorRequired]
+    [Parameter] public Expression<Func<object>>? For { get; set; }
 
     [Parameter] public TValue? NewValueDefault { get; set; }
 
-    // A simple row model for the grid
     public class Entry
     {
         public string Key { get; set; } = "";
-        public string KeyEdit { get; set; } = "";   // live editor buffer
+        public string KeyEdit { get; set; } = "";
         public TValue? Value { get; set; }
     }
 
@@ -121,29 +102,20 @@
 
     protected override void OnParametersSet()
     {
-        // Rehydrate rows from the incoming dictionary
-        _rows = Values?.Select(kv => new Entry
-        {
-            Key = kv.Key,
-            KeyEdit = kv.Key,
-            Value = kv.Value
-        }).ToList() ?? new();
+        _rows = Values?.Select(kv => new Entry { Key = kv.Key, KeyEdit = kv.Key, Value = kv.Value }).ToList() ?? new();
     }
 
     private async Task NotifyChangedAsync()
     {
-        // tell the parent form “the field changed”
         if (_editContext is not null && For is not null)
         {
             var fi = FieldIdentifier.Create(For);
             _editContext.NotifyFieldChanged(fi);
         }
-        await OnChanged.InvokeAsync();
+        await Task.CompletedTask;
     }
 
-
-
-    private async void AddRow()
+    private async Task AddRow()
     {
         var key = GenerateKey("new-key");
         _rows.Add(new Entry
@@ -151,50 +123,37 @@
             Key = key,
             KeyEdit = key,
             Value = NewValueDefault is not null ? NewValueDefault
-                  : typeof(TValue) == typeof(string) ? (TValue)(object)string.Empty
-                  : typeof(TValue) == typeof(int) ? (TValue)(object)0
-                  : typeof(TValue) == typeof(bool) ? (TValue)(object)false
-                  : default!
+                : typeof(TValue) == typeof(string) ? (TValue)(object)string.Empty
+                : typeof(TValue) == typeof(int) ? (TValue)(object)0
+                : typeof(TValue) == typeof(bool) ? (TValue)(object)false
+                : default!
         });
         await PushAsync();
     }
 
-    private async void RemoveRow(Entry e)
+    private async Task RemoveRow(Entry e)
     {
         if (e is null) return;
         _rows.Remove(e);
         await PushAsync();
     }
 
-    private async void RenameKey(Entry e, string? newKey)
+    private async Task RenameKey(Entry e, string? newKey)
     {
         if (e is null) return;
 
         newKey = (newKey ?? "").Trim();
-        if (string.IsNullOrEmpty(newKey) || newKey == e.Key)
+        if (string.IsNullOrEmpty(newKey) || newKey == e.Key ||
+            !System.Text.RegularExpressions.Regex.IsMatch(newKey, KeyPattern) ||
+            _rows.Any(r => r != e && r.Key.Equals(newKey, StringComparison.Ordinal)))
         {
             e.KeyEdit = e.Key; // snap back
             await NotifyChangedAsync();
             StateHasChanged();
             return;
         }
-        if (!System.Text.RegularExpressions.Regex.IsMatch(newKey, KeyPattern))
-        {
-            e.KeyEdit = e.Key;
-            await NotifyChangedAsync();
-            StateHasChanged();
-            return;
-        }
-        if (_rows.Any(r => r != e && r.Key.Equals(newKey, StringComparison.Ordinal)))
-        {
-            e.KeyEdit = e.Key;
-            await NotifyChangedAsync();
-            StateHasChanged();
-            return;
-        }
 
-        // commit rename
-        e.Key = newKey;
+        e.Key = newKey; // commit
         await PushAsync();
     }
 
@@ -206,24 +165,18 @@
         return key;
     }
 
-    private void Push()
-    {
-        // Synchronous sibling for ValueChanged on input
-        _ = PushAsync();
-    }
+    private void Push() => _ = PushAsync();
 
     private async Task PushAsync()
     {
-        // Build a fresh dictionary to send up
         var snapshot = _rows.ToDictionary(r => r.Key, r => r.Value!);
 
-        // Keep child in sync to avoid “revert” flicker
+        // Optional: keep to prevent flicker; remove if unnecessary.
         Values = snapshot;
 
         if (ValuesChanged.HasDelegate)
             await ValuesChanged.InvokeAsync(snapshot);
-        if (OnChanged.HasDelegate)
-            await OnChanged.InvokeAsync();
+
         await NotifyChangedAsync();
         StateHasChanged();
     }

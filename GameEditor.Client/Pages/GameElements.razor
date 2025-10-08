@@ -15,20 +15,19 @@
 
 <RadzenTabs>
     <Tabs>
-        <RadzenTabsItem Text="Players">
-            <GameElementsTable 
-                               Title="Players"
-                               Items="GamePackService.Current!.Players.Values"
-                               ShowCreate="true"
-                               CreateText="New Player"
-                     />
-        </RadzenTabsItem>
 
         <RadzenTabsItem Text="Scenes">
             <GameElementsTable Title="Scenes"
                                Items="GamePackService.Current!.Scenes.Values"
                                ShowCreate="true"
                                CreateText="New Scene" />
+        </RadzenTabsItem>
+
+        <RadzenTabsItem Text="Players">
+            <GameElementsTable Title="Players"
+                               Items="GamePackService.Current!.Players.Values"
+                               ShowCreate="true"
+                               CreateText="New Player" />
         </RadzenTabsItem>
 
 
@@ -47,6 +46,12 @@
                                Items="GamePackService.Current!.Npcs.Values"
                                ShowCreate="true"
                                CreateText="New NPC"/>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Exits">
+            <GameElementsTable Title="Exits"
+                               Items="GamePackService.Current!.Exits.Values"
+                               ShowCreate="true"
+                               CreateText="New Exit" />
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>

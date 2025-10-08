@@ -6,49 +6,25 @@
 @using GameEditor.Client.Model.Nodes;
 @using Blazor.Diagrams.Core.Models
 @using GameModel.Models
-@* @inject IDialogService DialogService; *@
+@inject DialogService DialogService;
 @inject IGamePackService GamePackService;
 
 
-<div class="node @(Node.Selected ? "selected":null)">
-    <RadzenCard>
-        <RadzenStack>
-            <div class="d-flex align-items-center">
-                <RadzenText Text="@Node.Element.Name" />
-                <RadzenButton Icon="edit"
-                              Size="ButtonSize.Medium"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Class="ml-2"
-                              Click="@EditDialog" />
-            </div>
+<div class="node @(Node.Selected ? "selected":null)" >
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText Text="@Node.Element.Name" />
+            <RadzenButton Icon="edit"
+                            Size="ButtonSize.Medium"
+                            ButtonStyle="ButtonStyle.Primary"
+                            Class="ml-2"
+                            Click="@EditDialog" />
+    </RadzenStack>
+        @if (Node.Element is Scene scene)
+    {
+        <RadzenText Text="@scene.MapLocation.ToString()" Style="display:block" />
+    }
 
-            @if (Node.Element is Scene scene)
-            {
-                <RadzenText Text="@scene.MapLocation.ToString()" Style="display:block" />
-            }
-        </RadzenStack>
-    </RadzenCard>
 
-    @* <MudCard>
-        <MudCardContent>
-            <MudText>@Node.Element.Name
-            <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                          Size="Size.Medium"
-                          Color="Color.Primary"
-                          Class="ml-2"
-                          OnClick="EditDialog" />
-            </MudText>
-            @if (Node.Element is Scene scene)
-            {
-                <MudText Typo="Typo.body2">@scene.MapLocation.ToString()</MudText>
-            }
-            
-        </MudCardContent>
-        @* <MudCardActions>
-            <MudButton Variant="Variant.Text" Color="Color.Primary">+State</MudButton>
-        </MudCardActions>
-    </MudCard> *@
-    
     @foreach (var port in Node.Ports)
     {
         // In case you have any ports to show
@@ -58,12 +34,41 @@
 </div>
 
 @code {
+    private GameElementNode _node = null;
+
     [Parameter]
-    public GameElementNode Node { get; set; } = null!;
-    protected override void OnInitialized()
-    {
-        // Initialize any properties or services if needed
-        base.OnInitialized();
+    [EditorRequired]
+    public GameElementNode Node { get => _node; set {
+            _node = value;
+            TypeKey = _node.Element.GetType() == typeof(Scene) ? "scene"
+              : _node.Element.GetType() == typeof(Item) ? "item"
+              : _node.Element.GetType() == typeof(Npc) ? "npc"
+              : _node.Element.GetType() == typeof(Player) ? "player"
+              : throw new InvalidOperationException($"Unsupported element type {_node.Element.GetType().Name}");
+
+                TypeTitle = _node.Element.GetType() == typeof(Scene) ? "Scene"
+              : _node.Element.GetType() == typeof(Item) ? "Item"
+              : _node.Element.GetType() == typeof(Npc) ? "NPC"
+              : _node.Element.GetType() == typeof(Player) ? "Player"
+              : "Element";
+    
+        }}
+
+    public IGameElement TElement => _node.Element;
+
+    private string? TypeKey { get; set; }
+    private string? TypeTitle { get; set; }
+
+
+
+    public string SceneStyle() {
+
+        if (Node.Element is Scene scene)
+        {
+            return $"width:{(Node.Size.Width * scene.MapLocation.Width)}px;height:{Node.Size.Height * scene.MapLocation.Height}px";
+        }
+
+        return string.Empty;
     }
 
     private async Task EditDialog()
@@ -72,38 +77,20 @@
         // This could involve invoking a service or a dialog component
         var title = Node.Element.Name;
         Console.WriteLine($"Editing node: {Node.Element.Name}");
+            // ---------- Helpers ----------
+   
 
-        
+        await DialogService.OpenSideAsync<GameElementDialog>(
+          $"Editing node: {Node.Element.Name}",
+        new Dictionary<string, object?>
+          {
+              ["QId"] = $"{TypeKey}:{Node.Element.Id}",
+              ["QMode"] = "edit"
+          },
+          new SideDialogOptions { Position = DialogPosition.Right, Width = "1000px", CloseDialogOnOverlayClick = false });
 
-        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true };
-        // DialogParameters dialogParams = new()
-        // {
-        //     { nameof(GameElementDialog<Scene>.Value), Node.Element},
+        // The dialog mutates GamePackService.Current directly; refresh our view.
 
-        // };
-        // var dialog = await DialogService.ShowAsync<GameElementDialog<Scene>>($"Edit {title}", dialogParams, options);
-        // var result = await dialog.Result;
-        // if (result == null || result.Canceled)
-        // {
-        //     Console.WriteLine("Edit dialog was canceled.");
-        //     return;
-        // };
-
-        //Temporarily, I only want to update what I know is in the form.  Don't drop the exits for example.
-
-        // if (Node.Element is Scene scene && result.Data is Scene newscene)
-        // {
-        //     scene.Name = newscene.Name;
-        //     scene.Description = newscene.Description;
-        //     scene.MapLocation = newscene.MapLocation;
-        //     scene.States = newscene.States;
-        //     scene.Attributes = newscene.Attributes;
-        //     scene.Properties = newscene.Properties;
-        //     scene.Flags = newscene.Flags;
-
-        // }
-        // Always update the GamePackService to ensure changes are saved
-        //await GamePackService.UpdateCurrentAsync();
         StateHasChanged();
     }
 

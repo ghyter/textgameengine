@@ -110,11 +110,9 @@
                         <RadzenNumeric @bind-Value="scene.MapLocation.Height" Name="MapHeight" />
                     </RadzenFormField>
                 </RadzenColumn>
-                
 
-
-                
-            } else
+            }
+            else if (_edit is not Exit)
             {
                 <RadzenColumn Size="12" Large="5">
                     <RadzenFormField Text="Starting Location" Variant="Variant.Filled" Component="St">
@@ -129,25 +127,86 @@
                 </RadzenColumn>
 
             }
-
-
     
             </RadzenRow>
-
-                
-            
-
-
-                  <br/>
-                    
+            <br/>
 
             <RadzenTabs>
                 <Tabs>
 
+                @if (_edit is Exit exit)
+                {
+                    <RadzenTabsItem Text="Targets">
+                        <RadzenColumn Size="12" Large="5">
+                            <ExitTargetsGrid TExit="Exit" Targets="@exit.Targets" />
+                        </RadzenColumn>
+                    </RadzenTabsItem>
+                }
+
+                @if (_edit is Scene scene)
+                {
+                    <RadzenTabsItem Text="Exits">
+                        <RadzenRow >
+                            <RadzenColumn Size="12" Style="text-align:right">
+                                <RadzenButton Icon="add" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                            </RadzenColumn>
+                            
+                        </RadzenRow>
+
+                        @foreach (var candidate in GamePackService.Current!.ExitCandidates(scene))
+                        {
+                            <RadzenText Text="@candidate.Direction.ToString()" TextStyle="TextStyle.Overline" />
+                            if (candidate.TargetScene is not null)
+                            {
+                                <RadzenText Text="@candidate.TargetScene.Name" />
+                            }
+                            else
+                            {
+                                <RadzenText Text="(none)" Style="font-style:italic;opacity:.75" />
+                            }
+                        }
+                        
+                        <RadzenDataList Data="@scene.Exits">
+                            <Template Context="exit">
+                                <RadzenRow>
+                                    <RadzenColumn Size="5">
+                                        <RadzenText Text="@exit.Direction.ToString()" TextStyle="TextStyle.Overline" />
+                                        @if (exit.Direction == GameModel.Models.Enums.ExitDirections.Custom)
+                                        {
+                                            <RadzenText Text="@exit.CustomDirection" />
+                                        }
+
+                                     
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="5">
+                                         <RadzenText Text="@exit.TargetId"/>
+
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="2" Style="text-align:right">
+                                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" />
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="12">
+                                        
+                                        <RadzenStack Orientation="Orientation.Horizontal">
+                                            @foreach (var state in exit.States)
+                                            {
+                                                <RadzenBadge BadgeStyle="@((exit.StartingState == state.Key) ? BadgeStyle.Success : BadgeStyle.Light)" Text="@state.Key" />
+                                            }
+                                        </RadzenStack>
+                                    </RadzenColumn>
+
+                                </RadzenRow>
+                            </Template>
+                        </RadzenDataList>
+
+
+                    </RadzenTabsItem>
+                }
+
                 <RadzenTabsItem Text="States">
                 <!-- States -->
                     <DictionaryTable TValue="string"
-                                        OnChanged="() => _isDirty = true"
                                         Help="Named states for this element."
                                         For="@(()=>_edit!.States)" 
                                         @bind-Values="StatesProxy" />
@@ -169,7 +228,6 @@
 
                 <RadzenTabsItem Text="Attributes">
                         <DictionaryTable TValue="int"
-                                            OnChanged="() => _isDirty = true"
                                             For="@(()=>_edit!.Attributes)"
                                             Help="Key/value attributes."
                                             @bind-Values="AttributesProxy" />
@@ -178,7 +236,6 @@
                 <RadzenTabsItem Text="Properties">
 
                         <DictionaryTable TValue="string"
-                                            OnChanged="() => _isDirty = true"
                                             For="@(()=>_edit!.Properties)"
                                             Help="Free-form properties."
                                             @bind-Values="PropertiesProxy" />
@@ -187,7 +244,6 @@
                 <RadzenTabsItem Text="Flags">
 
                     <DictionaryTable TValue="bool"
-                                        OnChanged="() => _isDirty = true"
                                         For="@(()=>_edit!.Flags)"
                                         Help="Named flags."
                                         @bind-Values="FlagsProxy" />

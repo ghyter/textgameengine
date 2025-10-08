@@ -1,0 +1,61 @@
+﻿@using GameModel.Models
+@using GameModel.Models.Enums
+@typeparam TExit
+
+<RadzenDataGrid TItem="ExitTarget"
+                Data="@Targets"
+                EditMode="DataGridEditMode.Single"
+                @ref="_grid"
+                RowCreate="@OnCreateRow">
+  <Columns>
+    <RadzenDataGridColumn TItem="ExitTarget" Title="Edit">
+      <EditTemplate Context="t">
+        <ExitTargetField @bind-Value="t" />
+      </EditTemplate>
+      <Template Context="t">
+        @t.SceneId → @t.TargetId (@t.Direction)
+      </Template>
+    </RadzenDataGridColumn>
+
+    <RadzenDataGridColumn TItem="ExitTarget" Title="Actions" Context="t" Width="10rem">
+      <Template>
+        <RadzenButton Icon="edit"   Size="ButtonSize.Small" Click="@(() => _grid.EditRow(t))" />
+        <RadzenButton Icon="delete" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => RemoveRow(t))" />
+      </Template>
+      <EditTemplate Context="t">
+        <RadzenButton Icon="save"   Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Click="@(() => _grid.UpdateRow(t))" />
+        <RadzenButton Icon="cancel" Size="ButtonSize.Small" class="rz-ml-1" Click="@(() => _grid.CancelEditRow(t))" />
+      </EditTemplate>
+    </RadzenDataGridColumn>
+  </Columns>
+</RadzenDataGrid>
+
+<RadzenButton Icon="add" Text="Add Target" Click="@AddRow" />
+
+@code {
+  [Parameter, EditorRequired] public List<ExitTarget> Targets { get; set; } = default!;
+  private RadzenDataGrid<ExitTarget> _grid = default!;
+
+  private async Task AddRow()
+  {
+    // Create a *new instance* and let the grid manage the insert row lifecycle
+    var draft = new ExitTarget {
+      SceneId = "",
+      TargetId = "",
+      Direction = ExitDirections.North
+    };
+    await _grid.InsertRow(draft);
+  }
+
+  private Task OnCreateRow(ExitTarget created)
+  {
+    // InsertRow will call this when user clicks Save on the new row
+    Targets.Add(created);
+    return Task.CompletedTask;
+  }
+
+  private void RemoveRow(ExitTarget row)
+  {
+    Targets.Remove(row);
+  }
+}

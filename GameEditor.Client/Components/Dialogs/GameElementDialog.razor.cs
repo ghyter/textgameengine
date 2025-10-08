@@ -209,6 +209,7 @@ public partial class GameElementDialog : ComponentBase
             "item" => "Item",
             "npc" => "NPC",
             "player" => "Player",
+            "exit" => "Exit",
             _ => throw new InvalidOperationException($"Unknown type '{_type}'.")
         };
 
@@ -234,7 +235,14 @@ public partial class GameElementDialog : ComponentBase
             case "item": LoadTyped<Item>(_key); break;
             case "npc": LoadTyped<Npc>(_key); break;
             case "player": LoadTyped<Player>(_key); break;
+            case "exit": LoadTyped<Exit>(_key); break;
             default: throw new InvalidOperationException($"Unknown type '{_type}'.");
+        }
+
+        if (_type == "scene")
+        {
+            var exitCandidates = Pack.ExitCandidates((Scene)_edit!);
+            Console.WriteLine($"Found {exitCandidates.Count} exit candidates.");
         }
     }
 
@@ -303,6 +311,10 @@ public partial class GameElementDialog : ComponentBase
             case "player":
                 UpsertInto(Pack.Players, (Player)_edit, _original as Player);
                 break;
+            case "exit":
+                UpsertInto(Pack.Exits, (Exit)_edit, _original as Exit);
+                break;
+
             default:
                 throw new InvalidOperationException($"Unknown type '{_type}'.");
         }
@@ -321,6 +333,7 @@ public partial class GameElementDialog : ComponentBase
             case "scene": Pack.Scenes.Remove(_key); break;
             case "item": Pack.Items.Remove(_key); break;
             case "npc": Pack.Npcs.Remove(_key); break;
+            case "exit": Pack.Exits.Remove(_key); break;
             case "player":
                 var isMain = string.Equals(_key, "main", StringComparison.OrdinalIgnoreCase)
                           || string.Equals(_key, "player", StringComparison.OrdinalIgnoreCase);
@@ -383,6 +396,7 @@ public partial class GameElementDialog : ComponentBase
             "item" => Pack.Items.TryGetValue(key, out var i) ? i as T : null,
             "npc" => Pack.Npcs.TryGetValue(key, out var n) ? n as T : null,
             "player" => Pack.Players.TryGetValue(key, out var n) ? n as T : null,
+            "exit" => Pack.Exits.TryGetValue(key, out var n) ? n as T : null,
             _ => null
         };
 

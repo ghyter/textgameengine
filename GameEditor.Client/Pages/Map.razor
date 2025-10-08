@@ -10,51 +10,100 @@
 @using GameEditor.Client.Components.MapNodes
 @using GameEditor.Client.Model.Nodes
 @using GameModel.Models
-@using GameModel.Models.Enums
-@using GameModel.Session
+@using Radzen
+@using Radzen.Blazor
 @using Point = Blazor.Diagrams.Core.Geometry.Point
 @inject IGamePackService GamePackService
-@* @inject ISnackbar snackbar *@
 
-<h3>Game Editor</h3>
+<RadzenStack Orientation="Orientation.Vertical" Gap="0.75rem">
 
-@if (Diagram is not null)
-{
-    <div class="diagram-container">
-        <CascadingValue Value="Diagram" IsFixed="true">
-            <DiagramCanvas>
-                <Widgets>
-                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
-                </Widgets>
-            </DiagramCanvas>
-        </CascadingValue>
-    </div>
-}
+    <!-- Header / Controls -->
+    <RadzenCard Style="border-radius:10px;">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
 
+            <RadzenText Text="Game Editor • Map" Style="font-weight:600; font-size:1.1rem" />
 
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.End">
 
+                <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem">
+                    <RadzenLabel Text="Cell Width (px)" />
+                    <RadzenNumeric @bind-Value="CellWidth"
+                                   TValue="int"
+                                   Min="40" Max="800" Step="10"
+                                   Style="width:120px" />
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem">
+                    <RadzenLabel Text="Cell Height (px)" />
+                    <RadzenNumeric @bind-Value="CellHeight"
+                                   TValue="int"
+                                   Min="40" Max="800" Step="10"
+                                   Style="width:120px" />
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem">
+                    <RadzenLabel Text="Level" />
+                    <RadzenDropDown @bind-Value="SelectedLevel"
+                                    Data="Levels"
+                                    TValue="int"
+                                    Style="width:140px" />
+                </RadzenStack>
+
+                <RadzenButton Icon="refresh" Text="Rebuild" ButtonStyle="ButtonStyle.Primary"
+                              Click="@Rebuild" />
+                <RadzenButton Icon="zoom_out_map" Text="Zoom to fit" ButtonStyle="ButtonStyle.Light"
+                              Click="@ZoomToFit" />
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenCard>
+
+    <!-- Diagram -->
+    @if (Diagram is not null)
+    {
+        <RadzenCard Style="height:calc(100vh - 260px); border-radius:10px;">
+            <CascadingValue Value="Diagram" IsFixed="true">
+                <DiagramCanvas>
+                    <Widgets>
+                        <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
+                    </Widgets>
+                </DiagramCanvas>
+            </CascadingValue>
+        </RadzenCard>
+    }
+
+</RadzenStack>
 
 @code {
-    private BlazorDiagram Diagram { get; set; } = null!;
-    private Dictionary<string, SceneNode> _nodemap { get; set; } = [];
+    private BlazorDiagram Diagram = null!;
+    private readonly Dictionary<string, SceneNode> _nodeMap = new();
 
-    private int xOffset = 300;
-    private int yOffset = 200;
+    // Grid pixels per cell
+    private int CellWidth { get; set; } = 300;
+    private int CellHeight { get; set; } = 250;
+
+    // Map level
+    private int SelectedLevel { get; set; } = 0;
+    private HashSet<int> Levels { get; set; } = new([0]);
+
+    // Layout constants
+    private const int NodePaddingPx = 6;
+    private const int BorderCells = 1;
 
     protected override void OnInitialized()
     {
-        // Create the diagram BEFORE the first render
         var options = new BlazorDiagramOptions
-            {
-                AllowMultiSelection = true,
-                Zoom = { Enabled = true },
-                Links =
-            {
-                // If you need these, re-add:
-                DefaultRouter = new NormalRouter(),
-                DefaultPathGenerator = new SmoothPathGenerator()
-            },
-            };
+        {
+            AllowMultiSelection = true,
+            Zoom = { Enabled = true },
+            Links =
+      {
+        DefaultRouter = new NormalRouter(),
+        DefaultPathGenerator = new SmoothPathGenerator()
+      }
+        };
 
         Diagram = new BlazorDiagram(options);
         Diagram.RegisterComponent<SceneNode, SceneWidget>();
@@ -64,99 +113,89 @@
     {
         if (!firstRender || Diagram is null) return;
 
-        if (GamePackService.Current is null || GamePackService.Current.Scenes.Count == 0)
-        {
-            //snackbar.Add("Current Game does not have any scenes", Severity.Error);
-            return;
-        }
+        var pack = GamePackService.Current;
+        if (pack is null || pack.Scenes.Count == 0) return;
 
-        var startingLocation = GamePackService.Current.Player.StartingLocation;
+        Levels = pack.Scenes.Values.Select(s => s.MapLocation?.Level ?? 0).ToHashSet();
+        if (!Levels.Contains(SelectedLevel))
+            SelectedLevel = Levels.FirstOrDefault();
 
-        var playerLocation = GamePackService.Current.Scenes.Where(p=> p.Key == startingLocation).FirstOrDefault();
-        
-
-        await AddLinks(playerLocation.Value,new Point(200, 200));
-        // OPTIONAL: center node after container is ready
-
-        await Task.Yield();
+        await BuildFromGridAsync();
         Diagram.Refresh();
         Diagram.ZoomToFit();
     }
 
+    private async Task BuildFromGridAsync()
+    {
+        Diagram.Links.Clear();
+        Diagram.Nodes.Clear();
+        _nodeMap.Clear();
 
-    private async Task AddLinks(Scene element, Point position){
+        var pack = GamePackService.Current;
+        if (pack is null) return;
 
-        if (!_nodemap.TryGetValue(element?.Id ?? string.Empty,out var nodemodel)){
+        var scenesOnLevel = pack.Scenes.Values
+          .Where(s => (s.MapLocation?.Level ?? 0) == SelectedLevel)
+          .ToList();
 
-            var node = new SceneNode(element!.Id,position, element)
-            {
-                Title = element.Name,              
-            };
-            
-            _nodemap[element.Id] = node;
-            Diagram.Nodes.Add(node);
+        if (scenesOnLevel.Count == 0) return;
 
-            foreach (var e in element.Exits)
-            {
+        int minCol = int.MaxValue, minRow = int.MaxValue;
+        int maxCol = int.MinValue, maxRow = int.MinValue;
 
-                PortAlignment? portdirection =  e.Direction switch{
-                    ExitDirections.North => PortAlignment.Top,
-                    ExitDirections.NorthEast => PortAlignment.TopRight,
-                    ExitDirections.East => PortAlignment.Right,
-                    ExitDirections.SouthEast => PortAlignment.BottomRight,
-                    ExitDirections.South => PortAlignment.Bottom,
-                    ExitDirections.SouthWest => PortAlignment.BottomLeft,
-                    ExitDirections.West => PortAlignment.Left,
-                    ExitDirections.NorthWest => PortAlignment.TopLeft,
-                    _=> null
-                };
-                if (portdirection != null){
-                    node.AddPort(new PortModel(node,portdirection.Value));
-                }
-                if ( GamePackService.Current!.Scenes.TryGetValue(e.TargetId, out var targetElement)){
-                    var offset = e.Direction switch
-                    {
-                        ExitDirections.North => new Point(position.X, position.Y - yOffset),
-                        ExitDirections.NorthEast => new Point(position.X + xOffset, position.Y - yOffset),
-                        ExitDirections.East => new Point(position.X + xOffset, position.Y),
-                        ExitDirections.SouthEast => new Point(position.X + xOffset, position.Y + yOffset),
-                        ExitDirections.South => new Point(position.X, position.Y + yOffset),
-                        ExitDirections.SouthWest => new Point(position.X - xOffset, position.Y + yOffset),
-                        ExitDirections.West => new Point(position.X - xOffset, position.Y),
-                        ExitDirections.NorthWest => new Point(position.X - xOffset, position.Y - yOffset),
-                        _ => new Point(1,1)
-                    };
+        foreach (var s in scenesOnLevel)
+        {
+            var m = s.MapLocation ?? new MapLocation();
+            var w = Math.Max(1, m.Width);
+            var h = Math.Max(1, m.Height);
 
-                    await AddLinks(targetElement,offset);
-                }
-            };
-
+            minCol = Math.Min(minCol, m.Column);
+            minRow = Math.Min(minRow, m.Row);
+            maxCol = Math.Max(maxCol, m.Column + (w - 1));
+            maxRow = Math.Max(maxRow, m.Row + (h - 1));
         }
 
+        var originCol = -minCol + BorderCells;
+        var originRow = -minRow + BorderCells;
+
+        foreach (var scene in scenesOnLevel)
+        {
+            var m = scene.MapLocation ?? new MapLocation();
+            int gw = Math.Max(1, m.Width);
+            int gh = Math.Max(1, m.Height);
+
+            var px = (originCol + m.Column) * CellWidth;
+            var py = (originRow + m.Row) * CellHeight;
+
+            var node = new SceneNode(scene.Id, new Point(px, py), scene)
+            {
+                Title = scene.Name
+            };
+
+            Diagram.Nodes.Add(node);
+
+            var widthPx = gw * CellWidth - NodePaddingPx;
+            var heightPx = gh * CellHeight - NodePaddingPx;
+
+            node.Size = new Size(widthPx, heightPx);
+            // or: node.SetSize(new Size(widthPx, heightPx)); // if your version requires
+
+            _nodeMap[scene.Id] = node;
+            
+        }
+
+        await Task.CompletedTask;
     }
 
-
-
-
-
-    private async Task CenterOnViewport(NodeModel node)
+    private async Task Rebuild()
     {
-        // Let JS interop inside the library finalize measurements if needed
-        await Task.Yield();
-
-        if (Diagram?.Container is null) return;
-
-        var cx = Diagram.Container.Width / 2.0;
-        var cy = Diagram.Container.Height / 2.0;
-
-        var zoom = Diagram.Zoom;
-        var pan  = Diagram.Pan; // screen-space translation
-
-        // Convert viewport center (screen) -> diagram coords
-        var worldX = (cx - pan.X) / zoom;
-        var worldY = (cy - pan.Y) / zoom;
-
-        node.Position = new Point(worldX - node.Size?.Width ?? 100 / 2.0, worldY - node.Size?.Height ?? 100 / 2.0);
+        await BuildFromGridAsync();
         Diagram.Refresh();
+    }
+
+    private Task ZoomToFit()
+    {
+        Diagram.ZoomToFit();
+        return Task.CompletedTask;
     }
 }
